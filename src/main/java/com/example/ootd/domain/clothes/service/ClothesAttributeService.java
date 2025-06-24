@@ -22,5 +22,5 @@ public interface ClothesAttributeService {
   PageResponse<ClothesAttributeDefDto> findByCondition(ClothesAttributeSearchRequest request);
 
   // 의상 속성 정의 삭제
-  ClothesAttributeDefDto delete(UUID definitionId);
+  void delete(UUID definitionId);
 }

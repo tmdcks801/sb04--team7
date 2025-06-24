@@ -43,7 +43,7 @@ public interface FeedService {
    * 피드 댓글
    */
   // 피드 댓글 등록
-  CommentDto createCommend(UUID feedId, CommentCreateRequest request);
+  CommentDto createComment(UUID feedId, CommentCreateRequest request);
 
   // 피드 댓글 조회
   PageResponse<CommentDto> findCommentByCondition(FeedCommentSearchRequest request);

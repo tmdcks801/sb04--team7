@@ -13,4 +13,7 @@ public interface ImageService {
 
   // 사진 조회
   String read(UUID id);
+
+  // 사진 삭제
+  void delete(UUID id);
 }

@@ -49,10 +49,13 @@ public class Feed {
   private String content; // 설명
 
   @Column
-  private int feedLike; // 좋아요 수
+  private long likeCount; // 좋아요 수
+
+  @Column
+  private int commentCount; // 댓글 수
 
   @Column(nullable = false, updatable = false)
-  @CreatedDate  
+  @CreatedDate
   private LocalDateTime createdAt;  // 생성일
 
   @Column
@@ -64,6 +67,7 @@ public class Feed {
     this.user = user;
     this.feedClothes = feedClothes;
     this.content = content;
-    this.feedLike = 0;
+    this.likeCount = 0;
+    this.commentCount = 0;
   }
 }

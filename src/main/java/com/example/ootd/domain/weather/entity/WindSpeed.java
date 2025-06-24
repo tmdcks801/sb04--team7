@@ -12,5 +12,5 @@ public class WindSpeed {
   private double windSpeed;
 
   @Enumerated(EnumType.STRING)
-  private WindStrength WindAsWord;
+  private WindStrength windAsWord;
 }

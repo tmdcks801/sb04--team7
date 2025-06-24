@@ -9,8 +9,8 @@ import lombok.Getter;
 @Getter
 public class WindSpeed {
 
-  private double speed;
+  private double windSpeed;
 
   @Enumerated(EnumType.STRING)
-  private WindStrength asWord;
+  private WindStrength WindAsWord;
 }

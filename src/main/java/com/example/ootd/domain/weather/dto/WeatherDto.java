@@ -1,8 +1,7 @@
 package com.example.ootd.domain.weather.dto;
 
-import com.example.ootd.domain.weather.entity.Wheather;
 import com.example.ootd.domain.weather.entity.SkyStatus;
-
+import com.example.ootd.domain.weather.entity.Wheather;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -36,6 +35,7 @@ public record WeatherDto(
     WindSpeedDto windSpeed
 
 ) {
+
   public static WeatherDto from(Wheather entity) {
     return new WeatherDto(
         entity.getId(),
@@ -44,23 +44,23 @@ public record WeatherDto(
         entity.getLocation().getName(),
         entity.getSkyStatus(),
         new TemperatureDto(
-            entity.getTemperature().getCurrent(),
-            entity.getTemperature().getMin(),
-            entity.getTemperature().getMax(),
-            entity.getTemperature().getComparedToDayBefore()
+            entity.getTemperature().getTemperatureCurrent(),
+            entity.getTemperature().getTemperatureMin(),
+            entity.getTemperature().getTemperatureMax(),
+            entity.getTemperature().getTemperatureComparedToDayBefore()
         ),
         new PrecipitationDto(
-            entity.getPrecipitation().getType(),
-            entity.getPrecipitation().getAmount(),
-            entity.getPrecipitation().getProbability()
+            entity.getPrecipitation().getPrecipitationType(),
+            entity.getPrecipitation().getPrecipitationAmount(),
+            entity.getPrecipitation().getPrecipitationProbability()
         ),
         new HumidityDto(
-            entity.getHumidity().getCurrent(),
-            entity.getHumidity().getComparedToDayBefore()
+            entity.getHumidity().getHumidityCurrent(),
+            entity.getHumidity().getHumidityComparedToDayBefore()
         ),
         new WindSpeedDto(
-            entity.getWindSpeed().getSpeed(),
-            entity.getWindSpeed().getAsWord()
+            entity.getWindSpeed().getWindSpeed(),
+            entity.getWindSpeed().getWindAsWord()
         )
     );
   }

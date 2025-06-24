@@ -23,20 +23,22 @@ public record WeatherSummaryDto(
     TemperatureDto temperature
 
 ) {
-  public static WeatherSummaryDto from(UUID id, SkyStatus status, Precipitation precipitation, Temperature temperature) {
+
+  public static WeatherSummaryDto from(UUID id, SkyStatus status, Precipitation precipitation,
+      Temperature temperature) {
     return new WeatherSummaryDto(
         id,
         status,
         new PrecipitationDto(
-            precipitation.getType(),
-            precipitation.getAmount(),
-            precipitation.getProbability()
+            precipitation.getPrecipitationType(),
+            precipitation.getPrecipitationAmount(),
+            precipitation.getPrecipitationProbability()
         ),
         new TemperatureDto(
-            temperature.getCurrent(),
-            temperature.getMin(),
-            temperature.getMax(),
-            temperature.getComparedToDayBefore()
+            temperature.getTemperatureCurrent(),
+            temperature.getTemperatureMin(),
+            temperature.getTemperatureMax(),
+            temperature.getTemperatureComparedToDayBefore()
         )
     );
   }

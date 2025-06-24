@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 public class Humidity {
 
-  private double current;
-  private double comparedToDayBefore;
+  private double humidityCurrent;
+  private double humidityComparedToDayBefore;
 }

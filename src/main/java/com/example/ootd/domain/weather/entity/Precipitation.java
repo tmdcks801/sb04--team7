@@ -10,8 +10,7 @@ import lombok.Getter;
 public class Precipitation {
 
   @Enumerated(EnumType.STRING)
-  private PrecipitationType type;
-
-  private double amount;
-  private double probability;
+  private PrecipitationType precipitationType;
+  private double precipitationAmount;
+  private double precipitationProbability;
 }

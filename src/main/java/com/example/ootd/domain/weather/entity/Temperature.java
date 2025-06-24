@@ -7,9 +7,10 @@ import lombok.Getter;
 @Getter
 public class Temperature {
 
-  private double current;
-  private double min;
-  private double max;
-  private double comparedToDayBefore;
+  private double temperatureCurrent;
+  private double temperatureMin;
+  private double temperatureMax;
+  private double temperatureComparedToDayBefore;
 }
+
 

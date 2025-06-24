@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -41,7 +40,7 @@ public class Feed {
 //  private User user;  // 피드 작성자
 
   @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<FeedClothes> feedClothes;  // 피드에 등록된 옷
+  private List<FeedClothes> feedClothes;  // 피드에 등록된 옷(중간 테이블)
 
   @Column
   private String content; // 설명
@@ -51,6 +50,9 @@ public class Feed {
 
   @Column
   private int commentCount; // 댓글 수
+
+  @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<FeedComment> comments; // 댓글 목록
 
   @Column(nullable = false, updatable = false)
   @CreatedDate
@@ -68,5 +70,6 @@ public class Feed {
 //    this.content = content;
 //    this.likeCount = 0;
 //    this.commentCount = 0;
+//    this.comments = new ArrayList<>();
 //  }
 }

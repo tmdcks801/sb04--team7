@@ -20,11 +20,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-@Table(
-    name = "messages",
-    indexes = {
-        @Index(name = "index", columnList = "sender, receiver")
-    })
+@Table(name = "messages")
 public class Message {
 
   @Id

@@ -39,23 +39,23 @@ public class Message {
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
-  @Column(length = 255)
-  private String contents;
+  @Column(name = "contents", length = 255)
+  private String content;
 
 
   @Builder
-  private Message(User sender, User receiver, String contents) {
+  private Message(User sender, User receiver, String content) {
     this.id = UUID.randomUUID();
     this.sender = sender;
     this.receiver = receiver;
-    this.contents = contents;
+    this.content = content;
   }
 
-  public static Message createMessage(User sender, User receiver, String contents) {
+  public static Message createMessage(User sender, User receiver, String content) {
     return Message.builder()
         .sender(sender)
         .receiver(receiver)
-        .contents(contents)
+        .content(content)
         .build();
   }
 

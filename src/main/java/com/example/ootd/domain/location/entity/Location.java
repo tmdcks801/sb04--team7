@@ -2,11 +2,12 @@ package com.example.ootd.domain.location.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.Id;
 
 @Entity
 @Table(name = "locations")
@@ -16,7 +17,7 @@ public class Location {
 
   @Id
   @GeneratedValue
-  private Long id;
+  private UUID id;
 
   private String name;
   private int location_x;

@@ -40,9 +40,10 @@ public class Clothes {
   @Column(nullable = false, updatable = false)
   private UUID id;  // pk
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", columnDefinition = "uuid")
-  private User user;  // 옷 등록자
+  // TODO: user 추가 후 주석 해제
+//  @ManyToOne(fetch = FetchType.LAZY)
+//  @JoinColumn(name = "user_id", columnDefinition = "uuid")
+//  private User user;  // 옷 등록자
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   @JoinColumn(name = "image_id", columnDefinition = "uuid")
@@ -63,10 +64,11 @@ public class Clothes {
   @LastModifiedDate
   private LocalDateTime updatedAt;  // 수정일
 
-  @Builder
-  public Clothes(User user, Image image, String name) {
-    this.user = user;
-    this.image = image;
-    this.name = name;
-  }
+  // TODO: user 추가 후 주석 해제
+//  @Builder
+//  public Clothes(User user, Image image, String name) {
+//    this.user = user;
+//    this.image = image;
+//    this.name = name;
+//  }
 }

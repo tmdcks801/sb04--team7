@@ -4,12 +4,9 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -38,9 +35,10 @@ public class Feed {
   @Column(updatable = false, nullable = false)
   private UUID id;  // pk
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", columnDefinition = "uuid")
-  private User user;  // 피드 작성자
+  // TODO: user 추가 후 주석 해제
+//  @ManyToOne(fetch = FetchType.LAZY)
+//  @JoinColumn(name = "user_id", columnDefinition = "uuid")
+//  private User user;  // 피드 작성자
 
   @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<FeedClothes> feedClothes;  // 피드에 등록된 옷
@@ -62,12 +60,13 @@ public class Feed {
   @LastModifiedDate
   private LocalDateTime updatedAt;  // 수정일
 
-  @Builder
-  public Feed(User user, List<FeedClothes> feedClothes, String content) {
-    this.user = user;
-    this.feedClothes = feedClothes;
-    this.content = content;
-    this.likeCount = 0;
-    this.commentCount = 0;
-  }
+  // TODO: user 추가 후 주석 해제
+//  @Builder
+//  public Feed(User user, List<FeedClothes> feedClothes, String content) {
+//    this.user = user;
+//    this.feedClothes = feedClothes;
+//    this.content = content;
+//    this.likeCount = 0;
+//    this.commentCount = 0;
+//  }
 }

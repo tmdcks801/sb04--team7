@@ -38,9 +38,10 @@ public class FeedComment {
   @JoinColumn(name = "feed_id", nullable = false)
   private Feed feed;  // 댓글 단 피드
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;  // 댓글 단 사용자
+  // TODO: user 추가 후 주석 해제
+//  @ManyToOne(fetch = FetchType.LAZY)
+//  @JoinColumn(name = "user_id", nullable = false)
+//  private User user;  // 댓글 단 사용자
 
   @Column
   private String content; // 댓글 내용
@@ -49,10 +50,11 @@ public class FeedComment {
   @CreatedDate
   private LocalDateTime createdAt;  // 생성일
 
-  @Builder
-  public FeedComment(Feed feed, User user, String content) {
-    this.feed = feed;
-    this.user = user;
-    this.content = content;
-  }
+  // TODO: user 추가 후 주석 해제
+//  @Builder
+//  public FeedComment(Feed feed, User user, String content) {
+//    this.feed = feed;
+//    this.user = user;
+//    this.content = content;
+//  }
 }

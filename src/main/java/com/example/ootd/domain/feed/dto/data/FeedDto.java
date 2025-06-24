@@ -11,8 +11,9 @@ public record FeedDto(
     UUID id,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
-    User author,
-    Weather weather,
+  // TODO: user, weather 추가 후 주석 해제
+//    User author,
+//    Weather weather,
     List<OotdDto> ootds,
     String content,
     long likeCount,

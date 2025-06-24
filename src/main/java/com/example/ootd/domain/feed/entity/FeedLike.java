@@ -45,17 +45,19 @@ public class FeedLike {
   @JoinColumn(name = "feed_id", nullable = false)
   private Feed feed;  // 좋아요 누른 피드
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;  // 좋아요 누른 사용자
+  // TODO: user 추가 후 주석 해제
+//  @ManyToOne(fetch = FetchType.LAZY)
+//  @JoinColumn(name = "user_id", nullable = false)
+//  private User user;  // 좋아요 누른 사용자
 
   @Column(nullable = false, updatable = false)
   @CreatedDate
   private LocalDateTime createdAt;  // 생성일
 
-  @Builder
-  public FeedLike(Feed feed, User user) {
-    this.feed = feed;
-    this.user = user;
-  }
+  // TODO: user 추가 후 주석 해제
+//  @Builder
+//  public FeedLike(Feed feed, User user) {
+//    this.feed = feed;
+//    this.user = user;
+//  }
 }

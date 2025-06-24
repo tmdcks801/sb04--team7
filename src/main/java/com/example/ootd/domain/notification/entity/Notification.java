@@ -20,7 +20,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 @Setter
 @NoArgsConstructor(access = PROTECTED)
-@CompoundIndex(def = "{'ownerId': 1, 'isRead': 1}")
 public class Notification {
 
   @Id
@@ -30,63 +29,63 @@ public class Notification {
   @CreatedDate
   private Instant createdAt;// 몽고db에는 localdate타임이 없어서 instant 썼음
   private NotificationType type;
-  private String content;
+  private String contents;
   private boolean read;
 
 
   @Builder
-  private Notification(UUID ownerId, NotificationType type, String content) {
+  private Notification(UUID ownerId, NotificationType type, String contents) {
     this.ownerId = ownerId;
     this.type = type;
-    this.content = content;
+    this.contents = contents;
     this.read = false;
   }
 
-  public static Notification createRoleChangeNotification(UUID ownerId, String content) {
+  public static Notification createRoleChangeNotification(UUID ownerId, String contents) {
     return Notification.builder()
         .ownerId(ownerId)
         .type(NotificationType.ROLE_CHANGED)
-        .content(content)
+        .contents(contents)
         .build();
   }
 
-  public static Notification createNewClothesAtribureNotification(UUID ownerId, String content) {
+  public static Notification createNewClothesAtribureNotification(UUID ownerId, String contents) {
     return Notification.builder()
         .ownerId(ownerId)
         .type(NotificationType.NEW_CLOTHES_ATTRIBUTE)
-        .content(content)
+        .contents(contents)
         .build();
   }
 
-  public static Notification createFeedNotification(UUID ownerId, String content) {
+  public static Notification createFeedNotification(UUID ownerId, String contents) {
     return Notification.builder()
         .ownerId(ownerId)
         .type(NotificationType.FEED_NOTIFICATION)
-        .content(content)
+        .contents(contents)
         .build();
   }
 
-  public static Notification createUploadFeedNotification(UUID ownerId, String content) {
+  public static Notification createUploadFeedNotification(UUID ownerId, String contents) {
     return Notification.builder()
         .ownerId(ownerId)
         .type(NotificationType.UPLOAD_FEED)
-        .content(content)
+        .contents(contents)
         .build();
   }
 
-  public static Notification createFollowNotification(UUID ownerId, String content) {
+  public static Notification createFollowNotification(UUID ownerId, String contents) {
     return Notification.builder()
         .ownerId(ownerId)
         .type(NotificationType.FOLLOW)
-        .content(content)
+        .contents(contents)
         .build();
   }
 
-  public static Notification createDirectMessageNotification(UUID ownerId, String content) {
+  public static Notification createDirectMessageNotification(UUID ownerId, String contents) {
     return Notification.builder()
         .ownerId(ownerId)
         .type(NotificationType.DIRECT_MESSAGE)
-        .content(content)
+        .contents(contents)
         .build();
   }
 

@@ -1,10 +1,13 @@
 package com.example.ootd.domain.notification.entity;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,6 +19,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "notification")
 @Getter
 @Setter
+@NoArgsConstructor(access = PROTECTED)
 @CompoundIndex(def = "{'ownerId': 1, 'isRead': 1}")
 public class Notification {
 
@@ -30,6 +34,7 @@ public class Notification {
   private boolean read;
 
 
+  @Builder
   private Notification(UUID ownerId, NotificationType type, String content) {
     this.ownerId = ownerId;
     this.type = type;
@@ -38,27 +43,51 @@ public class Notification {
   }
 
   public static Notification createRoleChangeNotification(UUID ownerId, String content) {
-    return new Notification(ownerId, NotificationType.ROLE_CHANGED, content);
+    return Notification.builder()
+        .ownerId(ownerId)
+        .type(NotificationType.ROLE_CHANGED)
+        .content(content)
+        .build();
   }
 
   public static Notification createNewClothesAtribureNotification(UUID ownerId, String content) {
-    return new Notification(ownerId, NotificationType.NEW_CLOTHES_ATTRIBUTE, content);
+    return Notification.builder()
+        .ownerId(ownerId)
+        .type(NotificationType.NEW_CLOTHES_ATTRIBUTE)
+        .content(content)
+        .build();
   }
 
   public static Notification createFeedNotification(UUID ownerId, String content) {
-    return new Notification(ownerId, NotificationType.FEED_NOTIFICATION, content);
+    return Notification.builder()
+        .ownerId(ownerId)
+        .type(NotificationType.FEED_NOTIFICATION)
+        .content(content)
+        .build();
   }
 
   public static Notification createUploadFeedNotification(UUID ownerId, String content) {
-    return new Notification(ownerId, NotificationType.UPLOAD_FEED, content);
+    return Notification.builder()
+        .ownerId(ownerId)
+        .type(NotificationType.UPLOAD_FEED)
+        .content(content)
+        .build();
   }
 
   public static Notification createFollowNotification(UUID ownerId, String content) {
-    return new Notification(ownerId, NotificationType.FOLLOW, content);
+    return Notification.builder()
+        .ownerId(ownerId)
+        .type(NotificationType.FOLLOW)
+        .content(content)
+        .build();
   }
 
   public static Notification createDirectMessageNotification(UUID ownerId, String content) {
-    return new Notification(ownerId, NotificationType.DIRECT_MESSAGE, content);
+    return Notification.builder()
+        .ownerId(ownerId)
+        .type(NotificationType.DIRECT_MESSAGE)
+        .content(content)
+        .build();
   }
 
   public void makeRead() {

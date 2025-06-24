@@ -80,5 +80,8 @@ public class User {
   @Column
   private int temperatureSensitivity;
 
+  @Column
+  private String address;
+
 
 }

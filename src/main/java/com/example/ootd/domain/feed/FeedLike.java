@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -23,7 +24,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  * 피드 좋아요 엔티티
  */
 @Entity
-@Table(name = "feed_likes")
+@Table(name = "feed_likes",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "pk_feed_user",
+            columnNames = {"feed_id", "user_id"}
+        )
+    })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)

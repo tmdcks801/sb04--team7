@@ -35,7 +35,7 @@ public class Attribute {
   @Column(nullable = false, updatable = false)
   private UUID id;  // pk
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String name;  // 속성 이름
 
   @Column(columnDefinition = "text")

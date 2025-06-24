@@ -3,6 +3,7 @@ package com.example.ootd.domain.user;
 import com.example.ootd.security.Provider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -10,15 +11,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "users")
 public class User {
 
@@ -29,6 +35,10 @@ public class User {
 //  @OneToOne
 //  @JoinColumn(name = "image_id", nullable = true)
 //  private Image image;
+//
+//  @ManyToMany? // 연관관계에 따라 중간 테이블 필요
+//  @Column
+//  private Location location
 
   @Column(nullable = false)
   private String name;
@@ -54,9 +64,11 @@ public class User {
   private String providerId;
 
   @Column
+  @CreatedDate
   private LocalDateTime createdAt;
 
   @Column
+  @LastModifiedDate
   private LocalDateTime updatedAt;
 
   @Column

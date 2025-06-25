@@ -3,12 +3,14 @@ package com.example.ootd.domain.follow.service.impl;
 
 import com.example.ootd.domain.follow.dto.FollowCreateRequest;
 import com.example.ootd.domain.follow.dto.FollowDto;
+import com.example.ootd.domain.follow.dto.FollowSummaryDto;
 import com.example.ootd.domain.follow.entity.Follow;
 import com.example.ootd.domain.follow.mapper.FollowMapper;
 import com.example.ootd.domain.follow.repository.FollowRepository;
 import com.example.ootd.domain.follow.service.FollowService;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +29,7 @@ public class FollowServiceImpl implements FollowService {
   /**
    * 팔로우 생성
    * @param request follower and followee IDs
-   * @return
+   * @return FollowDto
    */
   @Override
   @Transactional
@@ -58,4 +60,29 @@ public class FollowServiceImpl implements FollowService {
     return followMapper.toDto(savedFollow);
   }
 
+  /**
+   * 팔로우 요약 정보 조회
+   * @param userId
+   * @return FollowSummaryDto
+   */
+  @Override
+  public FollowSummaryDto getSummaryFollow(UUID userId) {
+    log.info("팔로우 요약 조회 : userId: {}", userId);
+
+    // 유저 조회
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+    // 팔로우 관계 요약 생성
+    FollowSummaryDto summary = FollowSummaryDto.builder()
+        .followeeId(user.getId())
+        .followerCount(followRepository.countByFollowerCount(user.getId()))
+        .followingCount(followRepository.countByFolloweeCount(user.getId()))
+        .followedByMe(followRepository.existsByFollowerIdAndFolloweeId(userId, user.getId()))
+        .followedByMeId(userId)
+        .followingByMe(followRepository.existsByFollowerIdAndFolloweeId(user.getId(), userId))
+        .build();
+
+    return summary;
+  }
 }

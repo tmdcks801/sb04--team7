@@ -9,4 +9,8 @@ import org.springframework.stereotype.Repository;
 public interface FollowRepository extends JpaRepository<Follow, UUID> {
 
   boolean existsByFollowerIdAndFolloweeId(UUID followerId, UUID followeeId);
+
+  long countByFollowerCount(UUID followerId);
+
+  long countByFolloweeCount(UUID followeeId);
 }

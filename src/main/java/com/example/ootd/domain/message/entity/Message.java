@@ -2,6 +2,7 @@ package com.example.ootd.domain.message.entity;
 
 import static lombok.AccessLevel.PROTECTED;
 
+import com.example.ootd.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

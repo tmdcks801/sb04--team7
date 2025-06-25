@@ -60,3 +60,8 @@ ootd:
 logging:
   level:
     root: info
+app:
+  jwt:
+    secret: "F811B1184C98D8543B1351D93948481900aDYQ82347641"
+    access-token-expiration: 900000
+    refresh-token-expiration: 604800000

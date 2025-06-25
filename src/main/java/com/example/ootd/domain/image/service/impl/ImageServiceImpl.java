@@ -4,6 +4,7 @@ import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.image.repository.ImageRepository;
 import com.example.ootd.domain.image.service.ImageService;
 import com.example.ootd.domain.image.service.S3Service;
+import com.example.ootd.exception.image.ImageNotFoundException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class ImageServiceImpl implements ImageService {
   @Override
   public String read(UUID id) {
     Image image = imageRepository.findById(id)
-        .orElseThrow(); // TODO: null 예외처리
+        .orElseThrow(() -> ImageNotFoundException.withId(id));
     return image.getUrl();
   }
 
@@ -40,7 +41,7 @@ public class ImageServiceImpl implements ImageService {
   public void delete(UUID id) {
 
     Image image = imageRepository.findById(id)
-        .orElseThrow(); // TODO: null 예외처리;
+        .orElseThrow(() -> ImageNotFoundException.withId(id));
     s3Service.delete(image.getFileName());
     imageRepository.deleteById(id);
   }

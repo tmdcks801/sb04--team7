@@ -5,10 +5,12 @@ import com.example.ootd.domain.user.dto.UserSummary;
 import java.util.UUID;
 import lombok.Builder;
 
+
 @Builder
 public record FollowDto(
     UUID id,
     UserSummary follower,
     UserSummary followee
 ) {
+
 }

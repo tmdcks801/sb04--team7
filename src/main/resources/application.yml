@@ -28,6 +28,14 @@ management:
     annotations:
       enabled: true
 
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}
+
+weather:
+  api:
+    key: ${WEATHER_API_KEY}
+
 info:
   name: ootd
   version: 1.7.0

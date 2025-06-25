@@ -1,8 +1,10 @@
 package com.example.ootd.domain.weather.dto;
 
+import com.example.ootd.domain.location.entity.Location;
 import com.example.ootd.domain.weather.entity.SkyStatus;
-import com.example.ootd.domain.weather.entity.Wheather;
+import com.example.ootd.domain.weather.entity.Weather;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record WeatherDto(
@@ -17,7 +19,7 @@ public record WeatherDto(
     LocalDateTime forecastAt,
 
 //    @Schema(description = "행정동 이름")
-    String locationName,
+    List<String> locationNames,
 
 //    @Schema(description = "하늘 상태", example = "CLEAR")
     SkyStatus skyStatus,
@@ -36,31 +38,31 @@ public record WeatherDto(
 
 ) {
 
-  public static WeatherDto from(Wheather entity) {
+  public static WeatherDto from(Weather weather, Location location) {
     return new WeatherDto(
-        entity.getId(),
-        entity.getForecastedAt(),
-        entity.getForecastAt(),
-        entity.getLocation().getName(),
-        entity.getSkyStatus(),
+        weather.getId(),
+        weather.getForecastedAt(),
+        weather.getForecastAt(),
+        location.getLocationNames(),
+        weather.getSkyStatus(),
         new TemperatureDto(
-            entity.getTemperature().getTemperatureCurrent(),
-            entity.getTemperature().getTemperatureMin(),
-            entity.getTemperature().getTemperatureMax(),
-            entity.getTemperature().getTemperatureComparedToDayBefore()
+            weather.getTemperature().getTemperatureCurrent(),
+            weather.getTemperature().getTemperatureMin(),
+            weather.getTemperature().getTemperatureMax(),
+            weather.getTemperature().getTemperatureComparedToDayBefore()
         ),
         new PrecipitationDto(
-            entity.getPrecipitation().getPrecipitationType(),
-            entity.getPrecipitation().getPrecipitationAmount(),
-            entity.getPrecipitation().getPrecipitationProbability()
+            weather.getPrecipitation().getPrecipitationType(),
+            weather.getPrecipitation().getPrecipitationAmount(),
+            weather.getPrecipitation().getPrecipitationProbability()
         ),
         new HumidityDto(
-            entity.getHumidity().getHumidityCurrent(),
-            entity.getHumidity().getHumidityComparedToDayBefore()
+            weather.getHumidity().getHumidityCurrent(),
+            weather.getHumidity().getHumidityComparedToDayBefore()
         ),
         new WindSpeedDto(
-            entity.getWindSpeed().getWindSpeed(),
-            entity.getWindSpeed().getWindAsWord()
+            weather.getWindSpeed().getWindSpeed(),
+            weather.getWindSpeed().getWindAsWord()
         )
     );
   }

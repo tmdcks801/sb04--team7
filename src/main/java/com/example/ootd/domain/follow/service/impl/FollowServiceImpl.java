@@ -85,4 +85,22 @@ public class FollowServiceImpl implements FollowService {
 
     return summary;
   }
+
+  /**
+   * 팔로우 삭제
+   * @param followId
+   */
+  @Override
+  @Transactional
+  public void deleteFollow(UUID followId) {
+    log.info("팔로우 삭제 : followId: {}", followId);
+
+    // 팔로우 조회
+    Follow follow = followRepository.findById(followId)
+        .orElseThrow(() -> new IllegalArgumentException("팔로우를 찾을 수 없습니다."));
+
+    // 팔로우 삭제
+    followRepository.delete(follow);
+    log.info("팔로우 삭제 완료 : followId: {}", followId);
+  }
 }

@@ -190,4 +190,32 @@ public class FollowServiceImplTest {
             assertThrows(IllegalArgumentException.class, () -> followService.getSummaryFollow(followerId));
         }
     }
+
+    @Nested
+    @DisplayName("팔로우 삭제 테스트")
+    class DeleteFollowTest {
+
+        @Test
+        @DisplayName("팔로우 삭제 성공")
+        void deleteFollowSuccess() {
+            // given
+            given(followRepository.findById(followId)).willReturn(Optional.of(follow));
+
+            // then
+            followService.deleteFollow(followId);
+
+            // when
+            assertThat(followRepository.existsById(followId)).isFalse();
+        }
+
+        @Test
+        @DisplayName("팔로우 삭제 실패 - 팔로우를 찾을 수 없음")
+        void deleteFollow_NotFount() {
+            // given
+            given(followRepository.findById(followId)).willReturn(Optional.empty());
+
+            // then
+            assertThrows(IllegalArgumentException.class, () -> followService.deleteFollow(followId));
+        }
+    }
 }

@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationController {
 
   //private final NotificationPublisherInterface notificationPublisherInterface;
-
-//  @PostMapping//테스트용
+  //@PostMapping//테스트용
 //  public ResponseEntity<Void> publish(@RequestBody @Validated NotificationRequest req) {
 //
 //    notificationPublisherInterface.publish(req);
 //    return ResponseEntity.accepted().build();
 //  }
+//
 
 
 }

@@ -1,5 +1,6 @@
 package com.example.ootd.domain.feed.entity;
 
+import com.example.ootd.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -45,19 +46,16 @@ public class FeedLike {
   @JoinColumn(name = "feed_id", nullable = false)
   private Feed feed;  // 좋아요 누른 피드
 
-  // TODO: user 추가 후 주석 해제
-//  @ManyToOne(fetch = FetchType.LAZY)
-//  @JoinColumn(name = "user_id", nullable = false)
-//  private User user;  // 좋아요 누른 사용자
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;  // 좋아요 누른 사용자
 
   @Column(nullable = false, updatable = false)
   @CreatedDate
   private LocalDateTime createdAt;  // 생성일
 
-  // TODO: user 추가 후 주석 해제
-//  @Builder
-//  public FeedLike(Feed feed, User user) {
-//    this.feed = feed;
-//    this.user = user;
-//  }
+  public FeedLike(Feed feed, User user) {
+    this.feed = feed;
+    this.user = user;
+  }
 }

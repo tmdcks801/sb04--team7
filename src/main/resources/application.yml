@@ -28,6 +28,7 @@ management:
     annotations:
       enabled: true
 
+
 ootd:
   storage:
     type: ${STORAGE_TYPE:s3}  # 기본값: s3
@@ -36,6 +37,15 @@ ootd:
       secret-key: ${AWS_S3_SECRET_KEY}
       region: ${AWS_S3_REGION}
       bucket: ${AWS_S3_BUCKET}
+
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}
+
+weather:
+  api:
+    key: ${WEATHER_API_KEY}
+
 
 info:
   name: ootd

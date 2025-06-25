@@ -4,7 +4,7 @@ package com.example.ootd.domain.weather.dto;
 import com.example.ootd.domain.weather.entity.Precipitation;
 import com.example.ootd.domain.weather.entity.SkyStatus;
 import com.example.ootd.domain.weather.entity.Temperature;
-import com.example.ootd.domain.weather.entity.Wheather;
+import com.example.ootd.domain.weather.entity.Weather;
 import java.util.UUID;
 
 //@Schema(description = "피드용 요약 날씨 정보 DTO")
@@ -43,7 +43,7 @@ public record WeatherSummaryDto(
     );
   }
 
-  public static WeatherSummaryDto from(Wheather wheather) {
+  public static WeatherSummaryDto from(Weather wheather) {
     return from(
         wheather.getId(),
         wheather.getSkyStatus(),

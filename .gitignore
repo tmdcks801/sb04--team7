@@ -48,3 +48,4 @@ bin/
 
 ### Github Actions ###
 !.github/
+src/main/resources/application-*.yml

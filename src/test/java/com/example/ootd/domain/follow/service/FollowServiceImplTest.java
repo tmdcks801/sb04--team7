@@ -1,0 +1,97 @@
+package com.example.ootd.domain.follow.service;
+
+import com.example.ootd.domain.follow.dto.FollowCreateRequest;
+import com.example.ootd.domain.follow.dto.FollowDto;
+import com.example.ootd.domain.follow.dto.FollowSummaryDto;
+import com.example.ootd.domain.follow.entity.Follow;
+import com.example.ootd.domain.follow.mapper.FollowMapper;
+import com.example.ootd.domain.follow.repository.FollowRepository;
+import com.example.ootd.domain.follow.service.impl.FollowServiceImpl;
+import com.example.ootd.domain.user.User;
+import com.example.ootd.domain.user.dto.UserSummary;
+import com.example.ootd.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.UUID;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("FollowService 테스트")
+public class FollowServiceImplTest {
+
+    @Mock
+    private FollowRepository followRepository;
+    
+    @Mock
+    private FollowMapper followMapper;
+    
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private FollowServiceImpl followService;
+
+    private User follower;
+    private User followee;
+    private Follow follow;
+    private FollowDto followDto;
+    private FollowCreateRequest followCreateRequest;
+    private FollowSummaryDto followSummaryDto;
+    private UUID followerId;
+    private UUID followeeId;
+    private UUID followId;
+
+    @BeforeEach
+    void setUp() {
+        // UUID 생성
+        followerId = UUID.randomUUID();
+        followeeId = UUID.randomUUID();
+        followId = UUID.randomUUID();
+
+        // User 엔티티 생성
+        follower = User.builder()
+                .name("팔로워")
+                .email("follower@test.com")
+                .build();
+
+        followee = User.builder()
+                .name("팔로위")
+                .email("followee@test.com")
+                .build();
+
+        // Follow 엔티티 생성
+        follow = Follow.builder()
+                .follower(follower)
+                .followee(followee)
+                .build();
+
+        // UserSummary 생성
+        UserSummary followerSummary = new UserSummary(followerId, "팔로워", null);
+        UserSummary followeeSummary = new UserSummary(followeeId, "팔로위", null);
+
+        // DTO 생성
+        followDto = FollowDto.builder()
+                .id(followId)
+                .follower(followerSummary)
+                .followee(followeeSummary)
+                .build();
+
+        followCreateRequest = new FollowCreateRequest(followerId, followeeId);
+
+        followSummaryDto = FollowSummaryDto.builder()
+                .followeeId(followeeId)
+                .followerCount(1L)
+                .followingCount(1L)
+                .followedByMe(false)
+                .followedByMeId(followerId)
+                .followingByMe(false)
+                .build();
+    }
+
+
+
+}

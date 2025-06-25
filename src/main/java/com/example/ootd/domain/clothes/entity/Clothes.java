@@ -65,9 +65,10 @@ public class Clothes {
   private LocalDateTime updatedAt;  // 수정일
 
   @Builder
-  public Clothes(User user, Image image, String name) {
+  public Clothes(User user, Image image, String name, ClothesType type) {
     this.user = user;
     this.image = image;
     this.name = name;
+    this.type = type;
   }
 }

@@ -43,6 +43,12 @@ dependencies {
     // aws
     implementation platform("software.amazon.awssdk:bom:2.25.33") // 버전 BOM 사용
     implementation "software.amazon.awssdk:s3"
+
+    // mapstruct
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 }
 
 tasks.named('test') {

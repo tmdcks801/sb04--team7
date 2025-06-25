@@ -22,15 +22,16 @@ public class ImageServiceImpl implements ImageService {
   private final ImageRepository imageRepository;
 
   @Override
-  public String upload(MultipartFile image) {
+  public Image upload(MultipartFile image) {
 
     Image saveImage = s3Service.save(image);
     imageRepository.save(saveImage);
 
-    return saveImage.getUrl();
+    return saveImage;
   }
 
   @Override
+  @Transactional(readOnly = true)
   public String read(UUID id) {
 
     Image image = imageRepository.findById(id)

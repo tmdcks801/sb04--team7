@@ -1,6 +1,7 @@
 package com.example.ootd.domain.clothes.entity;
 
 import com.example.ootd.domain.image.entity.Image;
+import com.example.ootd.domain.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,10 +41,9 @@ public class Clothes {
   @Column(nullable = false, updatable = false)
   private UUID id;  // pk
 
-  // TODO: user 추가 후 주석 해제
-//  @ManyToOne(fetch = FetchType.LAZY)
-//  @JoinColumn(name = "user_id", columnDefinition = "uuid")
-//  private User user;  // 옷 등록자
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", columnDefinition = "uuid")
+  private User user;  // 옷 등록자
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   @JoinColumn(name = "image_id", columnDefinition = "uuid")
@@ -64,11 +64,10 @@ public class Clothes {
   @LastModifiedDate
   private LocalDateTime updatedAt;  // 수정일
 
-  // TODO: user 추가 후 주석 해제
-//  @Builder
-//  public Clothes(User user, Image image, String name) {
-//    this.user = user;
-//    this.image = image;
-//    this.name = name;
-//  }
+  @Builder
+  public Clothes(User user, Image image, String name) {
+    this.user = user;
+    this.image = image;
+    this.name = name;
+  }
 }

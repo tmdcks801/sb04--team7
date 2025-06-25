@@ -63,17 +63,20 @@ public class FollowServiceImplTest {
 
         // User 엔티티 생성
         follower = User.builder()
+                .id(followerId)
                 .name("팔로워")
                 .email("follower@test.com")
                 .build();
 
         followee = User.builder()
+                .id(followeeId)
                 .name("팔로위")
                 .email("followee@test.com")
                 .build();
 
         // Follow 엔티티 생성
         follow = Follow.builder()
+                .id(followId)
                 .follower(follower)
                 .followee(followee)
                 .build();
@@ -152,6 +155,39 @@ public class FollowServiceImplTest {
 
             // then
             assertThrows(IllegalArgumentException.class, () -> followService.createFollow(followCreateRequest));
+        }
+    }
+
+    @Nested
+    @DisplayName("팔로우 요약 조회 테스트")
+    class GetSummaryFollowTests {
+
+        @Test
+        @DisplayName("팔로우 요약 조회 성공")
+        void getSummaryFollowSuccess() {
+            // given
+            given(userRepository.findById(followerId)).willReturn(Optional.of(follower));
+            given(followRepository.countByFolloweeId(followerId)).willReturn(1L);
+            given(followRepository.countByFollowerId(followerId)).willReturn(1L);
+            given(followRepository.existsByFollowerIdAndFolloweeId(followerId, followerId)).willReturn(false);
+
+            // then
+            FollowSummaryDto result = followService.getSummaryFollow(followerId);
+
+            // when
+            assertThat(result.followerCount()).isEqualTo(1L);
+            assertThat(result.followingCount()).isEqualTo(1L);
+            assertThat(result.followedByMe()).isFalse();
+        }
+
+        @Test
+        @DisplayName("팔로우 요약 조회 실패 - 유저를 찾을 수 없음")
+        void getSummaryFollow_UserNotFound() {
+            // given
+            given(userRepository.findById(followerId)).willReturn(Optional.empty());
+
+            // then
+            assertThrows(IllegalArgumentException.class, () -> followService.getSummaryFollow(followerId));
         }
     }
 }

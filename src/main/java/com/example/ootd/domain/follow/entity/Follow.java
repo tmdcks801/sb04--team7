@@ -44,7 +44,8 @@ public class Follow {
   private LocalDateTime createdAt;
 
   @Builder
-  public Follow(User follower, User followee) {
+  public Follow(UUID id, User follower, User followee) {
+    this.id = id;
     this.follower = follower;
     this.followee = followee;
   }

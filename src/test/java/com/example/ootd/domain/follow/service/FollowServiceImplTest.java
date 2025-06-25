@@ -1,5 +1,11 @@
 package com.example.ootd.domain.follow.service;
 
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+
 import com.example.ootd.domain.follow.dto.FollowCreateRequest;
 import com.example.ootd.domain.follow.dto.FollowDto;
 import com.example.ootd.domain.follow.dto.FollowSummaryDto;
@@ -10,8 +16,11 @@ import com.example.ootd.domain.follow.service.impl.FollowServiceImpl;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.dto.UserSummary;
 import com.example.ootd.domain.user.repository.UserRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -92,6 +101,57 @@ public class FollowServiceImplTest {
                 .build();
     }
 
+    @Nested
+    @DisplayName("팔로우 생성 테스트")
+    class CreateFollowTests {
 
+        @Test
+        @DisplayName("팔로우 생성 성공")
+        void createFollowSuccess() {
+            // given
+            given(userRepository.findById(followerId)).willReturn(Optional.of(follower));
+            given(userRepository.findById(followeeId)).willReturn(Optional.of(followee));
+            given(followRepository.save(any(Follow.class))).willReturn(follow);
+            given(followMapper.toDto(any(Follow.class))).willReturn(followDto);
 
+            // when
+            FollowDto result = followService.createFollow(followCreateRequest);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.followee().userId()).isEqualTo(followeeId);
+            assertThat(result.follower().userId()).isEqualTo(followerId);
+        }
+
+        @Test
+        @DisplayName("팔로우 생성 실패 - 이미 팔로우 중")
+        void createFollowAlready() {
+            // given
+            given(followRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).willReturn(true);
+
+            // then
+            assertThrows(IllegalArgumentException.class, () -> followService.createFollow(followCreateRequest));
+        }
+
+        @Test
+        @DisplayName("팔로우 생성 실패 - 팔로워를 찾을 수 없음")
+        void createFollow_FollowerNotFound() {
+            // given
+            given(userRepository.findById(followerId)).willReturn(Optional.empty());
+
+            // then
+            assertThrows(IllegalArgumentException.class, () -> followService.createFollow(followCreateRequest));
+        }
+
+        @Test
+        @DisplayName("팔로우 생성 실패 - 팔로우 대상 사용자를 찾을 수 없음")
+        void createFollow_FolloweeNotFound() {
+            // given
+            given(userRepository.findById(followerId)).willReturn(Optional.of(follower));
+            given(userRepository.findById(followeeId)).willReturn(Optional.empty());
+
+            // then
+            assertThrows(IllegalArgumentException.class, () -> followService.createFollow(followCreateRequest));
+        }
+    }
 }

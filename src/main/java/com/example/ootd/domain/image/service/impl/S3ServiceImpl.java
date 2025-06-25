@@ -60,8 +60,8 @@ public class S3ServiceImpl implements S3Service {
 
   @Override
   public void delete(String fileName) {
-    try {
 
+    try {
       DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
           .bucket(bucket)
           .key(fileName)

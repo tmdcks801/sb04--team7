@@ -32,8 +32,10 @@ public class ImageServiceImpl implements ImageService {
 
   @Override
   public String read(UUID id) {
+
     Image image = imageRepository.findById(id)
         .orElseThrow(() -> ImageNotFoundException.withId(id));
+
     return image.getUrl();
   }
 

@@ -1,16 +1,18 @@
 package com.example.ootd.domain.notification.controller;
 
-import com.example.ootd.domain.notification.dto.NotificationDto;
 import com.example.ootd.domain.notification.dto.NotificationRequest;
 import com.example.ootd.domain.notification.service.NotificationPublisherInterface;
-import java.time.Instant;
-import lombok.NoArgsConstructor;
+import com.example.ootd.domain.notification.service.NotificationServiceInterface;
+import com.example.ootd.dto.PageResponse;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -18,14 +20,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/notifications")
 public class NotificationController {
 
-  //private final NotificationPublisherInterface notificationPublisherInterface;
-  //@PostMapping//테스트용
-//  public ResponseEntity<Void> publish(@RequestBody @Validated NotificationRequest req) {
-//
-//    notificationPublisherInterface.publish(req);
-//    return ResponseEntity.accepted().build();
-//  }
-//
+  private final NotificationServiceInterface notificationService;
+
+  @GetMapping//애도 테스트 용
+  public ResponseEntity<PageResponse> getNotifications(
+      @RequestParam UUID receiverId,
+      @RequestParam(required = false) String cursor,
+      @RequestParam(required = false, defaultValue = "20") int limit) {
+
+    return ResponseEntity.ok(notificationService.getPageNation(receiverId, cursor, limit));
+  }
+
+  private final NotificationPublisherInterface notificationPublisherInterface;
+
+  @PostMapping//테스트용
+  public ResponseEntity<Void> publish(@RequestBody @Validated NotificationRequest req) {
+
+    notificationPublisherInterface.publish(req);
+    return ResponseEntity.accepted().build();
+  }
 
 
 }

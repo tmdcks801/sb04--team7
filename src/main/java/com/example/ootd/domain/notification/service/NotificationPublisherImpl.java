@@ -19,7 +19,7 @@ public class NotificationPublisherImpl implements NotificationPublisherInterface
   @Value("${spring.kafka.template.default-topic:notification-events}")
   private String topic;
 
-  @Override//이거 이미 비동기
+  @Override//이거 이미 비동기  알림 만들떄 이거 쓰면 됨
   public void publish(NotificationRequest notification) {
     kafkaTemplate.send(topic, notification.receiverId().toString(), notification);
   }

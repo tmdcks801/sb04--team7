@@ -28,12 +28,10 @@ public class Notification {
   private UUID id;
   @Indexed
   private UUID receiverId;
-  @CreatedDate
   private Instant createdAt;// 몽고db에는 localdate타입이 없어서 instant 썼음
   private String title;
   private String content;
   private NotificationLevel level;
-  private boolean read;
 
 
   @Builder
@@ -43,7 +41,7 @@ public class Notification {
     this.content = content;
     this.title = title;
     this.level = level;
-    this.read = false;
+    this.createdAt = Instant.now();
   }
 
   public static Notification createNotification(UUID receiverId,
@@ -54,15 +52,6 @@ public class Notification {
         .title(title)
         .level(level)
         .build();
-  }
-
-  public void makeRead() {
-    this.read = true;
-  }
-
-  //일단은 하루
-  public boolean isOlder() {
-    return createdAt.isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
   }
 
 }

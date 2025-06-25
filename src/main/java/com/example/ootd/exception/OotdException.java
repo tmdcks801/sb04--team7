@@ -35,5 +35,8 @@ public class OotdException extends RuntimeException {
 
   public void addDetail(String key, Object value) {
     this.details.put(key, value);
+
+  public OotdException(String message) {
+    super(message);
   }
 }

@@ -1,6 +1,12 @@
 package com.example.ootd.domain.follow.service.impl;
 
 
+import static com.example.ootd.exception.ErrorCode.ALREADY_FOLLOWED_USER;
+import static com.example.ootd.exception.ErrorCode.FOLLOWEE_NOT_FOUND;
+import static com.example.ootd.exception.ErrorCode.FOLLOWER_NOT_FOUND;
+import static com.example.ootd.exception.ErrorCode.FOLLOW_NOT_FOUND;
+import static com.example.ootd.exception.ErrorCode.FOLLOW_USER_NOT_FOUND;
+
 import com.example.ootd.domain.follow.dto.FollowCreateRequest;
 import com.example.ootd.domain.follow.dto.FollowDto;
 import com.example.ootd.domain.follow.dto.FollowSummaryDto;
@@ -10,11 +16,15 @@ import com.example.ootd.domain.follow.repository.FollowRepository;
 import com.example.ootd.domain.follow.service.FollowService;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
+import com.example.ootd.exception.ErrorCode;
+import com.example.ootd.exception.ErrorResponse;
+import com.example.ootd.exception.OotdException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.ErrorResponseException;
 
 @Service
 @Slf4j
@@ -38,15 +48,15 @@ public class FollowServiceImpl implements FollowService {
 
     // 이미 팔로우 하는지 확인
     if (followRepository.existsByFollowerIdAndFolloweeId(request.followerId(), request.followeeId())) {
-      throw new IllegalArgumentException("이미 팔로우 중인 사용자입니다.");
+      throw new OotdException(ALREADY_FOLLOWED_USER);
     }
 
     // 팔로워와 팔로우 대상 사용자를 조회
     User follower = userRepository.findById(request.followerId())
-        .orElseThrow(() -> new IllegalArgumentException("팔로워를 찾을 수 없습니다."));
+        .orElseThrow(() -> new OotdException(FOLLOWER_NOT_FOUND));
 
     User followee = userRepository.findById(request.followeeId())
-        .orElseThrow(() -> new IllegalArgumentException("팔로우 대상 사용자를 찾을 수 없습니다."));
+        .orElseThrow(() -> new OotdException(FOLLOWEE_NOT_FOUND));
 
 
     // 팔로우 관계 생성
@@ -71,7 +81,7 @@ public class FollowServiceImpl implements FollowService {
 
     // 유저 조회
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        .orElseThrow(() -> new OotdException(FOLLOW_USER_NOT_FOUND));
 
     // 팔로우 관계 요약 생성
     FollowSummaryDto summary = FollowSummaryDto.builder()
@@ -97,7 +107,7 @@ public class FollowServiceImpl implements FollowService {
 
     // 팔로우 조회
     Follow follow = followRepository.findById(followId)
-        .orElseThrow(() -> new IllegalArgumentException("팔로우를 찾을 수 없습니다."));
+        .orElseThrow(() -> new OotdException(FOLLOW_NOT_FOUND));
 
     // 팔로우 삭제
     followRepository.delete(follow);

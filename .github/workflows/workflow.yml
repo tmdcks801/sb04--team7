@@ -45,38 +45,59 @@ jobs:
         run: docker build -t test-image .
 
   # main 브랜치 push 시에만 배포
-  deploy:
-    needs: test-and-validate
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+deploy:
+  needs: test-and-validate
+  runs-on: ubuntu-latest
+  if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-2
 
-      - name: Generate image tags
-        id: meta
-        run: |
-          echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
-          echo "COMMIT_TAG=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/amd64
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.meta.outputs.COMMIT_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+    - name: Generate image tags
+      id: meta
+      run: |
+        echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
+        echo "COMMIT_TAG=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        echo "ECR_REGISTRY=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com" >> $GITHUB_OUTPUT
+
+    - name: Build and push Docker image to Amazon ECR
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64
+        push: true
+        tags: |
+          ${{ steps.meta.outputs.ECR_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          ${{ steps.meta.outputs.ECR_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.meta.outputs.COMMIT_TAG }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Substitute environment variables in task definition
+      run: |
+        envsubst < ecs-task-definition.json > final-task-def.json
+      env:
+        AWS_S3_ACCESS_KEY: ${{ secrets.AWS_S3_ACCESS_KEY }}
+        AWS_S3_SECRET_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
+        DATASOURCE_URL: ${{ secrets.DATASOURCE_URL }}
+
+    - name: Deploy to Amazon ECS
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: final-task-def.json
+        service: ootd-service
+        cluster: ootd-cluster
+        wait-for-service-stability: true

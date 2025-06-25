@@ -1,6 +1,7 @@
 package com.example.ootd.domain.notification.service;
 
 import com.example.ootd.domain.notification.dto.NotificationDto;
+import com.example.ootd.domain.notification.dto.NotificationRequest;
 import com.example.ootd.domain.notification.entity.Notification;
 import com.example.ootd.domain.notification.enums.NotificationLevel;
 import com.example.ootd.domain.notification.repository.NotificationRepository;
@@ -22,23 +23,13 @@ public class NotificationEventConsumer {
 
 
   @KafkaListener(topics = "notification-events", containerFactory = "kafkaListenerContainerFactory")
-  @Transactional
-  public void onMessage(NotificationDto dto, Acknowledgment ack) {
+  @Transactional //일단은 동기임
+  public void onMessage(NotificationRequest request, Acknowledgment ack) {
     try {
-      switch (dto.level()) {
-        case "INFO" ->
-            notificationService.createNotification(dto.receiverId(), dto.title(), dto.content(),
-                NotificationLevel.INFO);
-        case "WARNING" ->
-            notificationService.createNotification(dto.receiverId(), dto.title(), dto.content(),
-                NotificationLevel.WARNING);
-        case "ERROR" ->
-            notificationService.createNotification(dto.receiverId(), dto.title(), dto.content(),
-                NotificationLevel.ERROR);
-      }
+      notificationService.createNotification(request);
       ack.acknowledge();
     } catch (Exception ex) {
-      log.error("Failed to handle notification dto: {}", dto, ex);
+      //로그로 에러 던지기
       throw ex;
     }
   }

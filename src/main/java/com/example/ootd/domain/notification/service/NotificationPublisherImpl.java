@@ -1,6 +1,7 @@
 package com.example.ootd.domain.notification.service;
 
 import com.example.ootd.domain.notification.dto.NotificationDto;
+import com.example.ootd.domain.notification.dto.NotificationRequest;
 import javax.management.Notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,15 +12,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class NotificationPublisherImpli implements NotificationPublisherInterface {
+public class NotificationPublisherImpl implements NotificationPublisherInterface {
 
-  private final KafkaTemplate<String, NotificationDto> kafkaTemplate;
+  private final KafkaTemplate<String, NotificationRequest> kafkaTemplate;
 
   @Value("${spring.kafka.template.default-topic:notification-events}")
   private String topic;
 
-  @Override
-  public void publish(NotificationDto notification) {
+  @Override//이거 이미 비동기
+  public void publish(NotificationRequest notification) {
     kafkaTemplate.send(topic, notification.receiverId().toString(), notification);
   }
 

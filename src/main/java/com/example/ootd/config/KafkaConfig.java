@@ -1,6 +1,7 @@
 package com.example.ootd.config;
 
-import com.example.ootd.domain.notification.dto.NotificationDto;
+
+import com.example.ootd.domain.notification.dto.NotificationRequest;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -8,6 +9,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -35,7 +37,7 @@ public class KafkaConfig {
   private String bootstrapServers;
 
   @Bean//Producer 인스턴스를 만드는 팩토리
-  public ProducerFactory<String, NotificationDto> producerFactory() {
+  public ProducerFactory<String, NotificationRequest> producerFactory() {
     Map<String, Object> props = new HashMap<>();
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class); //직렬화
@@ -44,16 +46,17 @@ public class KafkaConfig {
     return new DefaultKafkaProducerFactory<>(props);
   }
 
-  @Bean //메세지 말행할떄 사용하는 빈
-  public KafkaTemplate<String, NotificationDto> kafkaTemplate() {
-    KafkaTemplate<String, NotificationDto> template = new KafkaTemplate<>(producerFactory());
-    template.setMessageConverter(new StringJsonMessageConverter());
-    return template;
+  @Primary
+  @Bean(name = "notificationKafkaTemplate")
+  public KafkaTemplate<String, NotificationRequest> notificationKafkaTemplate(
+      ProducerFactory<String, NotificationRequest> notificationProducerFactory) {
+    return new KafkaTemplate<>(notificationProducerFactory);
   }
 
   @Bean //	Consumer 인스턴스를 만드는 팩토리
-  public ConsumerFactory<String, NotificationDto> consumerFactory() {
-    JsonDeserializer<NotificationDto> deserializer = new JsonDeserializer<>(NotificationDto.class);
+  public ConsumerFactory<String, NotificationRequest> consumerFactory() {
+    JsonDeserializer<NotificationRequest> deserializer = new JsonDeserializer<>(
+        NotificationRequest.class);
     deserializer.addTrustedPackages("*");//모든 패키지에서 허용
     deserializer.setUseTypeMapperForKey(false);
 
@@ -68,12 +71,12 @@ public class KafkaConfig {
   }
 
   @Bean
-  public ConcurrentKafkaListenerContainerFactory<String, NotificationDto> kafkaListenerContainerFactory() {
-    ConcurrentKafkaListenerContainerFactory<String, NotificationDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+  public ConcurrentKafkaListenerContainerFactory<String, NotificationRequest> kafkaListenerContainerFactory() {
+    ConcurrentKafkaListenerContainerFactory<String, NotificationRequest> factory = new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(consumerFactory());
     factory.setConcurrency(3);//파티션 일단 세개
     factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
-    //실패하면 5초간격으로 ㄷ번
+    //실패하면 5초간격으로 3번
     CommonErrorHandler errorHandler = new DefaultErrorHandler(new FixedBackOff(5000L, 3L));
     factory.setCommonErrorHandler(errorHandler);
     return factory;
@@ -83,7 +86,8 @@ public class KafkaConfig {
   public NewTopic notificationTopic() {
     return TopicBuilder.name("notification-events")
         .partitions(3)
-        .replicas(2)
+        .replicas(1)
         .build();
   }
+
 }

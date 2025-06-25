@@ -31,48 +31,30 @@ public class Notification {
   @CreatedDate
   private Instant createdAt;// 몽고db에는 localdate타입이 없어서 instant 썼음
   private String title;
-  private String contents;
+  private String content;
   private NotificationLevel level;
   private boolean read;
 
 
   @Builder
-  private Notification(UUID receiverId, String title, String contents, NotificationLevel level) {
+  private Notification(UUID receiverId, String title, String content, NotificationLevel level) {
     this.id = UUID.randomUUID();
     this.receiverId = receiverId;
-    this.contents = contents;
+    this.content = content;
     this.title = title;
     this.level = level;
     this.read = false;
   }
 
-  public static Notification createInfoNotification(UUID receiverId, String title,
-      String contents) {
+  public static Notification createNotification(UUID receiverId,
+      String content, String title, NotificationLevel level) {
     return Notification.builder()
         .receiverId(receiverId)
-        .contents(contents)
-        .level(NotificationLevel.INFO)
+        .content(content)
+        .title(title)
+        .level(level)
         .build();
   }
-
-  public static Notification createWarningNotification(UUID receiverId, String title,
-      String contents) {
-    return Notification.builder()
-        .receiverId(receiverId)
-        .contents(contents)
-        .level(NotificationLevel.WARNING)
-        .build();
-  }
-
-  public static Notification createErrorNotification(UUID receiverId, String title,
-      String contents) {
-    return Notification.builder()
-        .receiverId(receiverId)
-        .contents(contents)
-        .level(NotificationLevel.ERROR)
-        .build();
-  }
-
 
   public void makeRead() {
     this.read = true;

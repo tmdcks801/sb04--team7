@@ -1,13 +1,40 @@
 spring:
+  # ───────── Kafka ─────────
   kafka:
     bootstrap-servers: localhost:9092
     producer:
+      acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
     consumer:
-      group-id: ootd
-      auto-offset-reset: earliest
+      group-id: notification-service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
+
+  # ───────── MongoDB ─────────
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: notification_db
+      uuid-representation: standard
+      auto-index-creation: true
+
+  # ───────── PostgreSQL ─────────
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dev
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: tmdcks1234
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true

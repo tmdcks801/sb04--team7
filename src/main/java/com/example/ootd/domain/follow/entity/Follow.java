@@ -1,5 +1,6 @@
 package com.example.ootd.domain.follow.entity;
 
+import com.example.ootd.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +18,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Getter @Builder
+@Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "follows")

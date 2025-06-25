@@ -18,7 +18,7 @@ public class WeatherApiClient {
   private final RestClient.Builder restClientBuilder;
 
   @Value("${weather.api.key}")
-  private final String weatherApiKey;
+  private String weatherApiKey;
 
   private static final String BASE_URL = "http://apis.data.go.kr";
 

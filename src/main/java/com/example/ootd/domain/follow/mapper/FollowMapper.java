@@ -17,6 +17,6 @@ public interface FollowMapper {
 
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "user.name", target = "name")
-    @Mapping(source = "user.profileImageUrl", target = "profileImageUrl")
+//    @Mapping(source = "user.profileImageUrl", target = "profileImageUrl")
     UserSummary toUserSummary(User user);
 }

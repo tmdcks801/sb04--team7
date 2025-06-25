@@ -76,8 +76,8 @@ public class FollowServiceImpl implements FollowService {
     // 팔로우 관계 요약 생성
     FollowSummaryDto summary = FollowSummaryDto.builder()
         .followeeId(user.getId())
-        .followerCount(followRepository.countByFollowerCount(user.getId()))
-        .followingCount(followRepository.countByFolloweeCount(user.getId()))
+        .followerCount(followRepository.countByFolloweeId(user.getId()))
+        .followingCount(followRepository.countByFollowerId(user.getId()))
         .followedByMe(followRepository.existsByFollowerIdAndFolloweeId(userId, user.getId()))
         .followedByMeId(userId)
         .followingByMe(followRepository.existsByFollowerIdAndFolloweeId(user.getId(), userId))

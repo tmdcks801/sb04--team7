@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 public interface NotificationServiceInterface {
 
-  NotificationDto createNotification(NotificationRequest request);
+  NotificationDto createNotification(NotificationDto request);
 
   NotificationDto get(UUID NotificationId);
 

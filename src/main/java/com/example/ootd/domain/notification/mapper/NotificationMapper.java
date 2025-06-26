@@ -17,5 +17,7 @@ public interface NotificationMapper {
   @Mapping(target = "createdAt", source = "createdAt")
   NotificationDto toDto(Notification entity);
 
+  Notification toEntity(NotificationDto dto);
+
   List<NotificationDto> toDtoList(List<Notification> entities);
 }

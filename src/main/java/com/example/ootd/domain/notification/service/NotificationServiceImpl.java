@@ -25,11 +25,9 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
 
   @Override
   @Transactional
-  public NotificationDto createNotification(NotificationRequest request) {
-    Notification notification = Notification.createNotification(request.receiverId()
-        , request.contents(), request.title(), request.level());
+  public NotificationDto createNotification(NotificationDto dto) {
+    Notification notification = Notification.createNotification(dto);
     repository.save(notification);
-
     return notificationMapper.toDto(notification);
   }
 
@@ -45,7 +43,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
   @Override
   @Transactional(readOnly = true)
   public PageResponse getPageNation(UUID receiverId, String cursor, int limit) {
-    
+
     List<Notification> slice;
     if (cursor == null || cursor.isBlank()) {
       slice = repository.findByReceiverIdOrderByCreatedAtDesc(

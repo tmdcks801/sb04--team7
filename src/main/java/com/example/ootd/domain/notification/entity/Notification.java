@@ -2,6 +2,7 @@ package com.example.ootd.domain.notification.entity;
 
 import static lombok.AccessLevel.PROTECTED;
 
+import com.example.ootd.domain.notification.dto.NotificationDto;
 import com.example.ootd.domain.notification.enums.NotificationLevel;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -35,22 +36,24 @@ public class Notification {
 
 
   @Builder
-  private Notification(UUID receiverId, String title, String content, NotificationLevel level) {
-    this.id = UUID.randomUUID();
+  private Notification(UUID id, UUID receiverId, String title, String content,
+      NotificationLevel level, Instant createdAt) {
+    this.id = id;
     this.receiverId = receiverId;
     this.content = content;
     this.title = title;
     this.level = level;
-    this.createdAt = Instant.now();
+    this.createdAt = createdAt;
   }
 
-  public static Notification createNotification(UUID receiverId,
-      String content, String title, NotificationLevel level) {
+  public static Notification createNotification(NotificationDto dto) {
     return Notification.builder()
-        .receiverId(receiverId)
-        .content(content)
-        .title(title)
-        .level(level)
+        .id(dto.id())
+        .receiverId(dto.receiverId())
+        .content(dto.content())
+        .title(dto.title())
+        .level(dto.level())
+        .createdAt(dto.createdAt())
         .build();
   }
 

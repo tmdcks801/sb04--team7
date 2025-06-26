@@ -24,7 +24,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
   private final NotificationMapper notificationMapper;
 
   @Override
-  @Transactional
+  @Transactional//안쓰긴 하는데 나중에 카프카로 바꾸면 씀
   public NotificationDto createNotification(NotificationDto dto) {
     Notification notification = Notification.createNotification(dto);
     repository.save(notification);
@@ -49,7 +49,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional(readOnly = true) //페이지네이션
   public PageResponse getPageNation(UUID receiverId, String cursor, int limit) {
 
     List<Notification> slice;

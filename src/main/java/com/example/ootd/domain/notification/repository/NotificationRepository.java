@@ -20,4 +20,7 @@ public interface NotificationRepository extends MongoRepository<Notification, UU
 
   int countByReceiverId(UUID receiverId);
 
+  List<Notification> findAllByReceiverIdAndIdGreaterThanOrderByCreatedAtAsc
+      (UUID receiverId, UUID lastEventId);
+
 }

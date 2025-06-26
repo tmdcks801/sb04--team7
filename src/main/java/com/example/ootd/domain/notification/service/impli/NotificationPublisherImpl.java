@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class NotificationPublisherImpl implements NotificationPublisherInterface
 
   @Override
   @Async("notificationExecutor")
+  @Transactional //이벤트 발행, 다른 서비스에서 이벤트 발생시킬떄 이거쓰면 됨
   public void publish(NotificationRequest req) {
     NotificationDto dto = notificationService.createNotification(req);
     eventPublisher.publishEvent(dto);

@@ -11,7 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class AsyncConfig {
 
-  @Bean(name = "notificationExecutor") //알림용
+  @Bean(name = "notificationExecutor") //알림용   따로 비동기 쓸꺼면 만드세요
   public Executor notificationExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
     executor.setCorePoolSize(4);//일단 그냥 있는거로
@@ -21,4 +21,6 @@ public class AsyncConfig {
     executor.initialize();
     return executor;
   }
+
+
 }

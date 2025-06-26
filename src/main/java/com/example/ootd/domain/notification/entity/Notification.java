@@ -54,13 +54,13 @@ public class Notification {
         .build();
   }
 
-  public static Notification createNotification(NotificationRequest dto) {
+  public static Notification createNotification(NotificationRequest req) {
     return Notification.builder()
         .id(UUID.randomUUID())
-        .receiverId(dto.receiverId())
-        .content(dto.content())
-        .title(dto.title())
-        .level(dto.level())
+        .receiverId(req.receiverId())
+        .content(req.content())
+        .title(req.title())
+        .level(req.level())
         .createdAt(Instant.now())
         .build();
   }

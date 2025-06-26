@@ -16,6 +16,7 @@ import com.example.ootd.domain.follow.service.impl.FollowServiceImpl;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.dto.UserSummary;
 import com.example.ootd.domain.user.repository.UserRepository;
+import java.util.Locale;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,17 +63,9 @@ public class FollowServiceImplTest {
         followId = UUID.randomUUID();
 
         // User 엔티티 생성
-        follower = User.builder()
-                .id(followerId)
-                .name("팔로워")
-                .email("follower@test.com")
-                .build();
+        User follower = new User("팔로워", "follower@test.com", "qwer1234");
 
-        followee = User.builder()
-                .id(followeeId)
-                .name("팔로위")
-                .email("followee@test.com")
-                .build();
+        User followee = new User("팔로위", "followee@test.com", "qwer1234");
 
         // Follow 엔티티 생성
         follow = Follow.builder()

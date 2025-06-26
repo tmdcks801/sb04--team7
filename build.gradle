@@ -56,7 +56,34 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
+    // queryDsl
+    implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    compileOnly "com.querydsl:querydsl-apt:5.0.0:jakarta"
 }
+
+// queryDsl 설정
+def querydslDir = "build/generated/querydsl"
+
+sourceSets {
+    main {
+        java {
+            srcDirs += querydslDir
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.generatedSourceOutputDirectory = file(querydslDir)
+    options.compilerArgs << "-parameters"
+}
+
+clean {
+    delete file(querydslDir)
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()

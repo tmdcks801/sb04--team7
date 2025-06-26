@@ -40,3 +40,5 @@ application-prod.yml
 ### Github Actions ###
 !.github/
 .env
+
+.DS_Store

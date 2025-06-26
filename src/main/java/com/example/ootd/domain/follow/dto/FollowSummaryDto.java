@@ -6,11 +6,11 @@ import lombok.Builder;
 
 @Builder
 public record FollowSummaryDto(
-    UUID followerId,
-    long followingCount,
+    UUID followeeId,
     long followerCount,
-    boolean followByMe,
-    UUID followedByMe,
+    long followingCount,
+    boolean followedByMe,
+    UUID followedByMeId,
     boolean followingByMe
 ) {
 }

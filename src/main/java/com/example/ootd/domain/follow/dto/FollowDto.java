@@ -5,6 +5,12 @@ import java.util.UUID;
 import lombok.Builder;
 
 
+@Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+public class FollowDto {
+
 @Builder
 public record FollowDto(
     UUID id,

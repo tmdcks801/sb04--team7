@@ -21,6 +21,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "follows")
 @EntityListeners(AuditingEntityListener.class)

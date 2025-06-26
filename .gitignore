@@ -39,6 +39,11 @@ application-prod.yml
 
 ### Github Actions ###
 !.github/
+<<<<<<< main
+src/main/resources/application-*.yml
+.env
+=======
 .env
 
 .DS_Store
+>>>>>>> develop

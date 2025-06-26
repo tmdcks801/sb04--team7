@@ -1,0 +1,317 @@
+package com.example.ootd.domain.follow.repository;
+
+import com.example.ootd.domain.follow.entity.Follow;
+import com.example.ootd.domain.user.User;
+import com.example.ootd.domain.user.repository.UserRepository;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+
+import java.util.List;
+import java.util.Optional;
+import org.springframework.test.context.ActiveProfiles;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@DisplayName("FollowRepository 테스트")
+@ActiveProfiles("test")
+class FollowRepositoryTest {
+
+
+    @Autowired
+    private FollowRepository followRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private User follower;
+    private User followee;
+
+    @BeforeEach
+    void setUp() {
+        // 테스트용 사용자 생성
+        User follower = new User("팔로워", "follower@test.com", "qwer12314");
+
+        User followee = new User("팔로위", "followee@test.com", "qwer1234");
+
+        userRepository.save(follower);
+        userRepository.save(followee);
+    }
+
+    @Nested
+    @DisplayName("JPA Repository 테스트")
+    class JpaRepositoryTests {
+
+        @Test
+        @DisplayName("팔로우 저장 테스트")
+        void saveFollow() {
+            // given
+            Follow follow = Follow.builder()
+                .follower(follower)
+                .followee(followee)
+                .build();
+
+            // when
+            Follow savedFollow = followRepository.save(follow);
+
+            // then
+            assertThat(savedFollow).isNotNull();
+            assertThat(savedFollow.getId()).isNotNull();
+            assertThat(savedFollow.getFollower()).isEqualTo(follower);
+            assertThat(savedFollow.getFollowee()).isEqualTo(followee);
+            assertThat(savedFollow.getCreatedAt()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("팔로우 단건 조회 테스트")
+        void findFollow() {
+            // given
+            Follow follow = Follow.builder()
+                .follower(follower)
+                .followee(followee)
+                .build();
+            Follow savedFollow = followRepository.save(follow);
+
+            // when
+            Optional<Follow> foundFollow = followRepository.findById(savedFollow.getId());
+
+            // then
+            assertThat(foundFollow).isPresent();
+            assertThat(foundFollow.get().getFollower().getId()).isEqualTo(follower.getId());
+            assertThat(foundFollow.get().getFollowee().getId()).isEqualTo(followee.getId());
+        }
+
+        @Test
+        @DisplayName("전체 팔로우 조회 테스트")
+        void findAllFollows() {
+            // given
+            Follow follow1 = Follow.builder()
+                .follower(follower)
+                .followee(followee)
+                .build();
+
+            User testUser = new User("테스트 유저", "test@test.com", "qwer1234");
+
+            userRepository.save(testUser);
+
+            Follow follow2 = Follow.builder()
+                .follower(testUser)
+                .followee(followee)
+                .build();
+
+            followRepository.save(follow1);
+            followRepository.save(follow2);
+
+            // when
+            List<Follow> follows = followRepository.findAll();
+
+            // then
+            assertThat(follows).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("팔로우 삭제 테스트")
+        void deleteFollow() {
+            // given
+            Follow follow = Follow.builder()
+                .follower(follower)
+                .followee(followee)
+                .build();
+            Follow savedFollow = followRepository.save(follow);
+
+            // when
+            followRepository.delete(savedFollow);
+
+            // then
+            Optional<Follow> deletedFollow = followRepository.findById(savedFollow.getId());
+            assertThat(deletedFollow).isEmpty();
+        }
+
+        @Test
+        @DisplayName("팔로우 수 조회 테스트")
+        void countFollows() {
+            // given
+            Follow follow = Follow.builder()
+                .follower(follower)
+                .followee(followee)
+                .build();
+            followRepository.save(follow);
+
+            // when
+            long count = followRepository.count();
+
+            // then
+            assertThat(count).isEqualTo(1);
+        }
+    }
+    @Test
+    @DisplayName("팔로우 존재 여부 확인 테스트 - 존재하는 경우")
+    void existsByFollowerIdAndFolloweeId_Exists() {
+        // given
+        Follow follow = Follow.builder()
+            .follower(follower)
+            .followee(followee)
+            .build();
+        followRepository.save(follow);
+
+        // when
+        boolean exists = followRepository.existsByFollowerIdAndFolloweeId(
+            follower.getId(), followee.getId());
+
+        // then
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    @DisplayName("팔로우 존재 여부 확인 테스트 - 존재하지 않는 경우")
+    void existsByFollowerIdAndFolloweeId_NotExists() {
+        // given
+        UUID randomFollowerId = UUID.randomUUID();
+        UUID randomFolloweeId = UUID.randomUUID();
+
+        // when
+        boolean exists = followRepository.existsByFollowerIdAndFolloweeId(
+            randomFollowerId, randomFolloweeId);
+
+        // then
+        assertThat(exists).isFalse();
+    }
+
+    @Test
+    @DisplayName("팔로워 수 조회 테스트")
+    void countByFollowerCount() {
+        // given
+        User anotherFollower = new User("팔로워2", "follower2@test.com", "qwer1234");
+        userRepository.save(anotherFollower);
+
+        Follow follow1 = Follow.builder()
+            .follower(follower)
+            .followee(followee)
+            .build();
+
+        Follow follow2 = Follow.builder()
+            .follower(anotherFollower)
+            .followee(followee)
+            .build();
+
+        followRepository.save(follow1);
+        followRepository.save(follow2);
+
+        // when
+        long followerCount = followRepository.countByFollowerId(follower.getId());
+
+        // then
+        assertThat(followerCount).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("팔로우 수 조회 테스트")
+    void countByFolloweeCount() {
+        // given
+        User anotherFollowee = new User("팔로위2", "followee2@test.com", "qwer1234");
+        userRepository.save(anotherFollowee);
+
+        Follow follow1 = Follow.builder()
+            .follower(follower)
+            .followee(followee)
+            .build();
+
+        Follow follow2 = Follow.builder()
+            .follower(follower)
+            .followee(anotherFollowee)
+            .build();
+
+        followRepository.save(follow1);
+        followRepository.save(follow2);
+
+        // when
+        long followeeCount = followRepository.countByFolloweeId(followee.getId());
+
+        // then
+        assertThat(followeeCount).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("여러 팔로우 관계에서 특정 사용자의 팔로워 수 조회")
+    void countByFollowerCount_Followers() {
+        // given
+        User follower2 = new User("팔로워2", "follower2@test.com", "qwer1234");
+
+        User follower3 = new User("팔로워3", "follower3@test.com", "qwer1234");
+
+        userRepository.save(follower2);
+        userRepository.save(follower3);
+
+        // followee를 팔로우하는 사용자들
+        Follow follow1 = Follow.builder()
+            .follower(follower)
+            .followee(followee)
+            .build();
+
+        Follow follow2 = Follow.builder()
+            .follower(follower2)
+            .followee(followee)
+            .build();
+
+        Follow follow3 = Follow.builder()
+            .follower(follower3)
+            .followee(followee)
+            .build();
+
+        followRepository.save(follow1);
+        followRepository.save(follow2);
+        followRepository.save(follow3);
+
+        // when - follower가 팔로우하는 사람 수 (1명)
+        long followerCount = followRepository.countByFollowerId(follower.getId());
+
+        // then
+        assertThat(followerCount).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("여러 팔로우 관계에서 특정 사용자를 팔로우하는 사람 수 조회")
+    void countByFolloweeCount_Followees() {
+        // given
+        User follower2 = new User("팔로워2", "follower2@test.com", "qwer1234");
+
+        User follower3 = new User("팔로워3", "follower3@test.com", "qwer1234");
+
+        userRepository.save(follower2);
+        userRepository.save(follower3);
+
+        // followee를 팔로우하는 여러 사용자들
+        Follow follow1 = Follow.builder()
+            .follower(follower)
+            .followee(followee)
+            .build();
+
+        Follow follow2 = Follow.builder()
+            .follower(follower2)
+            .followee(followee)
+            .build();
+
+        Follow follow3 = Follow.builder()
+            .follower(follower3)
+            .followee(followee)
+            .build();
+
+        followRepository.save(follow1);
+        followRepository.save(follow2);
+        followRepository.save(follow3);
+
+        // when - followee를 팔로우하는 사람 수 (3명)
+        long followeeCount = followRepository.countByFolloweeId(followee.getId());
+
+        // then
+        assertThat(followeeCount).isEqualTo(3);
+    }
+
+
+}

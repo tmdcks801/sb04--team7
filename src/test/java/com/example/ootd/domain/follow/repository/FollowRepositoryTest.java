@@ -36,15 +36,9 @@ class FollowRepositoryTest {
     @BeforeEach
     void setUp() {
         // 테스트용 사용자 생성
-        follower = User.builder()
-                .email("follower@test.com")
-                .name("팔로워")
-                .build();
-        
-        followee = User.builder()
-                .email("followee@test.com")
-                .name("팔로위")
-                .build();
+        User follower = new User("팔로워", "follower@test.com", "qwer12314");
+
+        User followee = new User("팔로위", "followee@test.com", "qwer1234");
 
         userRepository.save(follower);
         userRepository.save(followee);
@@ -102,10 +96,8 @@ class FollowRepositoryTest {
                 .followee(followee)
                 .build();
 
-            User testUser = User.builder()
-                .email("test@test.com")
-                .name("테스트 유저")
-                .build();
+            User testUser = new User("테스트 유저", "test@test.com", "qwer1234");
+
             userRepository.save(testUser);
 
             Follow follow2 = Follow.builder()
@@ -195,10 +187,7 @@ class FollowRepositoryTest {
     @DisplayName("팔로워 수 조회 테스트")
     void countByFollowerCount() {
         // given
-        User anotherFollower = User.builder()
-            .email("follower2@test.com")
-            .name("팔로워2")
-            .build();
+        User anotherFollower = new User("팔로워2", "follower2@test.com", "qwer1234");
         userRepository.save(anotherFollower);
 
         Follow follow1 = Follow.builder()
@@ -225,10 +214,7 @@ class FollowRepositoryTest {
     @DisplayName("팔로우 수 조회 테스트")
     void countByFolloweeCount() {
         // given
-        User anotherFollowee = User.builder()
-            .email("followee2@test.com")
-            .name("팔로위2")
-            .build();
+        User anotherFollowee = new User("팔로위2", "followee2@test.com", "qwer1234");
         userRepository.save(anotherFollowee);
 
         Follow follow1 = Follow.builder()
@@ -255,15 +241,9 @@ class FollowRepositoryTest {
     @DisplayName("여러 팔로우 관계에서 특정 사용자의 팔로워 수 조회")
     void countByFollowerCount_Followers() {
         // given
-        User follower2 = User.builder()
-            .email("follower2@test.com")
-            .name("팔로워2")
-            .build();
+        User follower2 = new User("팔로워2", "follower2@test.com", "qwer1234");
 
-        User follower3 = User.builder()
-            .email("follower3@test.com")
-            .name("팔로워3")
-            .build();
+        User follower3 = new User("팔로워3", "follower3@test.com", "qwer1234");
 
         userRepository.save(follower2);
         userRepository.save(follower3);
@@ -299,15 +279,9 @@ class FollowRepositoryTest {
     @DisplayName("여러 팔로우 관계에서 특정 사용자를 팔로우하는 사람 수 조회")
     void countByFolloweeCount_Followees() {
         // given
-        User follower2 = User.builder()
-            .email("follower2@test.com")
-            .name("팔로워2")
-            .build();
+        User follower2 = new User("팔로워2", "follower2@test.com", "qwer1234");
 
-        User follower3 = User.builder()
-            .email("follower3@test.com")
-            .name("팔로워3")
-            .build();
+        User follower3 = new User("팔로워3", "follower3@test.com", "qwer1234");
 
         userRepository.save(follower2);
         userRepository.save(follower3);

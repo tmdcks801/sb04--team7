@@ -64,8 +64,9 @@ public class GlobalExceptionHandler {
   private HttpStatus determineHttpStatus(OotdException e) {
     ErrorCode errorCode = e.getErrorCode();
     return switch (errorCode) {
-      case CLOTHES_NOT_FOUND, FEED_NOT_FOUND, IMAGE_NOT_FOUND, ATTRIBUTE_NOT_FOUND ->
-          HttpStatus.NOT_FOUND;
+      case CLOTHES_NOT_FOUND, FEED_NOT_FOUND, IMAGE_NOT_FOUND, FOLLOWER_NOT_FOUND,
+           FOLLOWEE_NOT_FOUND, FOLLOW_USER_NOT_FOUND, FOLLOW_NOT_FOUND, ATTRIBUTE_NOT_FOUND -> HttpStatus.NOT_FOUND;
+      case ALREADY_FOLLOWED_USER -> HttpStatus.CONFLICT;
       case INTERNAL_SERVER_ERROR, INVALID_REQUEST -> HttpStatus.INTERNAL_SERVER_ERROR;
     };
   }

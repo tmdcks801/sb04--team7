@@ -36,7 +36,6 @@ weather:
   api:
     key: ${WEATHER_API_KEY}
 
-
 info:
   name: ootd
   version: 1.7.0

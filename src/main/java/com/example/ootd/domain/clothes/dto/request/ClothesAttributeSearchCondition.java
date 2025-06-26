@@ -3,7 +3,7 @@ package com.example.ootd.domain.clothes.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import java.util.UUID;
 
-public record ClothesAttributeSearchRequest(
+public record ClothesAttributeSearchCondition(
     String cursor,
     UUID idAfter,
     @NotBlank(message = "limit은 필수입니다.")

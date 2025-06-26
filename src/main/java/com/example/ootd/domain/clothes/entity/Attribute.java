@@ -55,4 +55,12 @@ public class Attribute {
     this.name = name;
     this.details = details;
   }
+
+  public void updateName(String name) {
+    this.name = name;
+  }
+
+  public void updateDetails(List<String> details) {
+    this.details = details;
+  }
 }

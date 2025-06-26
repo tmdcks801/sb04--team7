@@ -28,6 +28,25 @@ management:
     annotations:
       enabled: true
 
+
+ootd:
+  storage:
+    type: ${STORAGE_TYPE:s3}  # 기본값: s3
+    s3:
+      access-key: ${AWS_S3_ACCESS_KEY}
+      secret-key: ${AWS_S3_SECRET_KEY}
+      region: ${AWS_S3_REGION}
+      bucket: ${AWS_S3_BUCKET}
+
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}
+
+weather:
+  api:
+    key: ${WEATHER_API_KEY}
+
+
 info:
   name: ootd
   version: 1.7.0
@@ -42,12 +61,27 @@ info:
     jpa:
       ddl-auto: ${spring.jpa.hibernate.ddl-auto}
     storage:
-      type: ${discodeit.storage.type}
-      path: ${discodeit.storage.local.root-path}
+      type: ${ootd.storage.type}
+      path: ${ootd.storage.local.root-path}
     multipart:
       max-file-size: ${spring.servlet.multipart.maxFileSize}
       max-request-size: ${spring.servlet.multipart.maxRequestSize}
 
+ootd:
+  storage:
+    type: s3
+    s3:
+      access-key: ${AWS_S3_ACCESS_KEY} # local -> .env, prod -> github secret
+      secret-key: ${AWS_S3_SECRET_KEY}
+      region: ${AWS_S3_REGION}
+      bucket: ${AWS_S3_BUCKET}
+
 logging:
   level:
     root: info
+app:
+  jwt:
+    secret: "F811B1184C98D8543B1351D93948481900aDYQ82347641"
+    access-token-expiration: 900000
+    refresh-token-expiration: 604800000
+

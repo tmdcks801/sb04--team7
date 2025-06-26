@@ -1,6 +1,6 @@
 package com.example.ootd.domain.weather.entity;
 
-import com.example.ootd.domain.location.entity.Location;
+import com.example.ootd.domain.location.entity.LocationXY;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -20,10 +20,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Wheather")
+@Table(name = "Weather")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Wheather {
+public class Weather {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -35,8 +35,8 @@ public class Wheather {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "location_id")
-  private Location location;
+  @JoinColumn(name = "location_xy_id")
+  private LocationXY locationXY;
 
   @Enumerated(EnumType.STRING)
   private SkyStatus skyStatus;

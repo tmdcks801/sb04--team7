@@ -12,7 +12,6 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +20,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Table(name = "follows")
 public class Follow {
 
@@ -39,4 +37,10 @@ public class Follow {
 
   @Column(name = "created_at", updatable = false, nullable = false)
   private LocalDateTime createdAt;
+
+  @Builder
+  public Follow(User follower, User followee) {
+    this.follower = follower;
+    this.followee = followee;
+  }
 }

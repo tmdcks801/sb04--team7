@@ -1,4 +1,4 @@
-package com.example.ootd.domain.notification.service;
+package com.example.ootd.domain.notification.service.inter;
 
 import com.example.ootd.domain.notification.dto.NotificationDto;
 

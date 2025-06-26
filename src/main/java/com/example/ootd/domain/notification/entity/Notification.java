@@ -3,6 +3,7 @@ package com.example.ootd.domain.notification.entity;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.example.ootd.domain.notification.dto.NotificationDto;
+import com.example.ootd.domain.notification.dto.NotificationRequest;
 import com.example.ootd.domain.notification.enums.NotificationLevel;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -10,10 +11,6 @@ import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -21,7 +18,6 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 @Document(collection = "notification")
 @Getter
-@CompoundIndex(def = "{'receiverId':1, 'read':1}", name = "receiver_read_idx")
 @NoArgsConstructor(access = PROTECTED)
 public class Notification {
 
@@ -46,6 +42,7 @@ public class Notification {
     this.createdAt = createdAt;
   }
 
+
   public static Notification createNotification(NotificationDto dto) {
     return Notification.builder()
         .id(dto.id())
@@ -54,6 +51,17 @@ public class Notification {
         .title(dto.title())
         .level(dto.level())
         .createdAt(dto.createdAt())
+        .build();
+  }
+
+  public static Notification createNotification(NotificationRequest dto) {
+    return Notification.builder()
+        .id(UUID.randomUUID())
+        .receiverId(dto.receiverId())
+        .content(dto.content())
+        .title(dto.title())
+        .level(dto.level())
+        .createdAt(Instant.now())
         .build();
   }
 

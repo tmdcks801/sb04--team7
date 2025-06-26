@@ -1,8 +1,8 @@
 package com.example.ootd.domain.notification.controller;
 
 import com.example.ootd.domain.notification.dto.NotificationRequest;
-import com.example.ootd.domain.notification.service.NotificationPublisherInterface;
-import com.example.ootd.domain.notification.service.NotificationServiceInterface;
+import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
+import com.example.ootd.domain.notification.service.inter.NotificationServiceInterface;
 import com.example.ootd.dto.PageResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

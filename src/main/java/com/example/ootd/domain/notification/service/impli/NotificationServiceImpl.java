@@ -1,15 +1,15 @@
-package com.example.ootd.domain.notification.service;
+package com.example.ootd.domain.notification.service.impli;
 
 import com.example.ootd.domain.notification.dto.NotificationDto;
 import com.example.ootd.domain.notification.dto.NotificationRequest;
 import com.example.ootd.domain.notification.entity.Notification;
 import com.example.ootd.domain.notification.mapper.NotificationMapper;
 import com.example.ootd.domain.notification.repository.NotificationRepository;
+import com.example.ootd.domain.notification.service.inter.NotificationServiceInterface;
 import com.example.ootd.dto.PageResponse;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -27,6 +27,14 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
   @Transactional
   public NotificationDto createNotification(NotificationDto dto) {
     Notification notification = Notification.createNotification(dto);
+    repository.save(notification);
+    return notificationMapper.toDto(notification);
+  }
+
+  @Override
+  @Transactional
+  public NotificationDto createNotification(NotificationRequest req) {
+    Notification notification = Notification.createNotification(req);
     repository.save(notification);
     return notificationMapper.toDto(notification);
   }
@@ -72,7 +80,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
       nextCursor = last.createdAt().toString();
       nextIdAfter = last.id();
     }
-    int totalCount = repository.countByReceiverId(receiverId);
+    int totalCount = repository.countByReceiverId(receiverId); //나중에 캐시 넣기
     return new PageResponse(
         dtos,
         hasNext,

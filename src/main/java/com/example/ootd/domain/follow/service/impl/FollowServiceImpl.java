@@ -97,20 +97,20 @@ public class FollowServiceImpl implements FollowService {
   }
 
   /**
-   * 팔로우 삭제
+   * 팔로우 취소
    * @param followId
    */
   @Override
   @Transactional
   public void deleteFollow(UUID followId) {
-    log.info("팔로우 삭제 : followId: {}", followId);
+    log.info("팔로우 취소 : followId: {}", followId);
 
     // 팔로우 조회
     Follow follow = followRepository.findById(followId)
         .orElseThrow(() -> new OotdException(FOLLOW_NOT_FOUND));
 
-    // 팔로우 삭제
+    // 팔로우 취소
     followRepository.delete(follow);
-    log.info("팔로우 삭제 완료 : followId: {}", followId);
+    log.info("팔로우 취소 완료 : followId: {}", followId);
   }
 }

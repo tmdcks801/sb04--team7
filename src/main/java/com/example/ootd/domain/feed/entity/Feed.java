@@ -1,6 +1,7 @@
 package com.example.ootd.domain.feed.entity;
 
 import com.example.ootd.domain.user.User;
+import com.example.ootd.domain.weather.entity.Weather;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,6 +46,10 @@ public class Feed {
   @JoinColumn(name = "user_id", columnDefinition = "uuid")
   private User user;  // 피드 작성자
 
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "weather_id", columnDefinition = "uuid")
+  private Weather weather;
+
   @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<FeedClothes> feedClothes;  // 피드에 등록된 옷(중간 테이블)
 
@@ -68,8 +74,9 @@ public class Feed {
   private LocalDateTime updatedAt;  // 수정일
 
   @Builder
-  public Feed(User user, List<FeedClothes> feedClothes, String content) {
+  public Feed(User user, Weather weather, List<FeedClothes> feedClothes, String content) {
     this.user = user;
+    this.weather = weather;
     this.feedClothes = feedClothes;
     this.content = content;
     this.likeCount = 0;

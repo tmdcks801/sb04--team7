@@ -34,12 +34,16 @@ public class Image {
   @Column(nullable = false, unique = true)
   private String url; // 이미지 url
 
+  @Column(nullable = false, unique = true)
+  private String fileName;
+
   @Column(nullable = false, updatable = false)
   @CreatedDate
   private LocalDateTime createdAt;  // 생성일
 
   @Builder
-  public Image(String url) {
+  public Image(String url, String fileName) {
     this.url = url;
+    this.fileName = fileName;
   }
 }

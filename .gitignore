@@ -34,18 +34,16 @@ bin/
 
 ### VS Code ###
 .vscode/
-
-### Mac OS ###
-.DS_Store
-
-### Discodeit ###
-.discodeit
-
-### 숨김 파일 ###
-.*
-!.gitignore
-
+application-dev.yml
+application-prod.yml
 
 ### Github Actions ###
 !.github/
+<<<<<<< main
 src/main/resources/application-*.yml
+.env
+=======
+.env
+
+.DS_Store
+>>>>>>> develop

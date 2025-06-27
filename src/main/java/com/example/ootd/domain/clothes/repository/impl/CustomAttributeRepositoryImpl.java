@@ -9,6 +9,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,8 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
             cursorCondition(condition)
         )
         .orderBy(
-            getOrderBy(condition.sortBy(), condition.sortDirection())
+            getOrderBy(condition.sortBy(), condition.sortDirection()),
+            qAttribute.id.asc()
         )
         .limit(condition.limit() + 1)
         .fetch();
@@ -65,7 +67,7 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
     }
 
     return qAttribute.name.contains(keywordLike)
-        .or(qAttribute.details.contains(keywordLike));
+        .or(qAttribute.detailsRaw.contains(keywordLike));
   }
 
   // 커서 페이지네이션
@@ -133,8 +135,8 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
         } else {
           return qAttribute.createdAt.asc();
         }
+      default:
+        return qAttribute.name.asc(); // 기본적으로 속성명 오름차순으로 정렬되도록 함
     }
-
-    return null;
   }
 }

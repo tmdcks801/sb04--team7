@@ -8,7 +8,16 @@ public record FollowListCondition(
     String cursor,
     UUID idAfter,
     int limit,
-    String nameLike
-) {
+    String nameLike,
+    String orderBy,
+    Direction direction
 
+) {
+  public String orderBy() {
+    return orderBy == null ? "createdAt" : orderBy;
+  }
+
+  public Direction direction() {
+    return direction == null ? Direction.ASCENDING : direction;
+  }
 }

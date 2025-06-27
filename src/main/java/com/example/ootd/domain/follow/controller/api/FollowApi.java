@@ -2,6 +2,7 @@ package com.example.ootd.domain.follow.controller.api;
 
 import com.example.ootd.domain.follow.dto.FollowCreateRequest;
 import com.example.ootd.domain.follow.dto.FollowDto;
+import com.example.ootd.domain.follow.dto.FollowListResponse;
 import com.example.ootd.domain.follow.dto.FollowSummaryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -49,22 +50,22 @@ public interface FollowApi {
       )
   })
   @GetMapping("api/follows/summary")
-  ResponseEntity<FollowSummaryDto> getSummary(@RequestBody UUID userId);
+  ResponseEntity<FollowSummaryDto> getSummary(@RequestParam UUID userId);
 
   @Operation(summary = "팔로잉 목록 조회", description = "팔로잉 목록 조회 API")
   @ApiResponses({
       @ApiResponse(
           responseCode = "200",
           description = "팔로잉 목록 조회 성공",
-          content = @Content(schema = @Schema(implementation = FollowSummaryDto.class))),
+          content = @Content(schema = @Schema(implementation = FollowListResponse.class))),
       @ApiResponse(
           responseCode = "400",
           description = "팔로잉 목록 조회 실패",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   @GetMapping("/api/follows/followings")
-  ResponseEntity<FollowSummaryDto> getFollowings(
-      @RequestBody UUID followerId,
+  ResponseEntity<FollowListResponse> getFollowings(
+      @RequestParam(name = "followerId") UUID userId,
       @RequestParam(required = false) String cursor,
       @RequestParam(required = false) UUID idAfter,
       @RequestParam int limit,
@@ -76,15 +77,15 @@ public interface FollowApi {
       @ApiResponse(
           responseCode = "200",
           description = "팔로워 목록 조회 성공",
-          content = @Content(schema = @Schema(implementation = FollowSummaryDto.class))),
+          content = @Content(schema = @Schema(implementation = FollowListResponse.class))),
       @ApiResponse(
           responseCode = "400",
           description = "팔로워 목록 조회 실패",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   @GetMapping("/api/follows/followers")
-  ResponseEntity<FollowSummaryDto> getFollowers(
-      @RequestBody UUID followeeId,
+  ResponseEntity<FollowListResponse> getFollowers(
+      @RequestParam(name = "followeeId") UUID userId,
       @RequestParam(required = false) String cursor,
       @RequestParam(required = false) UUID idAfter,
       @RequestParam int limit,

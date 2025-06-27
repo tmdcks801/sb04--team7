@@ -18,7 +18,7 @@ public interface FollowService {
 
   void deleteFollow(UUID followId);
 
-  FollowListResponse getFollowerList(FollowListCondition condition, UUID followerId);
+  FollowListResponse getFollowerList(FollowListCondition condition, UUID followeeId);
 
-  FollowListResponse getFollowingList(FollowListCondition condition, UUID followeeId);
+  FollowListResponse getFollowingList(FollowListCondition condition, UUID followerId);
 }

@@ -19,8 +19,6 @@ import com.example.ootd.domain.follow.repository.FollowRepository;
 import com.example.ootd.domain.follow.service.FollowService;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
-import com.example.ootd.exception.ErrorCode;
-import com.example.ootd.exception.ErrorResponse;
 import com.example.ootd.exception.OotdException;
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.ErrorResponseException;
 
 @Service
 @Slf4j
@@ -93,10 +90,11 @@ public class FollowServiceImpl implements FollowService {
         .followeeId(user.getId())
         .followerCount(followRepository.countByFolloweeId(user.getId()))
         .followingCount(followRepository.countByFollowerId(user.getId()))
-        .followedByMe(followRepository.existsByFollowerIdAndFolloweeId(userId, user.getId()))
-        .followedByMeId(userId)
         .followingByMe(followRepository.existsByFollowerIdAndFolloweeId(user.getId(), userId))
+        .followedByMeId(userId)
+        .followedByMe(followRepository.existsByFollowerIdAndFolloweeId(userId, user.getId()))
         .build();
+
 
     return summary;
   }
@@ -104,12 +102,12 @@ public class FollowServiceImpl implements FollowService {
   /**
    * 팔로워 목록 조회
    * @param condition
-   * @param followerId
+   * @param followeeId
    * @return FollowListResponse
    */
   @Override
-  public FollowListResponse getFollowerList(FollowListCondition condition, UUID followerId) {
-    log.info("팔로워 목록 조회 : followerId: {}", followerId);
+  public FollowListResponse getFollowerList(FollowListCondition condition, UUID followeeId) {
+    log.info("팔로워 목록 조회 : followeeId: {}", followeeId);
 
     // 값 추출
     String cursor = condition.cursor();
@@ -121,7 +119,7 @@ public class FollowServiceImpl implements FollowService {
 
     // limit + 1로 조회하여 다음 페이지 존재 여부 확인
     List<Follow> followers = followRepository.findFollowersWithCursor(
-        followerId, cursor, idAfter, limit + 1, nameLike, orderBy, direction);
+        followeeId, cursor, idAfter, limit + 1, nameLike, orderBy, direction);
 
     boolean hasNext = followers.size() > limit;
     List<Follow> responseList = hasNext ? followers.subList(0, limit) : followers;
@@ -135,9 +133,9 @@ public class FollowServiceImpl implements FollowService {
     }
 
     // 전체 카운트 조회
-    int totalCount = (int) followRepository.countByFolloweeId(followerId);
+    int totalCount = (int) followRepository.countByFolloweeId(followeeId);
 
-    log.info("팔로워 목록 조회 완료 : followerId: {}, cursor: {}, hasNext: {}", followerId, nextCursor, hasNext);
+    log.info("팔로워 목록 조회 완료 : followeeId: {}, cursor: {}, hasNext: {}", followeeId, nextCursor, hasNext);
 
     return FollowListResponse.builder()
         .data(responseList.stream().map(followMapper::toDto).toList())
@@ -153,12 +151,12 @@ public class FollowServiceImpl implements FollowService {
   /**
    * 팔로잉 목록 조회
    * @param condition
-   * @param followeeId
+   * @param followerId
    * @return FollowListResponse
    */
   @Override
-  public FollowListResponse getFollowingList(FollowListCondition condition, UUID followeeId) {
-    log.info("팔로위 목록 조회 : followeeId: {}", followeeId);
+  public FollowListResponse getFollowingList(FollowListCondition condition, UUID followerId) {
+    log.info("팔로잉 목록 조회 : followerId: {}", followerId);
 
     // 값 추출
     String cursor = condition.cursor();
@@ -169,8 +167,8 @@ public class FollowServiceImpl implements FollowService {
     Direction direction = condition.direction();
 
     // limit + 1로 조회하여 다음 페이지 존재 여부 확인
-    List<Follow> followees = followRepository.findFollowersWithCursor(
-        followeeId, cursor, idAfter, limit + 1, nameLike, orderBy, direction);
+    List<Follow> followees = followRepository.findFollowingsWithCursor(
+        followerId, cursor, idAfter, limit + 1, nameLike, orderBy, direction);
 
     boolean hasNext = followees.size() > limit;
     List<Follow> responseList = hasNext ? followees.subList(0, limit) : followees;
@@ -184,9 +182,9 @@ public class FollowServiceImpl implements FollowService {
     }
 
     // 전체 카운트 조회
-    int totalCount = (int) followRepository.countByFolloweeId(followeeId);
+    int totalCount = (int) followRepository.countByFollowerId(followerId);
 
-    log.info("팔로위 목록 조회 완료 : followeeId: {}, cursor: {}, hasNext: {}", followeeId, nextCursor, hasNext);
+    log.info("팔로잉 목록 조회 완료 : followerId: {}, cursor: {}, hasNext: {}", followerId, nextCursor, hasNext);
 
     return FollowListResponse.builder()
         .data(responseList.stream().map(followMapper::toDto).toList())

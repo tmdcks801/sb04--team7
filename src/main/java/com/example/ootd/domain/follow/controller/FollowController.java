@@ -38,7 +38,7 @@ public class FollowController {
   }
 
   @GetMapping("/summary")
-  public ResponseEntity<FollowSummaryDto> getSummary(@RequestBody UUID userId) {
+  public ResponseEntity<FollowSummaryDto> getSummary(@RequestParam UUID userId) {
     log.info("팔로우 요약 정보 요청 : userId = {}", userId);
     FollowSummaryDto summary = followService.getSummaryFollow(userId);
     return ResponseEntity.ok().body(summary);
@@ -46,14 +46,14 @@ public class FollowController {
 
   @GetMapping("/followings")
   public ResponseEntity<FollowListResponse> getFollowings(
-      @RequestParam UUID followerId,
+      @RequestParam(name = "followerId") UUID userId,
       @RequestParam(required = false) String cursor,
       @RequestParam(required = false) UUID idAfter,
       @RequestParam int limit,
       @RequestParam(required = false) String nameLike
   ){
-    log.info("팔로우 목록 조회 요청 : followerId = {}, cursor = {}, idAfter = {}, limit = {}, nameLike = {}",
-        followerId, cursor, idAfter, limit, nameLike);
+    log.info("팔로잉 목록 조회 요청 : userId = {}, cursor = {}, idAfter = {}, limit = {}, nameLike = {}",
+        userId, cursor, idAfter, limit, nameLike);
 
     FollowListCondition condition = FollowListCondition.builder()
       .cursor(cursor)
@@ -62,21 +62,21 @@ public class FollowController {
       .nameLike(nameLike)
       .build();
 
-    FollowListResponse response = followService.getFollowingList(condition, followerId);
-    log.info("팔로우 목록 조회 완료 : {}", response);
+    FollowListResponse response = followService.getFollowingList(condition, userId);
+    log.info("팔로잉 목록 조회 완료 : {}", response);
     return ResponseEntity.ok(response);
   }
 
   @GetMapping("/followers")
   public ResponseEntity<FollowListResponse> getFollowers(
-      @RequestParam UUID followeeId,
+      @RequestParam(name = "followeeId") UUID userId,
       @RequestParam(required = false) String cursor,
       @RequestParam(required = false) UUID idAfter,
       @RequestParam int limit,
       @RequestParam(required = false) String nameLike
   ){
-    log.info("팔로워 목록 조회 요청 : followeeId = {}, cursor = {}, idAfter = {}, limit = {}, nameLike = {}",
-        followeeId, cursor, idAfter, limit, nameLike);
+    log.info("팔로워 목록 조회 요청 : userId = {}, cursor = {}, idAfter = {}, limit = {}, nameLike = {}",
+        userId, cursor, idAfter, limit, nameLike);
 
     FollowListCondition condition = FollowListCondition.builder()
       .cursor(cursor)
@@ -85,7 +85,7 @@ public class FollowController {
       .nameLike(nameLike)
       .build();
 
-    FollowListResponse response = followService.getFollowerList(condition, followeeId);
+    FollowListResponse response = followService.getFollowerList(condition, userId);
     log.info("팔로워 목록 조회 완료 : {}", response);
     return ResponseEntity.ok(response);
   }

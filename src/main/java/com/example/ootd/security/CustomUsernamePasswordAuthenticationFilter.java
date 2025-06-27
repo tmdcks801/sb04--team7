@@ -2,6 +2,7 @@ package com.example.ootd.security;
 
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.dto.LoginDto;
+import com.example.ootd.exception.ErrorCode;
 import com.example.ootd.exception.OotdException;
 import com.example.ootd.security.jwt.JwtService;
 import com.example.ootd.security.jwt.JwtSession;
@@ -67,7 +68,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends
       return this.getAuthenticationManager().authenticate(token);
     } catch (IOException e){
       log.info("AUTHENTICATION FAILED : reason={}", e.getMessage());
-      throw new OotdException("Authentication Failed");
+      throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
     }
   }
 

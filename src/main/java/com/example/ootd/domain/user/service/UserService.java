@@ -11,8 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 public interface UserService {
 
   List<UserDto> getUsers(UserSearchCondition condition);
-  ProfileDto getUserProfile(UUID userId);
-  ProfileDto updateUserProfile(UUID userId, ProfileUpdateRequest request, MultipartFile profile);
 
+  ProfileDto getUserProfile(UUID userId);
+
+  ProfileDto updateUserProfile(UUID userId, ProfileUpdateRequest request, MultipartFile profile);
 
 }

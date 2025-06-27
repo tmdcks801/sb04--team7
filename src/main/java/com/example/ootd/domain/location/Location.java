@@ -31,4 +31,13 @@ public class Location {
   @Convert(converter = StringListConverter.class)
   @Column(columnDefinition = "TEXT") // 길이에 따라 TEXT 사용
   private List<String> locationNames;
+
+  public Location(double latitude, double longitude, int locationX, int locationY,
+      List<String> locationNames) {
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.locationX = locationX;
+    this.locationY = locationY;
+    this.locationNames = locationNames;
+  }
 }

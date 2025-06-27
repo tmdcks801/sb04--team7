@@ -1,8 +1,6 @@
 package com.example.ootd.domain.weather.dto;
 
-import com.example.ootd.domain.location.entity.Location;
 import com.example.ootd.domain.weather.entity.SkyStatus;
-import com.example.ootd.domain.weather.entity.Weather;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -38,32 +36,4 @@ public record WeatherDto(
 
 ) {
 
-  public static WeatherDto from(Weather weather, Location location) {
-    return new WeatherDto(
-        weather.getId(),
-        weather.getForecastedAt(),
-        weather.getForecastAt(),
-        location.getLocationNames(),
-        weather.getSkyStatus(),
-        new TemperatureDto(
-            weather.getTemperature().getTemperatureCurrent(),
-            weather.getTemperature().getTemperatureMin(),
-            weather.getTemperature().getTemperatureMax(),
-            weather.getTemperature().getTemperatureComparedToDayBefore()
-        ),
-        new PrecipitationDto(
-            weather.getPrecipitation().getPrecipitationType(),
-            weather.getPrecipitation().getPrecipitationAmount(),
-            weather.getPrecipitation().getPrecipitationProbability()
-        ),
-        new HumidityDto(
-            weather.getHumidity().getHumidityCurrent(),
-            weather.getHumidity().getHumidityComparedToDayBefore()
-        ),
-        new WindSpeedDto(
-            weather.getWindSpeed().getWindSpeed(),
-            weather.getWindSpeed().getWindAsWord()
-        )
-    );
-  }
 }

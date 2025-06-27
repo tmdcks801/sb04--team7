@@ -1,4 +1,4 @@
-package com.example.ootd.domain.location.entity;
+package com.example.ootd.domain.location;
 
 import com.example.ootd.converter.StringListConverter;
 import jakarta.persistence.Column;

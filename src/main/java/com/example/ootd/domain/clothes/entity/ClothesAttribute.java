@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -45,5 +46,23 @@ public class ClothesAttribute {
     this.clothes = clothes;
     this.attribute = attribute;
     this.value = value;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ClothesAttribute that = (ClothesAttribute) o;
+    return Objects.equals(clothes, that.clothes) && Objects.equals(attribute,
+        that.attribute) && Objects.equals(value, that.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(clothes, attribute, value);
   }
 }

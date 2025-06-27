@@ -1,10 +1,10 @@
 package com.example.ootd.domain.follow.repository.custom;
 
+import com.example.ootd.domain.follow.dto.Direction;
 import com.example.ootd.domain.follow.entity.Follow;
 import java.util.List;
 import java.util.UUID;
 
-//TODO : 프로토콜 사이트에 구현이 아직 안되어 있음. 사이트에 추가되면 구현
 public interface FollowRepositoryCustom {
 
   /**
@@ -22,7 +22,9 @@ public interface FollowRepositoryCustom {
       String cursor,
       UUID idAfter,
       int limit,
-      String nameLike
+      String nameLike,
+      String orderBy,
+      Direction direction
   );
 
   /**
@@ -40,6 +42,8 @@ public interface FollowRepositoryCustom {
       String cursor,
       UUID idAfter,
       int limit,
-      String nameLike
+      String nameLike,
+      String orderBy,
+      Direction direction
   );
 }

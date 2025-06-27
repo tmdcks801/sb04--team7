@@ -38,6 +38,8 @@ public class Message {
   private LocalDateTime createdAt;
   @Column(name = "contents", length = 255)
   private String content;
+  @Column(name = "dm_key", length = 255)
+  private String dmKey;
 
 
   @Builder
@@ -46,6 +48,7 @@ public class Message {
     this.sender = sender;
     this.receiver = receiver;
     this.content = content;
+    this.dmKey = makeDmKey(sender.getId(), receiver.getId());
   }
 
   public static Message createMessage(User sender, User receiver, String content) {
@@ -54,6 +57,17 @@ public class Message {
         .receiver(receiver)
         .content(content)
         .build();
+  }
+
+  private String makeDmKey(UUID first, UUID second) {
+    String a = first.toString();
+    String b = second.toString();
+
+    if (a.compareTo(b) < 0) {
+      return a + '_' + b;
+    } else {
+      return b + '_' + a;
+    }
   }
 
 }

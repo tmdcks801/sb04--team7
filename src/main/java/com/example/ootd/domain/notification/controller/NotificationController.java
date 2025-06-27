@@ -24,7 +24,7 @@ public class NotificationController {
 
   @GetMapping//애도 테스트 용
   public ResponseEntity<PageResponse> getNotifications(
-      @RequestParam UUID receiverId, //이거 보니 토큰에 있어서 따로 떼오는거 추가하기
+      @RequestParam UUID receiverId, //이거 보니 토큰에 있어서 따로 떼오는거로 변경
       @RequestParam(required = false) String cursor,
       @RequestParam(required = false, defaultValue = "20") int limit) {
 

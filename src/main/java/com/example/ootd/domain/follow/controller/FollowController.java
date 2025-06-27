@@ -3,6 +3,8 @@ package com.example.ootd.domain.follow.controller;
 
 import com.example.ootd.domain.follow.dto.FollowCreateRequest;
 import com.example.ootd.domain.follow.dto.FollowDto;
+import com.example.ootd.domain.follow.dto.FollowListCondition;
+import com.example.ootd.domain.follow.dto.FollowListResponse;
 import com.example.ootd.domain.follow.dto.FollowSummaryDto;
 import com.example.ootd.domain.follow.service.FollowService;
 import jakarta.validation.Valid;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -41,11 +44,56 @@ public class FollowController {
     return ResponseEntity.ok().body(summary);
   }
 
+  @GetMapping("/followings")
+  public ResponseEntity<FollowListResponse> getFollowings(
+      @RequestParam UUID followerId,
+      @RequestParam(required = false) String cursor,
+      @RequestParam(required = false) UUID idAfter,
+      @RequestParam int limit,
+      @RequestParam(required = false) String nameLike
+  ){
+    log.info("팔로우 목록 조회 요청 : followerId = {}, cursor = {}, idAfter = {}, limit = {}, nameLike = {}",
+        followerId, cursor, idAfter, limit, nameLike);
+
+    FollowListCondition condition = FollowListCondition.builder()
+      .cursor(cursor)
+      .idAfter(idAfter)
+      .limit(limit != 0 ? limit : 10)
+      .nameLike(nameLike)
+      .build();
+
+    FollowListResponse response = followService.getFollowingList(condition, followerId);
+    log.info("팔로우 목록 조회 완료 : {}", response);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/followers")
+  public ResponseEntity<FollowListResponse> getFollowers(
+      @RequestParam UUID followeeId,
+      @RequestParam(required = false) String cursor,
+      @RequestParam(required = false) UUID idAfter,
+      @RequestParam int limit,
+      @RequestParam(required = false) String nameLike
+  ){
+    log.info("팔로워 목록 조회 요청 : followeeId = {}, cursor = {}, idAfter = {}, limit = {}, nameLike = {}",
+        followeeId, cursor, idAfter, limit, nameLike);
+
+    FollowListCondition condition = FollowListCondition.builder()
+      .cursor(cursor)
+      .idAfter(idAfter)
+      .limit(limit != 0 ? limit : 10)
+      .nameLike(nameLike)
+      .build();
+
+    FollowListResponse response = followService.getFollowerList(condition, followeeId);
+    log.info("팔로워 목록 조회 완료 : {}", response);
+    return ResponseEntity.ok(response);
+  }
+
   @DeleteMapping("/{followId}")
   public ResponseEntity<Void> deleteFollow(@PathVariable UUID followId) {
     log.info("팔로우 취소 요청 : followId = {}", followId);
     followService.deleteFollow(followId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
-
 }

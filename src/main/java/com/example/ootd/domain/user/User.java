@@ -1,7 +1,7 @@
 package com.example.ootd.domain.user;
 
 import com.example.ootd.domain.image.entity.Image;
-import com.example.ootd.domain.location.entity.Location;
+import com.example.ootd.domain.location.Location;
 import com.example.ootd.security.Provider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +15,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -86,7 +85,7 @@ public class User {
   @Column
   private int temperatureSensitivity;
 
-  public User(String name, String email, String password){
+  public User(String name, String email, String password) {
     this.name = name;
     this.email = email;
     this.password = password;

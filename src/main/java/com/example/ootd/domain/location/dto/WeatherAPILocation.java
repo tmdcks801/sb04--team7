@@ -13,5 +13,7 @@ public record WeatherAPILocation(
 //    @Schema(description = "격자 Y")
     int y,
 //    @Schema(description = "행정동 이름")
-    String locationName
-) {}
+    List<String> locationNames
+) {
+
+}

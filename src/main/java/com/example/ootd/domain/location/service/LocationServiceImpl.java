@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class BasicLocationService implements LocationService {
+public class LocationServiceImpl implements LocationService {
 
   private final KakaoApiClient kakaoApiClient;
 

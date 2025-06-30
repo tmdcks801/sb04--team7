@@ -15,6 +15,6 @@ public interface NotificationServiceInterface {
 
   PageResponse getPageNation(UUID receiverId, String cursor, int limit);//페이지네이션
 
-  void readNotification(UUID NotificationId);//읽고나면 물리적 삭제, 논리적 삭제 한다면 품이 꽤 듬
+  void readNotification(UUID NotificationId);//읽고나면 물리적 삭제, 논리적 삭제로 바꾸면 품이 꽤 듬
 
 }

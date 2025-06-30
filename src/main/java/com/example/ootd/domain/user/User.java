@@ -1,7 +1,7 @@
 package com.example.ootd.domain.user;
 
 import com.example.ootd.domain.image.entity.Image;
-import com.example.ootd.domain.location.entity.Location;
+import com.example.ootd.domain.location.Location;
 import com.example.ootd.security.Provider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

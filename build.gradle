@@ -32,16 +32,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.kafka:spring-kafka'
     implementation("org.springframework.boot:spring-boot-starter-websocket")
-    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
 
-    compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
+    compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
-    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
-
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
@@ -51,7 +46,6 @@ dependencies {
     //비동기 재시도
     implementation 'org.springframework.retry:spring-retry'
     implementation 'org.springframework:spring-aspects'
-
 
     // aws
     implementation platform("software.amazon.awssdk:bom:2.25.33") // 버전 BOM 사용
@@ -74,8 +68,31 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
+    // Swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
 }
+
+// queryDsl 설정
+def querydslDir = "build/generated/querydsl"
+
+sourceSets {
+    main {
+        java {
+            srcDirs += querydslDir
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.generatedSourceOutputDirectory = file(querydslDir)
+    options.compilerArgs << "-parameters"
+}
+
+clean {
+    delete file(querydslDir)
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()

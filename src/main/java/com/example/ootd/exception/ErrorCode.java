@@ -4,13 +4,14 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
-  
+
   // Clothes 에러
   CLOTHES_NOT_FOUND("옷을 찾을 수 없습니다."),
-  
+  ATTRIBUTE_NOT_FOUND("속성 정의를 찾을 수 없습니다."),
+
   // Feed 에러
   FEED_NOT_FOUND("피드를 찾을 수 없습니다."),
-  
+
   // Image 에러
   IMAGE_NOT_FOUND("이미지를 찾을 수 없습니다."),
 

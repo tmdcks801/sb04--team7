@@ -1,6 +1,7 @@
 package com.example.ootd.domain.user.controller;
 
 
+import com.example.ootd.domain.user.dto.ResetPasswordRequest;
 import com.example.ootd.domain.user.dto.UserCreateRequest;
 import com.example.ootd.domain.user.dto.UserDto;
 import com.example.ootd.domain.user.service.AuthService;
@@ -50,5 +51,11 @@ public class AuthController {
   @GetMapping("/auth/me")
   public ResponseEntity<String> getAccessTokenFromRefreshToken(HttpServletRequest request){
     return ResponseEntity.ok(authService.getAccessToken(request));
+  }
+
+  @PostMapping("/auth/reset-password")
+  public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request){
+    authService.resetPassword(request);
+    return ResponseEntity.ok().build();
   }
 }

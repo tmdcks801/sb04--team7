@@ -9,6 +9,7 @@ import com.example.ootd.domain.user.dto.UserLockUpdateRequest;
 import com.example.ootd.domain.user.dto.UserRoleUpdateRequest;
 import com.example.ootd.domain.user.mapper.UserMapper;
 import com.example.ootd.domain.user.repository.UserRepository;
+import com.example.ootd.domain.user.util.EmailService;
 import com.example.ootd.exception.ErrorCode;
 import com.example.ootd.exception.OotdException;
 import com.example.ootd.security.jwt.JwtService;
@@ -18,9 +19,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,7 +42,7 @@ public class AuthServiceImpl implements AuthService{
   private final JwtService jwtService;
   private final PasswordEncoder encoder;
   private final JwtSessionRepository jwtSessionRepository;
-
+  private final EmailService emailService;
   @Override
   public UserDto registerUser(UserCreateRequest request) {
     User newUser = userMapper.toEntity(request, encoder);
@@ -104,7 +107,29 @@ public class AuthServiceImpl implements AuthService{
 
   @Override
   public void resetPassword(ResetPasswordRequest request) {
+    User user = userRepository.findByEmail(request.email()).orElseThrow(() -> new OotdException(ErrorCode.USER_NOT_FOUND) );
 
+    String tmpPwd = UUID.randomUUID().toString().substring(0,8);
+    String encodedTmpPwd = encoder.encode(tmpPwd);
+
+    user.resetPassword(encodedTmpPwd);
+    userRepository.save(user);
+
+    sendEmailAsync(user.getEmail(), tmpPwd)
+        .whenComplete((result, ex) -> {
+          if (ex == null) {
+            log.info("[이메일 전송 성공] : email={}", user.getEmail());
+          } else {
+            log.error("[이메일 전송 실패] : email={}", user.getEmail(), ex);
+          }
+        });
+  }
+
+  @Async // @Async + @Retryable 은 AOP 기반 동작시 에러 -> wrapping 메서드 구현
+  public CompletableFuture<Void> sendEmailAsync(String email, String tmpPwd) {
+    return CompletableFuture.runAsync(() -> {
+      emailService.sendEmail(email, tmpPwd);
+    });
   }
 
   private String extractRefreshTokenFromCookie(HttpServletRequest request) {

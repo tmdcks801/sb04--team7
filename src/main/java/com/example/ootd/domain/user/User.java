@@ -85,6 +85,12 @@ public class User {
   @Column
   private int temperatureSensitivity;
 
+  @Column
+  private boolean isTempPassword;
+
+  @Column
+  private LocalDateTime tempPasswordExpiration;
+
   public User(String name, String email, String password) {
     this.name = name;
     this.email = email;
@@ -96,6 +102,14 @@ public class User {
     this.gender = Gender.OTHER;
     this.birthDate = LocalDate.now(); // TODO: 변경
     this.temperatureSensitivity = 3;
+    this.isTempPassword = false;
+    this.tempPasswordExpiration = null;
   }
 
+
+  public void resetPassword(String tempPassword){
+    this.isTempPassword = true;
+    this.tempPasswordExpiration = LocalDateTime.now().plusMinutes(10);
+    this.password = tempPassword;
+  }
 }

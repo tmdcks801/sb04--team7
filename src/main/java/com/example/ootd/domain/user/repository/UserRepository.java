@@ -4,8 +4,11 @@ import com.example.ootd.domain.user.User;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface UserRepository extends JpaRepository<User, UUID>, CustomUserRepository {
 
   Optional<User> findByEmail (String email);
+  @Query("SELECT u FROM User u LEFT JOIN FETCH u.location LEFT JOIN FETCH u.image WHERE u.id = :userId")
+  Optional<User> findByIdWithLocationAndImage(UUID userId); // TODO : 이후 성능 최적화 -> Join 2개..
 }

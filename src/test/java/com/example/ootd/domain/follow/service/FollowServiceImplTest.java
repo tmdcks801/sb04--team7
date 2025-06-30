@@ -52,9 +52,6 @@ public class FollowServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private LocationRepository locationRepository;
-
     @InjectMocks
     private FollowServiceImpl followService;
 

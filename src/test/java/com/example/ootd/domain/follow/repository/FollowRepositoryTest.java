@@ -326,5 +326,12 @@ class FollowRepositoryTest {
         assertThat(followeeCount).isEqualTo(3);
     }
 
+    @DisplayName("커서 페이지네이션")
+    @Nested
+    class CursorPage {
+
+        
+    }
+
 
 }

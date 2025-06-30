@@ -38,7 +38,7 @@ public class WeatherReader implements ItemReader<WeatherBatchData> {
   private boolean initialized = false;
 
   @Override
-  public synchronized WeatherBatchData read() {
+  public WeatherBatchData read() {
     if (!initialized) {
       initializeData();
       initialized = true;

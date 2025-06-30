@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -36,12 +37,12 @@ public class AuthServiceImpl implements AuthService{
   private final UserMapper userMapper;
   private final UserRepository userRepository;
   private final JwtService jwtService;
-
+  private final PasswordEncoder encoder;
   private final JwtSessionRepository jwtSessionRepository;
 
   @Override
   public UserDto registerUser(UserCreateRequest request) {
-    User newUser = userMapper.toEntity(request);
+    User newUser = userMapper.toEntity(request, encoder);
     return userMapper.toDto(userRepository.save(newUser));
   }
 

@@ -42,11 +42,14 @@ public class UserServiceImpl implements UserService{
       );
     }
 
-    boolean hasNext = hasNext(condition.limit(), users.size());
+    boolean hasNext = hasNext(condition.limit() + 1, users.size());
+
     if(hasNext) users.remove(users.size() - 1);
     List<UserDto> userDtos = mapper.toDtoList(users);
-    UUID nextIdAfter = users.get(users.size() - 1).getId();
-    LocalDateTime nextCursor = calculateNextCursor(condition.sortDirection(), userDtos);
+
+    UUID nextIdAfter = hasNext ? users.get(users.size() - 1).getId() : null;
+
+    LocalDateTime nextCursor = hasNext ? calculateNextCursor(condition.sortDirection(), userDtos) : null;
 
     return mapper.toPaginatedResponse(
         userDtos,

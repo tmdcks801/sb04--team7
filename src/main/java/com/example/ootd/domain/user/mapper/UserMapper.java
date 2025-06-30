@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -38,19 +39,22 @@ public interface UserMapper {
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "image", ignore = true)
   @Mapping(target = "location", ignore = true)
+  @Mapping(target = "name", source = "request.name")
+  @Mapping(target = "email", source = "request.email")
   @Mapping(target = "createdAt", ignore = true)
-  @Mapping(target = "role", defaultValue = "ROLE_USER")
+  @Mapping(target = "role", ignore = true)
   @Mapping(target = "provider", ignore = true)
   @Mapping(target = "providerId", ignore = true)
-  @Mapping(target = "isLocked", defaultValue = "false")
-  @Mapping(target = "password", expression = "java(encodePassword(request.password(), passwordEncoder))")
+  @Mapping(target = "isLocked", ignore = true)
+  @Mapping(target = "password", source = "request.password", qualifiedByName = "encodePassword")
   User toEntity(UserCreateRequest request, @Context PasswordEncoder passwordEncoder);
 
-  @Mapping(target = "providers", expression = "java(user.getProvider() == null ? java.util.List.of() : java.util.List.of(user.getProvider()))")
+  @Mapping(target = "linkedOAuthProviders", expression = "java(user.getProvider() == null ? java.util.List.of() : java.util.List.of(user.getProvider()))")
   UserDto toDto(User user);
 
   List<UserDto> toDtoList(List<User> users);
 
+  @Named("encodePassword")
   default String encodePassword(String rawPassword, @Context PasswordEncoder encoder) {
     return encoder.encode(rawPassword);
   }

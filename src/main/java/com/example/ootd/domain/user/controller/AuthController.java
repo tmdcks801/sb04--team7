@@ -1,4 +1,4 @@
-package com.example.ootd.domain.user;
+package com.example.ootd.domain.user.controller;
 
 
 import com.example.ootd.domain.user.dto.UserCreateRequest;

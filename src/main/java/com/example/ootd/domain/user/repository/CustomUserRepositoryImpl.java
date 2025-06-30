@@ -36,7 +36,7 @@ public class CustomUserRepositoryImpl implements CustomUserRepository{
       booleanBuilder.and(user.role.eq(condition.roleEqual()));
     }
 
-    if(condition.locked()) {
+    if(condition.locked() != null && condition.locked()) {
       booleanBuilder.and(user.isLocked.eq(true));
     }
 

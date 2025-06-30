@@ -97,4 +97,5 @@ public class User {
     this.birthDate = LocalDate.now(); // TODO: 변경
     this.temperatureSensitivity = 3;
   }
+
 }

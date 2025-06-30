@@ -17,8 +17,26 @@ spring:
     multipart:
       maxFileSize: 5MB
       maxRequestSize: 10MB
-  config:
-    import: optional:file:.env[.properties]
+
+kakao:
+  api:
+    key: test-kakao-key
+
+weather:
+  api:
+    key: test-weather-key
+
+ootd:
+  storage:
+    type: local
+    local:
+      root-path: /tmp/test-uploads
+
+app:
+  jwt:
+    secret: "test-secret-key-for-testing-purposes-only"
+    access-token-expiration: 900000
+    refresh-token-expiration: 604800000
 
 logging:
   level:

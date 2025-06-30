@@ -1,6 +1,9 @@
 package com.example.ootd.domain.follow.repository;
 
+import com.example.ootd.config.QueryDslConfig;
 import com.example.ootd.domain.follow.entity.Follow;
+import com.example.ootd.domain.location.Location;
+import com.example.ootd.domain.location.repository.LocationRepository;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import java.util.UUID;
@@ -14,13 +17,17 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @DisplayName("FollowRepository 테스트")
+@Import(QueryDslConfig.class)
 @ActiveProfiles("test")
+@Transactional
 class FollowRepositoryTest {
 
 
@@ -30,18 +37,25 @@ class FollowRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private LocationRepository locationRepository;
+
     private User follower;
     private User followee;
+    private Location testLocation;
 
     @BeforeEach
     void setUp() {
+        // 테스트용 위치 생성
+        this.testLocation = new Location(37.5665, 126.9780, 60, 127, List.of("서울특별시", "중구", "명동"));
+        locationRepository.save(this.testLocation);
+
         // 테스트용 사용자 생성
-        User follower = new User("팔로워", "follower@test.com", "qwer12314");
+        this.follower = new User("팔로워", "follower@test.com", "qwer12314", this.testLocation);
+        this.followee = new User("팔로위", "followee@test.com", "qwer1234", this.testLocation);
 
-        User followee = new User("팔로위", "followee@test.com", "qwer1234");
-
-        userRepository.save(follower);
-        userRepository.save(followee);
+        userRepository.save(this.follower);
+        userRepository.save(this.followee);
     }
 
     @Nested
@@ -96,8 +110,7 @@ class FollowRepositoryTest {
                 .followee(followee)
                 .build();
 
-            User testUser = new User("테스트 유저", "test@test.com", "qwer1234");
-
+            User testUser = new User("테스트 유저", "test@test.com", "qwer1234", testLocation);
             userRepository.save(testUser);
 
             Follow follow2 = Follow.builder()
@@ -187,7 +200,7 @@ class FollowRepositoryTest {
     @DisplayName("팔로워 수 조회 테스트")
     void countByFollowerCount() {
         // given
-        User anotherFollower = new User("팔로워2", "follower2@test.com", "qwer1234");
+        User anotherFollower = new User("팔로워2", "follower2@test.com", "qwer1234", testLocation);
         userRepository.save(anotherFollower);
 
         Follow follow1 = Follow.builder()
@@ -214,7 +227,7 @@ class FollowRepositoryTest {
     @DisplayName("팔로우 수 조회 테스트")
     void countByFolloweeCount() {
         // given
-        User anotherFollowee = new User("팔로위2", "followee2@test.com", "qwer1234");
+        User anotherFollowee = new User("팔로위2", "followee2@test.com", "qwer1234", testLocation);
         userRepository.save(anotherFollowee);
 
         Follow follow1 = Follow.builder()
@@ -241,9 +254,9 @@ class FollowRepositoryTest {
     @DisplayName("여러 팔로우 관계에서 특정 사용자의 팔로워 수 조회")
     void countByFollowerCount_Followers() {
         // given
-        User follower2 = new User("팔로워2", "follower2@test.com", "qwer1234");
+        User follower2 = new User("팔로워2", "follower2@test.com", "qwer1234", testLocation);
 
-        User follower3 = new User("팔로워3", "follower3@test.com", "qwer1234");
+        User follower3 = new User("팔로워3", "follower3@test.com", "qwer1234", testLocation);
 
         userRepository.save(follower2);
         userRepository.save(follower3);
@@ -279,9 +292,9 @@ class FollowRepositoryTest {
     @DisplayName("여러 팔로우 관계에서 특정 사용자를 팔로우하는 사람 수 조회")
     void countByFolloweeCount_Followees() {
         // given
-        User follower2 = new User("팔로워2", "follower2@test.com", "qwer1234");
+        User follower2 = new User("팔로워2", "follower2@test.com", "qwer1234", testLocation);
 
-        User follower3 = new User("팔로워3", "follower3@test.com", "qwer1234");
+        User follower3 = new User("팔로워3", "follower3@test.com", "qwer1234", testLocation);
 
         userRepository.save(follower2);
         userRepository.save(follower3);

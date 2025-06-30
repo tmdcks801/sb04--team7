@@ -16,6 +16,8 @@ import com.example.ootd.domain.follow.service.impl.FollowServiceImpl;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.dto.UserSummary;
 import com.example.ootd.domain.user.repository.UserRepository;
+import com.example.ootd.exception.ErrorCode;
+import com.example.ootd.exception.OotdException;
 import java.util.Locale;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,7 +128,7 @@ public class FollowServiceImplTest {
             given(followRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).willReturn(true);
 
             // then
-            assertThrows(IllegalArgumentException.class, () -> followService.createFollow(followCreateRequest));
+            assertThrows(OotdException.class, () -> followService.createFollow(followCreateRequest));
         }
 
         @Test
@@ -136,7 +138,7 @@ public class FollowServiceImplTest {
             given(userRepository.findById(followerId)).willReturn(Optional.empty());
 
             // then
-            assertThrows(IllegalArgumentException.class, () -> followService.createFollow(followCreateRequest));
+            assertThrows(OotdException.class, () -> followService.createFollow(followCreateRequest));
         }
 
         @Test
@@ -147,7 +149,7 @@ public class FollowServiceImplTest {
             given(userRepository.findById(followeeId)).willReturn(Optional.empty());
 
             // then
-            assertThrows(IllegalArgumentException.class, () -> followService.createFollow(followCreateRequest));
+            assertThrows(OotdException.class, () -> followService.createFollow(followCreateRequest));
         }
     }
 
@@ -180,7 +182,7 @@ public class FollowServiceImplTest {
             given(userRepository.findById(followerId)).willReturn(Optional.empty());
 
             // then
-            assertThrows(IllegalArgumentException.class, () -> followService.getSummaryFollow(followerId));
+            assertThrows(OotdException.class, () -> followService.getSummaryFollow(followerId));
         }
     }
 
@@ -208,7 +210,7 @@ public class FollowServiceImplTest {
             given(followRepository.findById(followId)).willReturn(Optional.empty());
 
             // then
-            assertThrows(IllegalArgumentException.class, () -> followService.deleteFollow(followId));
+            assertThrows(OotdException.class, () -> followService.deleteFollow(followId));
         }
     }
 }

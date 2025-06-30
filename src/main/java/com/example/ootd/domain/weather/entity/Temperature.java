@@ -18,6 +18,10 @@ public class Temperature {
   private double temperatureMin;
   private double temperatureMax;
   private double temperatureComparedToDayBefore;
+
+  public void setTemperatureComparedToDayBefore(Double diff) {
+    this.temperatureComparedToDayBefore = diff;
+  }
 }
 
 

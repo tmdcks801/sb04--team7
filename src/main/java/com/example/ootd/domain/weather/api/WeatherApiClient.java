@@ -22,16 +22,17 @@ public class WeatherApiClient {
   @Value("${weather.api.key}")
   private String weatherApiKey;
 
+  private String baseTime = "0200";
+
   private static final String FULL_BASE_URL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
 
-  public List<WeatherApiResponse.Item> getVillageForecast(int nx, int ny) {
+  public List<WeatherApiResponse.Item> getVillageForecast(int nx, int ny, int numOfRows) {
     LocalDate baseDate = LocalDate.now();
-    String baseTime = "0500";
 
     String fullUrl = UriComponentsBuilder
         .fromHttpUrl(FULL_BASE_URL)
         .queryParam("serviceKey", weatherApiKey)
-        .queryParam("numOfRows", 100)
+        .queryParam("numOfRows", numOfRows)
         .queryParam("pageNo", 1)
         .queryParam("dataType", "JSON")
         .queryParam("base_date", baseDate.format(DateTimeFormatter.BASIC_ISO_DATE))

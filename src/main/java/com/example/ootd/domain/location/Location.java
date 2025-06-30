@@ -26,7 +26,9 @@ public class Location {
   private UUID id;
   private double latitude;
   private double longitude;
+  @Column(name = "location_x")
   private int locationX;
+  @Column(name = "location_y")
   private int locationY;
   @Convert(converter = StringListConverter.class)
   @Column(columnDefinition = "TEXT") // 길이에 따라 TEXT 사용

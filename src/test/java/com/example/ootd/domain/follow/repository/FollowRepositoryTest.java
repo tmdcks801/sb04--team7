@@ -1,6 +1,7 @@
 package com.example.ootd.domain.follow.repository;
 
 import com.example.ootd.config.QueryDslConfig;
+import com.example.ootd.domain.follow.dto.Direction;
 import com.example.ootd.domain.follow.entity.Follow;
 import com.example.ootd.domain.location.Location;
 import com.example.ootd.domain.location.repository.LocationRepository;
@@ -330,7 +331,90 @@ class FollowRepositoryTest {
     @Nested
     class CursorPage {
 
-        
+        @Test
+        @DisplayName("팔로잉 목록 커서 페이지네이션 테스트")
+        void findFollowingsWithCursor() {
+            // given
+            User user1 = new User("유저1", "user1@test.com", "qwer1234", testLocation);
+            User user2 = new User("유저2", "user2@test.com", "qwer1234", testLocation);
+            User user3 = new User("유저3", "user3@test.com", "qwer1234", testLocation);
+            
+            userRepository.save(user1);
+            userRepository.save(user2);
+            userRepository.save(user3);
+
+            Follow follow1 = Follow.builder().follower(follower).followee(user1).build();
+            Follow follow2 = Follow.builder().follower(follower).followee(user2).build();
+            Follow follow3 = Follow.builder().follower(follower).followee(user3).build();
+            
+            followRepository.save(follow1);
+            followRepository.save(follow2);
+            followRepository.save(follow3);
+
+            // when
+            List<Follow> result = followRepository.findFollowingsWithCursor(
+                follower.getId(), null, null, 2, null, "createdAt", Direction.ASCENDING);
+
+            // then
+            assertThat(result).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("팔로워 목록 커서 페이지네이션 테스트")
+        void findFollowersWithCursor() {
+            // given
+            User user1 = new User("유저1", "user1@test.com", "qwer1234", testLocation);
+            User user2 = new User("유저2", "user2@test.com", "qwer1234", testLocation);
+            User user3 = new User("유저3", "user3@test.com", "qwer1234", testLocation);
+            
+            userRepository.save(user1);
+            userRepository.save(user2);
+            userRepository.save(user3);
+
+            Follow follow1 = Follow.builder().follower(user1).followee(followee).build();
+            Follow follow2 = Follow.builder().follower(user2).followee(followee).build();
+            Follow follow3 = Follow.builder().follower(user3).followee(followee).build();
+            
+            followRepository.save(follow1);
+            followRepository.save(follow2);
+            followRepository.save(follow3);
+
+            // when
+            List<Follow> result = followRepository.findFollowersWithCursor(
+                followee.getId(), null, null, 2, null, "createdAt", Direction.ASCENDING);
+
+            // then
+            assertThat(result).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("이름 검색 조건으로 커서 페이지네이션 테스트")
+        void findFollowingsWithCursorAndNameSearch() {
+            // given
+            User alice = new User("Alice", "alice@test.com", "qwer1234", testLocation);
+            User bob = new User("Bob", "bob@test.com", "qwer1234", testLocation);
+            User charlie = new User("Charlie", "charlie@test.com", "qwer1234", testLocation);
+            
+            userRepository.save(alice);
+            userRepository.save(bob);
+            userRepository.save(charlie);
+
+            Follow follow1 = Follow.builder().follower(follower).followee(alice).build();
+            Follow follow2 = Follow.builder().follower(follower).followee(bob).build();
+            Follow follow3 = Follow.builder().follower(follower).followee(charlie).build();
+            
+            followRepository.save(follow1);
+            followRepository.save(follow2);
+            followRepository.save(follow3);
+
+            // when
+            List<Follow> result = followRepository.findFollowingsWithCursor(
+                follower.getId(), null, null, 10, "A", "createdAt", Direction.ASCENDING);
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getFollowee().getName()).isEqualTo("Alice");
+        }
     }
 
 

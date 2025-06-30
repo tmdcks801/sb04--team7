@@ -43,6 +43,10 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    //비동기 재시도
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework:spring-aspects'
+
     // aws
     implementation platform("software.amazon.awssdk:bom:2.25.33") // 버전 BOM 사용
     implementation "software.amazon.awssdk:s3"

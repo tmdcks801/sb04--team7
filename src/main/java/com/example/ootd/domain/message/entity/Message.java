@@ -58,7 +58,7 @@ public class Message {
         .build();
   }
 
-  private String makeDmKey(UUID first, UUID second) {
+  public static String makeDmKey(UUID first, UUID second) {
     String a = first.toString();
     String b = second.toString();
 

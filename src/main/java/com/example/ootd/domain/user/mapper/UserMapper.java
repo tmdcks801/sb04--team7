@@ -2,6 +2,7 @@ package com.example.ootd.domain.user.mapper;
 
 
 import com.example.ootd.domain.user.User;
+import com.example.ootd.domain.user.dto.ProfileDto;
 import com.example.ootd.domain.user.dto.UserCreateRequest;
 import com.example.ootd.domain.user.dto.UserDto;
 import com.example.ootd.domain.user.dto.UserPagedResponse;
@@ -63,4 +64,8 @@ public interface UserMapper {
   @Mapping(source = "condition.sortDirection", target = "sortDirection")
   UserPagedResponse toPaginatedResponse(List<UserDto> data, String nextCursor, UUID nextIdAfter, boolean hasNext, Long totalCount, UserSearchCondition condition);
 
+
+  @Mapping(target = "userId", source = "id")
+  @Mapping(target = "profileImageUrl", source = "image.url")
+  ProfileDto toProfileDto(User user);
 }

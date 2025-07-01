@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,8 +49,8 @@ public class ClothesController {
 
   @PostMapping
   public ResponseEntity<ClothesDto> create(
-      @RequestBody ClothesCreateRequest request,
-      @RequestBody MultipartFile image) {
+      @RequestPart("request") ClothesCreateRequest request,
+      @RequestPart("image") MultipartFile image) {
 
     log.info("의상 등록 요청: {}", request);
 
@@ -79,8 +80,8 @@ public class ClothesController {
   @PatchMapping(path = "/{clothesId}")
   public ResponseEntity<ClothesDto> update(
       @PathVariable UUID clothesId,
-      @RequestBody ClothesUpdateRequest request,
-      @RequestBody MultipartFile image
+      @RequestPart("request") ClothesUpdateRequest request,
+      @RequestPart("image") MultipartFile image
   ) {
 
     log.info("의상 수정 요청: clothesId={}, request={}", clothesId, request);

@@ -6,6 +6,7 @@ import com.example.ootd.domain.clothes.entity.ClothesType;
 import com.example.ootd.domain.clothes.entity.QClothes;
 import com.example.ootd.domain.clothes.repository.CustomClothesRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -72,6 +73,11 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
    */
   // 커서(cursor) 세팅
   private BooleanExpression cursorCondition(String cursor, UUID idAfter) {
+
+    if (StringUtils.isNullOrEmpty(cursor)) {
+
+      return afterCondition(idAfter);
+    }
 
     LocalDateTime cursorCreatedAt = LocalDateTime.parse(cursor);
 

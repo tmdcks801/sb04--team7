@@ -55,7 +55,9 @@ public class SecurityConfig {
             "vite.svg",
             "/api/auth/sign-in",
             "/api/auth/refresh",
-            "/api/auth/me")
+            "/api/auth/me",
+                "/test/sendEmail",
+                "/api/auth/reset-password")
             .permitAll()
             .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
             .requestMatchers("/test/me").hasRole("USER")

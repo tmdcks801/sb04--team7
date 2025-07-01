@@ -1,7 +1,9 @@
 package com.example.ootd.domain.weather.repository;
 
 import com.example.ootd.domain.weather.entity.Weather;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +22,6 @@ public interface WeatherRepository extends JpaRepository<Weather, UUID> {
         AND FUNCTION('MINUTE', w.forecastAt) = 0
       """)
   List<Weather> findMidnightWeathersByRegionNameWithLatestForecastedAt(String regionName);
+
+  Optional<Weather> findByRegionNameAndForecastAt(String regionName, LocalDateTime forecastAt);
 }

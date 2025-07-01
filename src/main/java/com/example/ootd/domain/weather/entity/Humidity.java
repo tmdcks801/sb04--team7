@@ -16,4 +16,8 @@ public class Humidity {
 
   private double humidityCurrent;
   private double humidityComparedToDayBefore;
+
+  public void setHumidityComparedToDayBefore(Double diff) {
+    this.humidityComparedToDayBefore = diff;
+  }
 }

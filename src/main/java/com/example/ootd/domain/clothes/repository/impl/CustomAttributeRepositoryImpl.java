@@ -9,7 +9,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +69,9 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
         .or(qAttribute.detailsRaw.contains(keywordLike));
   }
 
-  // 커서 페이지네이션
+  /**
+   * 커서 페이지네이션
+   */
   // 커서(cursor) 세팅
   private BooleanExpression cursorCondition(ClothesAttributeSearchCondition condition) {
 

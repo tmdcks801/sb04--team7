@@ -2,9 +2,8 @@ package com.example.ootd.domain.clothes.service.impl;
 
 import com.example.ootd.domain.clothes.dto.data.ClothesAttributeDto;
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
-import com.example.ootd.domain.clothes.dto.data.RecommendationDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesCreateRequest;
-import com.example.ootd.domain.clothes.dto.request.ClothesSearchRequest;
+import com.example.ootd.domain.clothes.dto.request.ClothesSearchCondition;
 import com.example.ootd.domain.clothes.dto.request.ClothesUpdateRequest;
 import com.example.ootd.domain.clothes.entity.Attribute;
 import com.example.ootd.domain.clothes.entity.Clothes;
@@ -95,8 +94,51 @@ public class ClothesServiceImpl implements ClothesService {
 
   @Override
   @Transactional(readOnly = true)
-  public PageResponse<ClothesDto> findByCondition(ClothesSearchRequest request) {
-    return null;
+  public PageResponse<ClothesDto> findByCondition(ClothesSearchCondition condition) {
+
+    log.debug("의상 목록 조회 시작: {}", condition);
+
+    List<Clothes> clothes = clothesRepository.findByCondition(condition);
+
+    // 다음 페이지 없는 경우
+    if (clothes.size() <= condition.limit()) {
+
+      PageResponse<ClothesDto> pageResponse = PageResponse.<ClothesDto>builder()
+          .data(clothesMapper.toDtoList(clothes))
+          .hasNext(false)
+          .nextCursor(null)
+          .nextIdAfter(null)
+          .sortBy("createdAt")
+          .sortDirection("DESCENDING")
+          .totalCount(
+              clothesRepository.countByCondition(condition.typeEqual(), condition.ownerId()))
+          .build();
+
+      log.info("의상 목록 조회 완료: dataCount={}", clothes.size());
+
+      return pageResponse;
+    }
+
+    // 다음 페이지 있는 경우
+    clothes.remove(clothes.size() - 1); // 다음 페이지 확인용 요소 삭제
+    Clothes lastClothes = clothes.get(clothes.size() - 1);
+    String nextCursor = lastClothes.getCreatedAt().toString();
+    UUID nextIdAfter = lastClothes.getId();
+
+    PageResponse<ClothesDto> pageResponse = PageResponse.<ClothesDto>builder()
+        .data(clothesMapper.toDtoList(clothes))
+        .hasNext(true)
+        .nextCursor(nextCursor)
+        .nextIdAfter(nextIdAfter)
+        .sortBy("createdAt")
+        .sortDirection("DESCENDING")
+        .totalCount(
+            clothesRepository.countByCondition(condition.typeEqual(), condition.ownerId()))
+        .build();
+
+    log.info("의상 목록 조회 완료: dataCount={}", clothes.size());
+
+    return pageResponse;
   }
 
   @Override
@@ -108,12 +150,6 @@ public class ClothesServiceImpl implements ClothesService {
     clothesRepository.delete(clothes);
 
     log.info("의상 삭제 완료");
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public RecommendationDto recommend(UUID weatherId) {
-    return null;
   }
 
   private Clothes getClothesById(UUID clothesId) {

@@ -8,7 +8,7 @@ public class AttributeDetailNotFoundException extends ClothesException {
     super(ErrorCode.ATTRIBUTE_DETAIL_NOT_FOUND);
   }
 
-  public AttributeDetailNotFoundException withValue(String value) {
+  public static AttributeDetailNotFoundException withValue(String value) {
     AttributeDetailNotFoundException exception = new AttributeDetailNotFoundException();
     exception.addDetail("value", value);
     return exception;

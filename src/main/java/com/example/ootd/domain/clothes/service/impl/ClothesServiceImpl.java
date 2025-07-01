@@ -18,6 +18,7 @@ import com.example.ootd.domain.image.service.ImageService;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.dto.PageResponse;
+import com.example.ootd.exception.clothes.AttributeDetailNotFoundException;
 import com.example.ootd.exception.clothes.AttributeNotFoundException;
 import com.example.ootd.exception.clothes.ClothesNotFountException;
 import com.querydsl.core.util.StringUtils;
@@ -206,6 +207,7 @@ public class ClothesServiceImpl implements ClothesService {
 
   private Map<UUID, Attribute> getAttributeMap(Clothes clothes,
       List<ClothesAttributeDto> attributeDtoList) {
+
     List<UUID> clothesAttributeIdList = attributeDtoList.stream()
         .map(ClothesAttributeDto::definitionId)
         .toList();
@@ -220,8 +222,13 @@ public class ClothesServiceImpl implements ClothesService {
       Map<UUID, Attribute> attributeMap, Clothes clothes) {
 
     Attribute attribute = attributeMap.get(dto.definitionId());
+    
     if (attribute == null) {
       throw AttributeNotFoundException.withId(dto.definitionId());
+    }
+    // 해당 속성에 value(속성 내용)가 없는 경우 예외처리
+    if (!attribute.getDetails().contains(dto.value())) {
+      throw AttributeDetailNotFoundException.withValue(dto.value());
     }
 
     return ClothesAttribute.builder()

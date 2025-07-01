@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,23 +47,11 @@ public class FollowController {
 
   @GetMapping("/followings")
   public ResponseEntity<FollowListResponse> getFollowings(
-      @RequestParam(name = "followerId") UUID userId,
-      @RequestParam(required = false) String cursor,
-      @RequestParam(required = false) UUID idAfter,
-      @RequestParam int limit,
-      @RequestParam(required = false) String nameLike
+    @RequestParam(name = "followingId") UUID userId,
+    @ModelAttribute @Valid FollowListCondition conditions
   ){
-    log.info("팔로잉 목록 조회 요청 : userId = {}, cursor = {}, idAfter = {}, limit = {}, nameLike = {}",
-        userId, cursor, idAfter, limit, nameLike);
-
-    FollowListCondition condition = FollowListCondition.builder()
-      .cursor(cursor)
-      .idAfter(idAfter)
-      .limit(limit != 0 ? limit : 10)
-      .nameLike(nameLike)
-      .build();
-
-    FollowListResponse response = followService.getFollowingList(condition, userId);
+    log.info("팔로잉 목록 조회 요청 : userId = {}, conditions = {}", userId, conditions);
+    FollowListResponse response = followService.getFollowingList(conditions, userId);
     log.info("팔로잉 목록 조회 완료 : {}", response);
     return ResponseEntity.ok(response);
   }
@@ -70,22 +59,10 @@ public class FollowController {
   @GetMapping("/followers")
   public ResponseEntity<FollowListResponse> getFollowers(
       @RequestParam(name = "followeeId") UUID userId,
-      @RequestParam(required = false) String cursor,
-      @RequestParam(required = false) UUID idAfter,
-      @RequestParam int limit,
-      @RequestParam(required = false) String nameLike
+      @ModelAttribute @Valid FollowListCondition conditions
   ){
-    log.info("팔로워 목록 조회 요청 : userId = {}, cursor = {}, idAfter = {}, limit = {}, nameLike = {}",
-        userId, cursor, idAfter, limit, nameLike);
-
-    FollowListCondition condition = FollowListCondition.builder()
-      .cursor(cursor)
-      .idAfter(idAfter)
-      .limit(limit != 0 ? limit : 10)
-      .nameLike(nameLike)
-      .build();
-
-    FollowListResponse response = followService.getFollowerList(condition, userId);
+    log.info("팔로워 목록 조회 요청 : userId = {}, conditions = {}", userId, conditions);
+    FollowListResponse response = followService.getFollowerList(conditions, userId);
     log.info("팔로워 목록 조회 완료 : {}", response);
     return ResponseEntity.ok(response);
   }

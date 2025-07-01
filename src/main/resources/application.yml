@@ -73,4 +73,8 @@ app:
     secret: "F811B1184C98D8543B1351D93948481900aDYQ82347641"
     access-token-expiration: 900000
     refresh-token-expiration: 604800000
-
+mongo:
+  host: ${MONGO_HOST}
+  port: ${MONGO_PORT}
+  db: ${MONGO_DB}
+  collection: ${MONGO_COLLECTION}

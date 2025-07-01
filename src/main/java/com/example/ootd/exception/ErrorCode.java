@@ -7,9 +7,11 @@ public enum ErrorCode {
 
   // Auth 에러
   AUTHENTICATION_FAILED("인증에 실패하였습니다."),
+
   // Clothes 에러
   CLOTHES_NOT_FOUND("옷을 찾을 수 없습니다."),
   ATTRIBUTE_NOT_FOUND("속성 정의를 찾을 수 없습니다."),
+  ATTRIBUTE_DETAIL_NOT_FOUND("속성 내용을 찾을 수 없습니다."),
 
   // Feed 에러
   FEED_NOT_FOUND("피드를 찾을 수 없습니다."),

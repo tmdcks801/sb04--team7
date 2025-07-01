@@ -24,6 +24,7 @@ import com.example.ootd.exception.clothes.ClothesNotFountException;
 import com.querydsl.core.util.StringUtils;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -177,25 +178,59 @@ public class ClothesServiceImpl implements ClothesService {
     }
   }
 
+  // TODO: 테스트 후 수정
   private void updateAttribute(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
 
-    Map<UUID, Attribute> attributeMap = getAttributeMap(clothes, attributeDtoList);
+    if (attributeDtoList == null) {
+      return;
+    }
 
-    for (ClothesAttributeDto dto : attributeDtoList) {
+    // 1. Map<attributeId, value> 형태로 요청 데이터를 정리
+    Map<UUID, String> incomingAttrMap = attributeDtoList.stream()
+        .collect(Collectors.toMap(
+            ClothesAttributeDto::definitionId,
+            ClothesAttributeDto::value,
+            (v1, v2) -> v2 // 중복 키가 있을 경우 마지막 키 사용 (중복 방지)
+        ));
 
-      ClothesAttribute clothesAttribute = getClothesAttribute(dto, attributeMap, clothes);
+    // 2. 기존 속성 리스트
+    Set<ClothesAttribute> currentAttributes = clothes.getClothesAttributes();
 
-      if (clothes.getClothesAttributes().contains(clothesAttribute)) {
-        clothes.removeClothesAttribute(clothesAttribute);
+    // 3. 삭제 대상: 요청에 없는 attributeId → 제거
+    currentAttributes.removeIf(existing ->
+        !incomingAttrMap.containsKey(existing.getAttribute().getId())
+    );
+
+    Map<UUID, Attribute> attributeMap = getAttributeMap(attributeDtoList);
+
+    // 4. 새로 추가할 속성만 Clothes에 추가
+    for (Map.Entry<UUID, String> entry : incomingAttrMap.entrySet()) {
+      UUID attributeId = entry.getKey();
+      String newValue = entry.getValue();
+
+      // 기존 속성 찾기
+      ClothesAttribute existing = currentAttributes.stream()
+          .filter(attr -> attr.getAttribute().getId().equals(attributeId))
+          .findFirst()
+          .orElse(null);
+
+      if (existing != null) {
+        // value가 다르면 업데이트
+        if (!existing.getValue().equals(newValue)) {
+          existing.updateValue(newValue);
+        }
       } else {
-        clothes.addClothesAttribute(clothesAttribute);
+        Attribute attribute = attributeMap.get(attributeId);
+        ClothesAttribute newAttr = new ClothesAttribute(clothes, attribute, newValue);
+        clothes.addClothesAttribute(newAttr);
       }
     }
   }
 
+
   private void setClothesAttributes(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
 
-    Map<UUID, Attribute> attributeMap = getAttributeMap(clothes, attributeDtoList);
+    Map<UUID, Attribute> attributeMap = getAttributeMap(attributeDtoList);
 
     for (ClothesAttributeDto dto : attributeDtoList) {
 
@@ -205,8 +240,7 @@ public class ClothesServiceImpl implements ClothesService {
     }
   }
 
-  private Map<UUID, Attribute> getAttributeMap(Clothes clothes,
-      List<ClothesAttributeDto> attributeDtoList) {
+  private Map<UUID, Attribute> getAttributeMap(List<ClothesAttributeDto> attributeDtoList) {
 
     List<UUID> clothesAttributeIdList = attributeDtoList.stream()
         .map(ClothesAttributeDto::definitionId)
@@ -222,7 +256,7 @@ public class ClothesServiceImpl implements ClothesService {
       Map<UUID, Attribute> attributeMap, Clothes clothes) {
 
     Attribute attribute = attributeMap.get(dto.definitionId());
-    
+
     if (attribute == null) {
       throw AttributeNotFoundException.withId(dto.definitionId());
     }

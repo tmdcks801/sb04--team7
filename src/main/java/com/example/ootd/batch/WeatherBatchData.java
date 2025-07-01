@@ -4,9 +4,9 @@ import com.example.ootd.domain.weather.api.WeatherApiResponse;
 import com.example.ootd.domain.weather.api.WeatherApiResponse.Item;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class WeatherBatchData {
 
   private String regionName;
@@ -14,5 +14,13 @@ public class WeatherBatchData {
 
   public void addItem(WeatherApiResponse.Item item) {
     this.items.add(item);
+  }
+
+  public void setRegionName(String regionName) {
+    this.regionName = regionName;
+  }
+
+  public void setItems(List<Item> timeItems) {
+    this.items = timeItems;
   }
 }

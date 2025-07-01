@@ -1,5 +1,6 @@
 package com.example.ootd.domain.user.dto;
 
+import com.example.ootd.domain.location.Location;
 import com.example.ootd.domain.user.Gender;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -9,7 +10,7 @@ public record ProfileDto(
     String name,
     Gender gender,
     LocalDate birthDate,
-    // Location location,
+    Location location,
     int temperatureSensitivity,
     String profileImageUrl
 ) {

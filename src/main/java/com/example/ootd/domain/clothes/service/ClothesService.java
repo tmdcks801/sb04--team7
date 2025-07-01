@@ -18,7 +18,7 @@ public interface ClothesService {
   ClothesDto create(ClothesCreateRequest request, MultipartFile image);
 
   // 옷 수정
-  ClothesDto update(ClothesUpdateRequest request, MultipartFile image);
+  ClothesDto update(ClothesUpdateRequest request, MultipartFile image, UUID clothesId);
 
   // 옷 목록 조회
   PageResponse<ClothesDto> findByCondition(ClothesSearchRequest request);

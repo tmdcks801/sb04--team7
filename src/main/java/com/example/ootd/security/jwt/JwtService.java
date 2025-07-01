@@ -1,6 +1,7 @@
 package com.example.ootd.security.jwt;
 
 import com.example.ootd.domain.user.User;
+import com.example.ootd.exception.ErrorCode;
 import com.example.ootd.exception.OotdException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
@@ -68,8 +69,29 @@ public class JwtService {
     return jwtSessionRepository.save(session);
   }
 
-  // 토큰 유효성 검증
+  public JwtSession rotateRefreshToken(String token){
 
+    JwtSession session = jwtSessionRepository.findByRefreshToken(token)
+        .orElseThrow(() -> new OotdException(ErrorCode.AUTHENTICATION_FAILED));
+
+    if(!validateToken(token)){
+      jwtSessionRepository.delete(session);
+      throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
+    }
+
+    BlackList.addToBlacklist(session.getAccessToken(), extractExpiry(session.getAccessToken()));
+    BlackList.addToBlacklist(session.getRefreshToken(), extractExpiry(session.getRefreshToken()));
+
+    User user = session.getUser();
+    String newAccessToken = generateAccessToken(user);
+    String newRefreshToken = generateRefreshToken(user.getId());
+
+    session.updateTokens(newAccessToken, newRefreshToken);
+
+    return jwtSessionRepository.save(session);
+  }
+
+  // 토큰 유효성 검증
   public boolean validateToken(String token) {
     try {
 
@@ -93,6 +115,13 @@ public class JwtService {
     }
   }
 
+  public void invalidateToken(String token) {
+    JwtSession session = jwtSessionRepository.findByRefreshToken(token)
+        .orElseThrow(() -> new OotdException(ErrorCode.AUTHENTICATION_FAILED));
+    BlackList.addToBlacklist(session.getAccessToken(), extractExpiry(session.getAccessToken()));
+    BlackList.addToBlacklist(session.getRefreshToken(), extractExpiry(session.getRefreshToken()));
+    jwtSessionRepository.delete(session);
+  }
   // 만료 시간 추출
   public Instant extractExpiry(String token){
     try{
@@ -105,7 +134,7 @@ public class JwtService {
       Date expiration = claims.getExpiration();
       return expiration.toInstant();
     }catch (Exception e){
-      throw new OotdException("Error while extracting token");
+      throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
     }
   }
 
@@ -121,7 +150,7 @@ public class JwtService {
 
       return objectMapper.convertValue(claims.get("email"), String.class);
     }catch (Exception e){
-      throw new OotdException("Error while extracting token");
+      throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
     }
   }
 
@@ -139,7 +168,7 @@ public class JwtService {
           .signWith(getSigningKey())
           .compact();
     } catch (Exception e){
-      throw new OotdException("Error generating access token");
+      throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
     }
   }
 

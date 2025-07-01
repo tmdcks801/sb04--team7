@@ -16,6 +16,18 @@ spring:
       - dev
   config:
     import: optional:file:.env[.properties]
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ootdboo1@gmail.com
+    password: ${GOOGLE_APP_PWD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 management:
   endpoints:
     web:
@@ -35,6 +47,13 @@ kakao:
 weather:
   api:
     key: ${WEATHER_API_KEY}
+  batch:
+    thread-pool-size: 10  # 동시 실행 스레드 수
+    chunk-size: 10        # 청크 크기
+    regions-per-partition: 5  # 파티션당 지역 수
+  regions:
+    file:
+      path: classpath:regions.csv
 
 info:
   name: ootd

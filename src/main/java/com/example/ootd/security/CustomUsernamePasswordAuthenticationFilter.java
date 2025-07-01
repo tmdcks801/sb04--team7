@@ -88,11 +88,11 @@ public class CustomUsernamePasswordAuthenticationFilter extends
     CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
     User user = userDetails.getUser();
 
-    HttpSession sessionObj = request.getSession(false);
-    if (sessionObj != null) {
-      sessionObj.setAttribute("userId", user.getId());
-      sessionRegistry.registerNewSession(sessionObj.getId(), authResult.getPrincipal());
-    }
+//    HttpSession sessionObj = request.getSession(false);
+//    if (sessionObj != null) {
+//      sessionObj.setAttribute("userId", user.getId());
+//      sessionRegistry.registerNewSession(sessionObj.getId(), authResult.getPrincipal());
+//    }
 
     JwtSession session = jwtService.generateJwtSession(user);
 

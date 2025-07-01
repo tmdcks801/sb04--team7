@@ -4,6 +4,7 @@ import com.example.ootd.domain.user.dto.ProfileDto;
 import com.example.ootd.domain.user.dto.ProfileUpdateRequest;
 import com.example.ootd.domain.user.dto.UserDto;
 import com.example.ootd.domain.user.dto.UserPagedResponse;
+import com.example.ootd.domain.user.dto.UserRoleUpdateRequest;
 import com.example.ootd.domain.user.dto.UserSearchCondition;
 import java.util.List;
 import java.util.UUID;
@@ -17,4 +18,5 @@ public interface UserService {
 
   ProfileDto updateUserProfile(UUID userId, ProfileUpdateRequest request, MultipartFile profile);
 
+  UserDto changeUserRole(UserRoleUpdateRequest request, UUID userId);
 }

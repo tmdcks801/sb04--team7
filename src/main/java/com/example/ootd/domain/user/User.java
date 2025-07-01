@@ -112,4 +112,8 @@ public class User {
     this.tempPasswordExpiration = LocalDateTime.now().plusMinutes(10);
     this.password = tempPassword;
   }
+
+  public void updateRole(UserRole role){
+    this.role = role;
+  }
 }

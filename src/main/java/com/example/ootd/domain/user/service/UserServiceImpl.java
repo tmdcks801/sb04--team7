@@ -1,16 +1,17 @@
 package com.example.ootd.domain.user.service;
 
-import com.example.ootd.domain.location.Location;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.dto.ProfileDto;
 import com.example.ootd.domain.user.dto.ProfileUpdateRequest;
 import com.example.ootd.domain.user.dto.UserDto;
 import com.example.ootd.domain.user.dto.UserPagedResponse;
+import com.example.ootd.domain.user.dto.UserRoleUpdateRequest;
 import com.example.ootd.domain.user.dto.UserSearchCondition;
 import com.example.ootd.domain.user.mapper.UserMapper;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.exception.ErrorCode;
 import com.example.ootd.exception.OotdException;
+import com.example.ootd.security.jwt.JwtSessionRepository;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -28,6 +29,7 @@ public class UserServiceImpl implements UserService{
 
   private final UserRepository userRepository;
   private final UserMapper mapper;
+  private final JwtSessionRepository jwtSessionRepository;
 
   @Override
   @Transactional
@@ -79,6 +81,18 @@ public class UserServiceImpl implements UserService{
     return null;
   }
 
+  @Override
+  @Transactional
+  public UserDto changeUserRole(UserRoleUpdateRequest request, UUID userId){
+    User user = userRepository.findById(userId).orElseThrow(() -> new OotdException(ErrorCode.USER_NOT_FOUND));
+    user.updateRole(request.role());
+
+    jwtSessionRepository.deleteAllByUser_Id(userId); // TODO : 현재 SRP 위반, 추후 분리
+
+    return mapper.toDto(user);
+  }
+
+
   private boolean hasNext(int limit, int paginatedSize){
     return limit == paginatedSize;
   }
@@ -91,4 +105,6 @@ public class UserServiceImpl implements UserService{
             : Comparator.naturalOrder()))
         .findFirst().orElse(null);
   }
+
+
 }

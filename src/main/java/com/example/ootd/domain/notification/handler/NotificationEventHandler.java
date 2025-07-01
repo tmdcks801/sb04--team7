@@ -21,7 +21,7 @@ public class NotificationEventHandler {
 
   private final SsePushServiceInterface ssePushServiceInterface;
 
-  @Async("sseExecutor")
+  @Async("sseExecutor")//일단 문제 없는거 같음...
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
   @Retryable(
       retryFor = Exception.class,          // 일단 모든 예외

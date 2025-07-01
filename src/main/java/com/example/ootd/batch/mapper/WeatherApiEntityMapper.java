@@ -74,14 +74,6 @@ public class WeatherApiEntityMapper {
       }
     }
 
-    // 누락된 카테고리 로깅
-    for (String category : requiredCategories) {
-      if (!categoryMap.containsKey(category)) {
-        log.warn("Missing category [{}] in weather API response for region: {}", category,
-            regionName);
-      }
-    }
-
     try {
       LocalDateTime forecastAt = LocalDateTime.of(
           LocalDate.parse(fcstDate, DateTimeFormatter.BASIC_ISO_DATE),

@@ -106,6 +106,13 @@ ootd:
 logging:
   level:
     root: info
+    # Spring Retry 관련 로그 끄기
+    org.springframework.retry: WARN  # 또는 ERROR, OFF
+    org.springframework.retry.support.RetryTemplate: WARN
+    # Spring Batch 관련 로그도 끄기
+    org.springframework.batch: WARN
+    org.springframework.batch.core.step: WARN
+    org.springframework.batch.item: WARN
 app:
   jwt:
     secret: "F811B1184C98D8543B1351D93948481900aDYQ82347641"

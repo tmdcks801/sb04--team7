@@ -53,17 +53,11 @@ public class WeatherWriter implements ItemWriter<Weather> {
             weather.getWindSpeed().getWindAsWord().name()
         );
 
-        if (result > 0) {
-          successCount++;
-          log.trace("Successfully saved weather for region: {}", weather.getRegionName());
-        }
-
       } catch (Exception e) {
         log.error("Failed to save weather for region: {}", weather.getRegionName(), e);
         // 에러가 발생해도 다음 아이템 처리를 계속 진행
       }
     }
 
-    log.info("Successfully saved {} out of {} weather records", successCount, items.size());
   }
 }

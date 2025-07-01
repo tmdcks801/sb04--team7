@@ -23,7 +23,10 @@ import com.example.ootd.exception.clothes.AttributeNotFoundException;
 import com.example.ootd.exception.clothes.ClothesNotFountException;
 import com.querydsl.core.util.StringUtils;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -113,22 +116,6 @@ public class ClothesServiceImpl implements ClothesService {
     return null;
   }
 
-  private void setClothesAttributes(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
-    for (ClothesAttributeDto dto : attributeDtoList) {
-
-      Attribute attribute = attributeRepository.findById(dto.definitionId())
-          .orElseThrow(() -> AttributeNotFoundException.withId(dto.definitionId()));
-
-      ClothesAttribute clothesAttribute = ClothesAttribute.builder()
-          .clothes(clothes)
-          .attribute(attribute)
-          .value(dto.value())
-          .build();
-
-      clothes.addClothesAttribute(clothesAttribute);
-    }
-  }
-
   private Clothes getClothesById(UUID clothesId) {
     return clothesRepository.findById(clothesId)
         .orElseThrow(() -> ClothesNotFountException.withId(clothesId));
@@ -154,20 +141,57 @@ public class ClothesServiceImpl implements ClothesService {
   }
 
   private void updateAttribute(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
-    if (attributeDtoList != null) {
-      for (ClothesAttributeDto dto : attributeDtoList) {
 
-        Attribute attribute = attributeRepository.findById(dto.definitionId())
-            .orElseThrow(() -> AttributeNotFoundException.withId(dto.definitionId()));
+    Map<UUID, Attribute> attributeMap = getAttributeMap(clothes, attributeDtoList);
 
-        ClothesAttribute clothesAttribute = ClothesAttribute.builder()
-            .clothes(clothes)
-            .attribute(attribute)
-            .value(dto.value())
-            .build();
+    for (ClothesAttributeDto dto : attributeDtoList) {
 
-        clothes.updateClothesAttribute(clothesAttribute);
+      ClothesAttribute clothesAttribute = getClothesAttribute(dto, attributeMap, clothes);
+
+      if (clothes.getClothesAttributes().contains(clothesAttribute)) {
+        clothes.removeClothesAttribute(clothesAttribute);
+      } else {
+        clothes.addClothesAttribute(clothesAttribute);
       }
     }
+  }
+
+  private void setClothesAttributes(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
+
+    Map<UUID, Attribute> attributeMap = getAttributeMap(clothes, attributeDtoList);
+
+    for (ClothesAttributeDto dto : attributeDtoList) {
+
+      ClothesAttribute clothesAttribute = getClothesAttribute(dto, attributeMap, clothes);
+
+      clothes.addClothesAttribute(clothesAttribute);
+    }
+  }
+
+  private Map<UUID, Attribute> getAttributeMap(Clothes clothes,
+      List<ClothesAttributeDto> attributeDtoList) {
+    List<UUID> clothesAttributeIdList = attributeDtoList.stream()
+        .map(ClothesAttributeDto::definitionId)
+        .toList();
+
+    List<Attribute> attributeList = attributeRepository.findAllById(clothesAttributeIdList);
+
+    return attributeList.stream()
+        .collect(Collectors.toMap(Attribute::getId, Function.identity()));
+  }
+
+  private ClothesAttribute getClothesAttribute(ClothesAttributeDto dto,
+      Map<UUID, Attribute> attributeMap, Clothes clothes) {
+
+    Attribute attribute = attributeMap.get(dto.definitionId());
+    if (attribute == null) {
+      throw AttributeNotFoundException.withId(dto.definitionId());
+    }
+
+    return ClothesAttribute.builder()
+        .clothes(clothes)
+        .attribute(attribute)
+        .value(dto.value())
+        .build();
   }
 }

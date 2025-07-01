@@ -18,9 +18,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -61,7 +59,6 @@ public class Clothes {
   @Column(nullable = false)
   private ClothesType type;
 
-  // TODO : Set으로 수정 -> 관련 부분 함께 수정
   @OneToMany(mappedBy = "clothes", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private Set<ClothesAttribute> clothesAttributes = new HashSet<>();
 
@@ -97,14 +94,6 @@ public class Clothes {
 
   public void updateImage(Image image) {
     this.image = image;
-  }
-
-  public void updateClothesAttribute(ClothesAttribute clothesAttribute) {
-    if (this.clothesAttributes.contains(clothesAttribute)) {
-      removeClothesAttribute(clothesAttribute);
-    } else {
-      addClothesAttribute(clothesAttribute);
-    }
   }
 
   public void addClothesAttribute(ClothesAttribute clothesAttribute) {

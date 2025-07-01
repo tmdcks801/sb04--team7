@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class WindSpeed {
 
-  private double windSpeed;
+  private Double windSpeed;
 
   @Enumerated(EnumType.STRING)
   private WindStrength windAsWord;

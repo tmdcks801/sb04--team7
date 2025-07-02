@@ -106,7 +106,7 @@ public class ClothesServiceImpl implements ClothesService {
     if (clothes.size() <= condition.limit()) {
 
       PageResponse<ClothesDto> pageResponse = PageResponse.<ClothesDto>builder()
-          .data(clothesMapper.toDtoList(clothes))
+          .data(clothesMapper.toDto(clothes))
           .hasNext(false)
           .nextCursor(null)
           .nextIdAfter(null)
@@ -128,7 +128,7 @@ public class ClothesServiceImpl implements ClothesService {
     UUID nextIdAfter = lastClothes.getId();
 
     PageResponse<ClothesDto> pageResponse = PageResponse.<ClothesDto>builder()
-        .data(clothesMapper.toDtoList(clothes))
+        .data(clothesMapper.toDto(clothes))
         .hasNext(true)
         .nextCursor(nextCursor)
         .nextIdAfter(nextIdAfter)

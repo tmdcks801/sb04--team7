@@ -51,7 +51,7 @@ public class Feed {
   private Weather weather;
 
   @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<FeedClothes> feedClothes;  // 피드에 등록된 옷(중간 테이블)
+  private List<FeedClothes> feedClothes = new ArrayList<>();  // 피드에 등록된 옷(중간 테이블)
 
   @Column
   private String content; // 설명
@@ -63,7 +63,7 @@ public class Feed {
   private int commentCount; // 댓글 수
 
   @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<FeedComment> comments; // 댓글 목록
+  private List<FeedComment> comments = new ArrayList<>(); // 댓글 목록
 
   @Column(nullable = false, updatable = false)
   @CreatedDate
@@ -74,13 +74,22 @@ public class Feed {
   private LocalDateTime updatedAt;  // 수정일
 
   @Builder
-  public Feed(User user, Weather weather, List<FeedClothes> feedClothes, String content) {
+  public Feed(User user, Weather weather, String content) {
     this.user = user;
     this.weather = weather;
-    this.feedClothes = feedClothes;
     this.content = content;
     this.likeCount = 0;
     this.commentCount = 0;
-    this.comments = new ArrayList<>();
+  }
+
+  public void addFeedClothes(FeedClothes feedClothes) {
+    this.feedClothes.add(feedClothes);
+  }
+
+  public void updateContent(String content) {
+    if (this.content.equals(content)) {
+      return;
+    }
+    this.content = content;
   }
 }

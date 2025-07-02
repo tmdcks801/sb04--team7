@@ -1,6 +1,7 @@
 package com.example.ootd.security;
 
 import com.example.ootd.domain.user.User;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -31,5 +32,15 @@ public class CustomUserDetails implements UserDetails {
   @Override
   public String getUsername() {
     return user.getEmail();
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+
+    if(user.isTempPassword() && user.getTempPasswordExpiration() != null){
+      return user.getTempPasswordExpiration().isAfter(LocalDateTime.now());
+    }
+
+    return true;
   }
 }

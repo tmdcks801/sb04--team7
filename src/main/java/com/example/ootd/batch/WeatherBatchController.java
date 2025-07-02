@@ -2,6 +2,7 @@ package com.example.ootd.batch;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/batch/weather")
 @RequiredArgsConstructor
 public class WeatherBatchController {
+
+  private final WeatherCleanupScheduler weatherCleanupScheduler;
 
   private final WeatherScheduler weatherBatchScheduler;
   private final JobLauncher jobLauncher;
@@ -56,4 +60,30 @@ public class WeatherBatchController {
           .body("Failed to start retry job: " + e.getMessage());
     }
   }
+
+
+  // 수동으로 날씨 삭제
+  @PostMapping("/manual")
+  public ResponseEntity<Map<String, String>> manualCleanup(
+      @RequestParam(defaultValue = "2") int daysToKeep) {
+
+    try {
+      weatherCleanupScheduler.manualCleanup(daysToKeep);
+
+      return ResponseEntity.ok(Map.of(
+          "message", "Manual cleanup completed successfully",
+          "daysKept", String.valueOf(daysToKeep),
+          "timestamp", java.time.LocalDateTime.now().toString()
+      ));
+
+    } catch (Exception e) {
+      log.error("수동 삭제 실패", e);
+
+      return ResponseEntity.internalServerError().body(Map.of(
+          "error", "Manual cleanup failed: " + e.getMessage(),
+          "timestamp", java.time.LocalDateTime.now().toString()
+      ));
+    }
+  }
+
 }

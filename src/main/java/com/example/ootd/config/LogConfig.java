@@ -16,48 +16,47 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class LogConfig extends AppenderBase<ILoggingEvent> {
 
-  private String host;
-  private int port;
-  private String dbName; // 기본값 설정
-  private String collectionName;
-  private String username;
-  private String password;
-
+  private String uri;
+  private String collectionName = "logs";
+  private String dbName;
   private MongoClient mongoClient;
+  private MongoDatabase database;
 
    @Override
   public void start() {
+    if (uri == null || uri.isBlank()) {
+      addError("MongoDB uri 빠짐");
+      return;
+    }
     try {
-      host = System.getenv("MONGO_HOST") != null ? System.getenv("MONGO_HOST") : host;
-      port = System.getenv("MONGO_PORT") != null ? Integer.parseInt(System.getenv("MONGO_PORT"))
-          : port;
-      dbName = System.getenv("LOG_MONGO_DB") != null ? System.getenv("LOG_MONGO_DB") : dbName;
+      mongoClient = MongoClients.create(uri);
 
-      mongoClient = MongoClients.create(buildConnectionUri());
+      String databaseName = (dbName != null && !dbName.isBlank())
+          ? dbName
+          : extractDbName(uri);
+
+      database = mongoClient.getDatabase(databaseName);
       super.start();
     } catch (Exception e) {
-      addError("MongoDBAppender 시작 실패", e);
+      addError("MongoDB 연결 실패", e);
     }
   }
 
   @Override
   protected void append(ILoggingEvent event) {
-    if (mongoClient == null) {
-      addError("MongoClient가 null이라 오류.");
+    if (database == null) {
+      addError("MongoDB 연결 실패");
       return;
     }
-
     try {
-      MongoDatabase database = mongoClient.getDatabase(dbName);
-
-      String dateSuffix = new SimpleDateFormat("yyyy_MM_dd").format(new Date());
+      String dateSuffix = new SimpleDateFormat("yyyy_MM_dd").format(new Date(event.getTimeStamp()));
       String dynamicCollectionName;
-
-      if (event.getLoggerName().contains(".security") ||  //패이지 이름에 따라 분류되도록 함
-          event.getLoggerName().contains(".user")) {
-        dynamicCollectionName = collectionName + "_" + dateSuffix + "_security_test";
+      if (event.getLoggerName() != null &&
+          (event.getLoggerName().contains(".security") || event.getLoggerName()
+              .contains(".user"))) {
+        dynamicCollectionName = collectionName + "_" + dateSuffix + "_security";
       } else {
-        dynamicCollectionName = collectionName + "_" + dateSuffix + "_test";
+        dynamicCollectionName = collectionName + "_" + dateSuffix;
       }
 
       MongoCollection<Document> currentCollection = database.getCollection(dynamicCollectionName);
@@ -78,20 +77,19 @@ public class LogConfig extends AppenderBase<ILoggingEvent> {
  @Override
   public void stop() {
     if (mongoClient != null) {
-      try {
-        mongoClient.close();
-      } catch (Exception e) {
-        addError("종료 시 오류", e);
-      }
+      mongoClient.close();
     }
     super.stop();
   }
 
-  private String buildConnectionUri() {
-    if (username != null && password != null) {
-      return String.format("mongodb://%s:%s@%s:%d", username, password, host, port);
-    } else {
-      return String.format("mongodb://%s:%d", host, port);
+  private String extractDbName(String connectionUri) {
+    int slash = connectionUri.lastIndexOf('/');
+    if (slash == -1 || slash == connectionUri.length() - 1) {
+      throw new IllegalArgumentException("uri 빠짐");
     }
+    int question = connectionUri.indexOf('?', slash);
+    return (question == -1)
+        ? connectionUri.substring(slash + 1)
+        : connectionUri.substring(slash + 1, question);
   }
 }

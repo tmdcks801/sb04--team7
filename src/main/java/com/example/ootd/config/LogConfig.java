@@ -25,7 +25,7 @@ public class LogConfig extends AppenderBase<ILoggingEvent> {
 
   private MongoClient mongoClient;
 
-  @Override
+   @Override
   public void start() {
     try {
       host = System.getenv("MONGO_HOST") != null ? System.getenv("MONGO_HOST") : host;
@@ -75,7 +75,7 @@ public class LogConfig extends AppenderBase<ILoggingEvent> {
     }
   }
 
-  @Override
+ @Override
   public void stop() {
     if (mongoClient != null) {
       try {
@@ -94,6 +94,4 @@ public class LogConfig extends AppenderBase<ILoggingEvent> {
       return String.format("mongodb://%s:%d", host, port);
     }
   }
-
-
 }

@@ -16,6 +16,11 @@ public interface ClothesMapper {
   @Mapping(source = "clothesAttributes", target = "attributes")
   ClothesDto toDto(Clothes clothes);
 
+  @Mapping(source = "user.id", target = "ownerId")
+  @Mapping(source = "image.url", target = "imageUrl")
+  @Mapping(source = "clothesAttributes", target = "attributes")
+  List<ClothesDto> toDtoList(List<Clothes> clothes);
+
   @Mapping(source = "attribute.id", target = "definitionId")
   @Mapping(source = "attribute.name", target = "definitionName")
   @Mapping(source = "attribute.details", target = "selectableValues")

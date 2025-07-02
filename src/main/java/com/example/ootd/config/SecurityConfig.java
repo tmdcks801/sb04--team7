@@ -2,16 +2,21 @@ package com.example.ootd.config;
 
 import com.example.ootd.security.CustomUserDetailsService;
 import com.example.ootd.security.CustomUsernamePasswordAuthenticationFilter;
+import com.example.ootd.security.jwt.JwtAuthenticationFilter;
 import com.example.ootd.security.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -35,22 +40,48 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain chain(HttpSecurity http,
       AuthenticationManager manager,
-      CustomUsernamePasswordAuthenticationFilter customFilter) throws Exception {
+      CustomUsernamePasswordAuthenticationFilter customFilter,
+      JwtAuthenticationFilter jwtFilter) throws Exception {
     customFilter.setAuthenticationManager(manager);
 
     http
         .csrf(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth.requestMatchers(
+            "/assets/**",
+            "/closet-hanger-logo.png",
+            "/index.html",
+            "vite.svg",
+            "/api/auth/sign-in",
+            "/api/auth/refresh",
+            "/api/auth/me",
+                "/test/sendEmail",
+                "/api/auth/reset-password")
+            .permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+            .requestMatchers("/test/me").hasRole("USER")
+            .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterAt(customFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
 
   @Bean
-  public AuthenticationManager authManager(AuthenticationConfiguration configuration)
+  public AuthenticationManager authManager(HttpSecurity http, PasswordEncoder passwordEncoder, CustomUserDetailsService userDetailsService)
       throws Exception {
-    return configuration.getAuthenticationManager();
+
+    AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+    builder
+        .userDetailsService(userDetailsService)
+        .passwordEncoder(passwordEncoder);
+
+    return builder.build();
   }
 
   @Bean
@@ -63,4 +94,12 @@ public class SecurityConfig {
     return new BCryptPasswordEncoder();
   }
 
+  @Bean
+  public RoleHierarchy roleHierarchy(){
+    String hierarchyString = """
+        ROLE_ADMIN > ROLE_USER
+        """;
+
+    return RoleHierarchyImpl.fromHierarchy(hierarchyString);
+  }
 }

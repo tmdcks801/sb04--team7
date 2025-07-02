@@ -32,6 +32,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.kafka:spring-kafka'
     implementation("org.springframework.boot:spring-boot-starter-websocket")
+    // Batch
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
 
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
@@ -70,8 +72,7 @@ dependencies {
 
     // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
-
-    //로그
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 // queryDsl 설정

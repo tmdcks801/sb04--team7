@@ -1,5 +1,7 @@
-package com.example.ootd.batch;
+package com.example.ootd.batch.job;
 
+import com.example.ootd.batch.dto.RegionInfo;
+import com.example.ootd.batch.dto.WeatherBatchData;
 import com.example.ootd.domain.weather.api.WeatherApiClient;
 import com.example.ootd.domain.weather.api.WeatherApiResponse;
 import java.util.ArrayList;

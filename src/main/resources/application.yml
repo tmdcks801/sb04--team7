@@ -17,6 +17,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    jdbc:
+      batch_size: 100      # ddl 몇개 모아서 DB에 전송할지
+      order_inserts: true
+      order_updates: true
     open-in-view: false
   batch:
     job:
@@ -39,6 +43,7 @@ spring:
           auth: true
           starttls:
             enable: true
+
   security:
     oauth2:
       client:
@@ -53,6 +58,14 @@ spring:
             authorization-uri: https://accounts.google.com/o/oauth2/auth
             token-uri: https://oauth2.googleapis.com/token
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${NOTIFICATIN_DB}
+      uuid-representation: standard
+      auto-index-creation: true
+
 management:
   endpoints:
     web:
@@ -75,14 +88,19 @@ weather:
   batch:
     enabled: true
     grid-size: 10
-    chunk-size: 10        # 청크 크기
-    regions-per-partition: 5  # 파티션당 지역 수
+    chunk-size: 300        # 청크 크기
+    regions-per-partition: 10  # 파티션당 지역 수
     numOfRows: 1000
     thread-pool:
       core-size: 5
       max-size: 10
     schedule:
       cron: "0 30 2,5,8,11,14,17,20,23 * * *"
+    cleanup:
+      enabled: true                    # 정리 스케줄러 활성화
+      retention-days: 2                # 보존할 일수 (2일)
+      cron: "0 0 3 * * *"             # 매일 새벽 3시 실행
+      preserve-feed-referenced: true   # Feed 참조 데이터 보존 여부
   regions:
     file:
       path: classpath:regions.csv
@@ -132,5 +150,5 @@ app:
     access-token-expiration: 900000
     refresh-token-expiration: 604800000
 mongo:
-  uri: ${MONGODB_URI}
+  uri: ${MONGODB_URI_LOG}
   collection: ${MONGO_COLLECTION}

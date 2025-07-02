@@ -119,7 +119,5 @@ app:
     access-token-expiration: 900000
     refresh-token-expiration: 604800000
 mongo:
-  host: ${MONGO_HOST}
-  port: ${MONGO_PORT}
-  db: ${MONGO_DB}
+  uri: ${MONGODB_URI}
   collection: ${MONGO_COLLECTION}

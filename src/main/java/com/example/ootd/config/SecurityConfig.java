@@ -4,6 +4,9 @@ import com.example.ootd.security.CustomUserDetailsService;
 import com.example.ootd.security.CustomUsernamePasswordAuthenticationFilter;
 import com.example.ootd.security.jwt.JwtAuthenticationFilter;
 import com.example.ootd.security.jwt.JwtService;
+import com.example.ootd.security.oauth2.CustomOAuth2UserService;
+import com.example.ootd.security.oauth2.OAuth2LoginSuccessHandler;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,31 +44,43 @@ public class SecurityConfig {
   public SecurityFilterChain chain(HttpSecurity http,
       AuthenticationManager manager,
       CustomUsernamePasswordAuthenticationFilter customFilter,
-      JwtAuthenticationFilter jwtFilter) throws Exception {
+      JwtAuthenticationFilter jwtFilter,
+      OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+      CustomOAuth2UserService customOAuth2UserService) throws Exception {
     customFilter.setAuthenticationManager(manager);
 
     http
+        .exceptionHandling(e -> e
+            .authenticationEntryPoint((request, response, authException) -> {
+              response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            })
+        )
         .csrf(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth.requestMatchers(
-            "/assets/**",
-            "/closet-hanger-logo.png",
-            "/index.html",
-            "vite.svg",
-            "/api/auth/sign-in",
-            "/api/auth/refresh",
-            "/api/auth/me",
-                "/test/sendEmail",
-                "/api/auth/reset-password")
-            .permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-            .requestMatchers("/test/me").hasRole("USER")
-            .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
-            .anyRequest().authenticated()
+        .authorizeHttpRequests(auth -> auth    .requestMatchers(
+            "/",
+                "/assets/**",
+                "/static/**",
+                "/favicon.ico",
+                "/closet-hanger-logo.png",
+                "/index.html",
+                "/vite.svg"
+                ).permitAll()
+            .requestMatchers("/oauth2/callback").permitAll()
+            .requestMatchers("/api/auth/me").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                .requestMatchers("/test/me").hasRole("USER")
+                .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
         )
+        .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo ->
+                userInfo.userService(customOAuth2UserService))
+            .successHandler(oAuth2LoginSuccessHandler))
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterAt(customFilter, UsernamePasswordAuthenticationFilter.class);
 

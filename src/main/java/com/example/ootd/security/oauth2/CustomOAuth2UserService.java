@@ -6,6 +6,7 @@ import com.example.ootd.exception.ErrorCode;
 import com.example.ootd.exception.OotdException;
 import com.example.ootd.security.Provider;
 import java.util.Collections;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -27,24 +28,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     OAuth2User oAuth2User = super.loadUser(userRequest);
 
     String registrationId = userRequest.getClientRegistration().getRegistrationId();
+    Map<String, Object> attributes = oAuth2User.getAttributes();
 
-    String email;
-    String name;
-    String providerId;
-
-    if ("google".equals(registrationId)) {
-      email = oAuth2User.getAttribute("email");
-      name = oAuth2User.getAttribute("name");
-      providerId = oAuth2User.getAttribute("sub");
-    } else {
-      throw new OotdException(ErrorCode.USER_NOT_FOUND);
-    }
-
-    User user = userRepository.findByEmail(email)
-        .orElseGet(() -> {
-          User newUser = new User(name, email, providerId, Provider.GOOGLE);
-          return userRepository.save(newUser);
-        });
+    OAuth2Provider provider = OAuth2Provider.valueOf(registrationId.toUpperCase());
+    User user = provider.getOrCreateUser(attributes, userRepository);
 
     return new DefaultOAuth2User(
         Collections.singleton(() -> user.getRole().name()),
@@ -52,4 +39,41 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         "email"
     );
   }
+
+
+
+  private enum OAuth2Provider {
+    GOOGLE {
+      @Override
+      User getOrCreateUser(Map<String, Object> attributes, UserRepository userRepository){
+        String email = (String) attributes.get("email");
+        String name = (String) attributes.get("name");
+        String providerId = (String) attributes.get("sub");
+
+        return userRepository.findByEmail(email).orElseGet(() -> {
+          User newUser = new User(name, email, providerId, Provider.GOOGLE);
+          return userRepository.save(newUser);
+        });
+      }
+    },
+    KAKAO{
+      @Override
+      User getOrCreateUser(Map<String, Object> attributes, UserRepository userRepository){
+        // TODO : 이후 카카오 형식에 맞추어 리팩토링
+        String email = (String) attributes.get("email");
+        String name = (String) attributes.get("name");
+        String providerId = (String) attributes.get("sub");
+
+        return userRepository.findByEmail(email).orElseGet(() -> {
+          User newUser = new User(name, email, providerId, Provider.GOOGLE);
+          return userRepository.save(newUser);
+        });
+      }
+    };
+
+    abstract User getOrCreateUser(Map<String, Object> attributes, UserRepository userRepository);
+  }
+
 }
+
+

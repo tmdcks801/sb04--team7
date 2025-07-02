@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface WeatherRepository extends JpaRepository<Weather, UUID> {
 
@@ -24,4 +26,17 @@ public interface WeatherRepository extends JpaRepository<Weather, UUID> {
   List<Weather> findMidnightWeathersByRegionNameWithLatestForecastedAt(String regionName);
 
   Optional<Weather> findByRegionNameAndForecastAt(String regionName, LocalDateTime forecastAt);
+
+  @Modifying
+  @Query("""
+      DELETE FROM Weather w 
+      WHERE w.forecastedAt < :cutoffDate 
+        AND w.id NOT IN (
+            SELECT DISTINCT f.weather.id 
+            FROM Feed f 
+            WHERE f.weather IS NOT NULL
+        )
+      """)
+  int deleteOldWeatherDataPreservingFeedReferences(@Param("cutoffDate") LocalDateTime cutoffDate);
+
 }

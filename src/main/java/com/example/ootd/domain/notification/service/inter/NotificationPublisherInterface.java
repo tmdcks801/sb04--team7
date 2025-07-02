@@ -12,8 +12,8 @@ public interface NotificationPublisherInterface {
   void publish(NotificationRequest event);
 
   //리스트안 사람한테 알람
-  void publishToMany(NotificationEvent event, List<UUID> userIdList);
+  //void publishToMany(NotificationEvent event, List<UUID> userIdList);
 
   //유저 모두한테 알람
-  void publishToAll(NotificationEvent event);
+  //void publishToAll(NotificationEvent event);
 }

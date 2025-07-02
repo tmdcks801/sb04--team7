@@ -27,6 +27,12 @@ spring:
           auth: true
           starttls:
             enable: true
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${NOTIFICATIN_DB}
+      uuid-representation: standard
+      auto-index-creation: true
 
 management:
   endpoints:
@@ -93,5 +99,5 @@ app:
     access-token-expiration: 900000
     refresh-token-expiration: 604800000
 mongo:
-  uri: ${MONGODB_URI}
+  uri: ${MONGODB_URI_LOG}
   collection: ${MONGO_COLLECTION}

@@ -3,6 +3,7 @@ package com.example.ootd.security;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.dto.LoginDto;
 import com.example.ootd.exception.ErrorCode;
+import com.example.ootd.exception.ErrorResponse;
 import com.example.ootd.exception.OotdException;
 import com.example.ootd.security.jwt.JwtService;
 import com.example.ootd.security.jwt.JwtSession;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -107,13 +109,24 @@ public class CustomUsernamePasswordAuthenticationFilter extends
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
     objectMapper.writeValue(response.getWriter(), session.getAccessToken());
-
   }
 
   @Override // TODO : ErrorResponse 구현 후 구현
   protected void unsuccessfulAuthentication(HttpServletRequest request,
       HttpServletResponse response, AuthenticationException failed)
       throws IOException, ServletException {
-    super.unsuccessfulAuthentication(request, response, failed);
+
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+
+    objectMapper.writeValue(response.getWriter(), new ErrorResponse(
+        "AuthenticationException",
+        "인증에 실패하였습니다.",
+        Map.of("reason", failed.getMessage())
+    ).toString());
+
+    throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
   }
 }

@@ -8,6 +8,7 @@ import com.example.ootd.domain.message.repository.MessageRepository;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.domain.user.service.UserService;
+import com.example.ootd.dto.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.List;
@@ -54,39 +55,44 @@ public class MessageServiceImp implements MessageServiceInterface {
   }
 
   @Override
-  public List<DirectMessageDto> getMessage(MessagePaginationDto req) {
-    try {
-      String dmKey = Message.makeDmKey(req.sender(), req.receiver());
+  public PageResponse getMessage(MessagePaginationDto req) {
+    String dmKey = Message.makeDmKey(req.sender(), req.receiver());
 
-      Sort sort = req.isAfter() ? Sort.by("id").ascending() : Sort.by("id").descending();
-      Pageable pageable = PageRequest.of(0, req.limit(), sort);
+    int limit = req.limit() > 0 ? req.limit() : 20;
+    Sort.Direction dir = req.isAfter() ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-      List<Message> messages;
-      if (req.cursor() == null) {
-        messages = messageRepository.findByDmKey(dmKey, pageable);
-      } else if (req.isAfter()) {
-        messages = messageRepository.findByDmKeyAndIdGreaterThan(dmKey, req.cursor(), pageable);
-      } else {
-        messages = messageRepository.findByDmKeyAndIdLessThan(dmKey, req.cursor(), pageable);
-      }
+    Pageable pageable = PageRequest.of(0, limit + 1, Sort.by(dir, "id"));
 
-      if (messages.isEmpty()) {
-        return Collections.emptyList();
-      }
-
-      // 클라이언트 편의를 위해 원하는 방향으로 정렬
-      if (!req.isAfter()) {
-        Collections.reverse(messages);
-      }
-
-      return messages.stream()
-          .map(messageMapper::toDto)
-          .collect(Collectors.toList());
-    } catch (Exception e) {
-      log.error("메세지 오류 나중에 상세 기입");
-      throw new IllegalArgumentException(
-          "메시지 조회 중 오류 발생", e);
+    List<Message> messages;
+    if (req.cursor() == null) {
+      messages = messageRepository.findByDmKey(dmKey, pageable);
+    } else if (req.isAfter()) {
+      messages = messageRepository.findByDmKeyAndIdGreaterThan(dmKey, req.cursor(), pageable);
+    } else {
+      messages = messageRepository.findByDmKeyAndIdLessThan(dmKey, req.cursor(), pageable);
     }
-  }
 
+    boolean hasNext = messages.size() > limit;
+    if (hasNext) {
+      messages = messages.subList(0, limit);
+    }
+
+    if (dir == Sort.Direction.DESC) {
+      Collections.reverse(messages);
+    }
+
+    List<DirectMessageDto> data = messages.stream()
+        .map(messageMapper::toDto)
+        .collect(Collectors.toList());
+
+    UUID nextCursor = hasNext && !messages.isEmpty()
+        ? messages.get(messages.size() - 1).getId()
+        : null;
+    long totalCount = messageRepository.countByDmKey(dmKey);
+
+    return new PageResponse(
+        data, hasNext, nextCursor, null,
+        "id", dir.name(), totalCount);
+
+  }
 }

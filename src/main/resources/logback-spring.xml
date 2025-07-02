@@ -8,12 +8,11 @@
     </encoder>
   </appender>
 
-  <appender name="MONGODB" class="com.example.test.LogConfig">
+  <appender name="MONGODB" class="com.example.ootd.config.LogConfig">
     <uri>${mongo.uri}</uri>
     <collectionName>${mongo.collection}</collectionName>
   </appender>
 
-  <!-- info 이상의 로그 -->
   <logger name="com.example" level="INFO" additivity="true">
     <appender-ref ref="MONGODB"/>
   </logger>
@@ -25,4 +24,6 @@
   <root level="INFO">
     <appender-ref ref="CONSOLE"/>
   </root>
+
+
 </configuration>

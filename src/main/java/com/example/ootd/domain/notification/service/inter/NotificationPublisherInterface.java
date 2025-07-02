@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface NotificationPublisherInterface {
 
-  //이벤트 발행, 다른 서비스에서 이벤트 발생시킬떄 이거쓰면 됨
+ //이벤트 발행, 다른 서비스에서 이벤트 발생시킬떄 이거쓰면 됨
   void publish(NotificationRequest event);
 
   //리스트안 사람한테 알람

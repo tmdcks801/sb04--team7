@@ -85,4 +85,11 @@ public class Feed {
   public void addFeedClothes(FeedClothes feedClothes) {
     this.feedClothes.add(feedClothes);
   }
+
+  public void updateContent(String content) {
+    if (this.content.equals(content)) {
+      return;
+    }
+    this.content = content;
+  }
 }

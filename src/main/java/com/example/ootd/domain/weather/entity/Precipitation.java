@@ -18,6 +18,6 @@ public class Precipitation {
 
   @Enumerated(EnumType.STRING)
   private PrecipitationType precipitationType;
-  private double precipitationAmount;
-  private double precipitationProbability;
+  private Double precipitationAmount;
+  private Double precipitationProbability;
 }

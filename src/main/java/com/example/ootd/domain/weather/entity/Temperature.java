@@ -14,10 +14,22 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Temperature {
 
-  private double temperatureCurrent;
-  private double temperatureMin;
-  private double temperatureMax;
-  private double temperatureComparedToDayBefore;
+  private Double temperatureCurrent;
+  private Double temperatureMin;
+  private Double temperatureMax;
+  private Double temperatureComparedToDayBefore;
+
+  public void setTemperatureCurrent(Double temperatureCurrent) {
+    this.temperatureCurrent = temperatureCurrent;
+  }
+
+  public void setTemperatureMin(Double temperatureMin) {
+    this.temperatureMin = temperatureMin;
+  }
+
+  public void setTemperatureMax(Double temperatureMax) {
+    this.temperatureMax = temperatureMax;
+  }
 
   public void setTemperatureComparedToDayBefore(Double diff) {
     this.temperatureComparedToDayBefore = diff;

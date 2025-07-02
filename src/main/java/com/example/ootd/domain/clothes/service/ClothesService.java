@@ -1,9 +1,8 @@
 package com.example.ootd.domain.clothes.service;
 
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
-import com.example.ootd.domain.clothes.dto.data.RecommendationDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesCreateRequest;
-import com.example.ootd.domain.clothes.dto.request.ClothesSearchRequest;
+import com.example.ootd.domain.clothes.dto.request.ClothesSearchCondition;
 import com.example.ootd.domain.clothes.dto.request.ClothesUpdateRequest;
 import com.example.ootd.dto.PageResponse;
 import java.util.UUID;
@@ -21,11 +20,8 @@ public interface ClothesService {
   ClothesDto update(ClothesUpdateRequest request, MultipartFile image, UUID clothesId);
 
   // 옷 목록 조회
-  PageResponse<ClothesDto> findByCondition(ClothesSearchRequest request);
+  PageResponse<ClothesDto> findByCondition(ClothesSearchCondition condition);
 
   // 옷 삭제
   void delete(UUID clothesId);
-
-  // 옷 추천
-  RecommendationDto recommend(UUID weatherId);
 }

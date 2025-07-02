@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Humidity {
 
-  private double humidityCurrent;
-  private double humidityComparedToDayBefore;
+  private Double humidityCurrent;
+  private Double humidityComparedToDayBefore;
 
   public void setHumidityComparedToDayBefore(Double diff) {
     this.humidityComparedToDayBefore = diff;

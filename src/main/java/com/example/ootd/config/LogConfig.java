@@ -2,81 +2,89 @@ package com.example.ootd.config;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import com.mongodb.*;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import lombok.Setter;
 import org.bson.Document;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Setter
 public class LogConfig extends AppenderBase<ILoggingEvent> {
 
-  private String host = "localhost";
-  private int port = 27017;
-  private String dbName;
-  private String collectionName = "log";
+  private String host;
+  private int port;
+  private String dbName; // 기본값 설정
+  private String collectionName;
   private String username;
   private String password;
 
   private MongoClient mongoClient;
 
-  @Override
+   @Override
   public void start() {
     try {
-      if (System.getenv("MONGO_HOST") != null) {
-        this.host = System.getenv("MONGO_HOST");
-      }
-      if (System.getenv("MONGO_PORT") != null) {
-        this.port = Integer.parseInt(System.getenv("MONGO_PORT"));
-      }
-      if (System.getenv("LOG_MONGO_DB") != null) {
-        this.dbName = System.getenv("LOG_MONGO_DB");
-      }
+      host = System.getenv("MONGO_HOST") != null ? System.getenv("MONGO_HOST") : host;
+      port = System.getenv("MONGO_PORT") != null ? Integer.parseInt(System.getenv("MONGO_PORT"))
+          : port;
+      dbName = System.getenv("LOG_MONGO_DB") != null ? System.getenv("LOG_MONGO_DB") : dbName;
 
-      String uri = buildConnectionUri();
-      mongoClient = MongoClients.create(uri);
+      mongoClient = MongoClients.create(buildConnectionUri());
       super.start();
     } catch (Exception e) {
-      addError("Failed to start MongoDBAppender", e);
+      addError("MongoDBAppender 시작 실패", e);
     }
   }
 
   @Override
   protected void append(ILoggingEvent event) {
-    try {
-      if (mongoClient == null) {
-        mongoClient = MongoClients.create(buildConnectionUri());
-      }
+    if (mongoClient == null) {
+      addError("MongoClient가 null이라 오류.");
+      return;
+    }
 
+    try {
       MongoDatabase database = mongoClient.getDatabase(dbName);
 
       String dateSuffix = new SimpleDateFormat("yyyy_MM_dd").format(new Date());
-      String dynamicCollectionName = collectionName + "_" + dateSuffix;
+      String dynamicCollectionName;
+
+      if (event.getLoggerName().contains(".security") ||  //패이지 이름에 따라 분류되도록 함
+          event.getLoggerName().contains(".user")) {
+        dynamicCollectionName = collectionName + "_" + dateSuffix + "_security_test";
+      } else {
+        dynamicCollectionName = collectionName + "_" + dateSuffix + "_test";
+      }
+
       MongoCollection<Document> currentCollection = database.getCollection(dynamicCollectionName);
 
-      Document doc = new Document();
-      doc.append("timestamp", new Date(event.getTimeStamp()));
-      doc.append("level", event.getLevel().toString());
-      doc.append("thread", event.getThreadName());
-      doc.append("logger", event.getLoggerName());
-      doc.append("message", event.getFormattedMessage());
+      Document doc = new Document()
+          .append("timestamp", new Date(event.getTimeStamp()))
+          .append("level", event.getLevel().toString())
+          .append("thread", event.getThreadName())
+          .append("logger", event.getLoggerName())
+          .append("message", event.getFormattedMessage());
 
       currentCollection.insertOne(doc);
     } catch (Exception e) {
-      addError("Failed to write log to MongoDB", e);
+      addError("MongoDB 로그 저장 실패", e);
     }
   }
 
-  @Override
+ @Override
   public void stop() {
-    super.stop();
     if (mongoClient != null) {
-      mongoClient.close();
+      try {
+        mongoClient.close();
+      } catch (Exception e) {
+        addError("종료 시 오류", e);
+      }
     }
+    super.stop();
   }
 
   private String buildConnectionUri() {
@@ -86,5 +94,4 @@ public class LogConfig extends AppenderBase<ILoggingEvent> {
       return String.format("mongodb://%s:%d", host, port);
     }
   }
-
 }

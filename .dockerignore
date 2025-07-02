@@ -1,0 +1,83 @@
+# Gradle 빌드 관련
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+gradle-wrapper.properties
+
+# IDE 관련
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS 관련
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git 관련
+.git
+.gitignore
+README.md
+HELP.md
+
+# 로그 파일
+*.log
+
+# 환경 설정 파일 (민감한 정보 포함)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 테스트 관련
+src/test/
+
+# 문서 및 기타
+docs/
+*.md
+LICENSE
+.editorconfig
+
+# 임시 파일
+*.tmp
+*.temp
+
+# 압축 파일
+*.zip
+*.tar.gz
+*.rar
+
+# Java 관련
+*.class
+
+# Node.js 관련 (프론트엔드가 포함된 경우)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 개발 도구 설정
+intellij-java-google-style.xml
+
+# Docker 관련
+Dockerfile
+.dockerignore
+
+# CI/CD 관련
+.github/
+.gitlab-ci.yml
+Jenkinsfile
+
+# ECS 관련
+ecs-task-definition.json

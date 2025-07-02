@@ -2,9 +2,8 @@ package com.example.ootd.domain.clothes.service.impl;
 
 import com.example.ootd.domain.clothes.dto.data.ClothesAttributeDto;
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
-import com.example.ootd.domain.clothes.dto.data.RecommendationDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesCreateRequest;
-import com.example.ootd.domain.clothes.dto.request.ClothesSearchRequest;
+import com.example.ootd.domain.clothes.dto.request.ClothesSearchCondition;
 import com.example.ootd.domain.clothes.dto.request.ClothesUpdateRequest;
 import com.example.ootd.domain.clothes.entity.Attribute;
 import com.example.ootd.domain.clothes.entity.Clothes;
@@ -19,11 +18,16 @@ import com.example.ootd.domain.image.service.ImageService;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.dto.PageResponse;
+import com.example.ootd.exception.clothes.AttributeDetailNotFoundException;
 import com.example.ootd.exception.clothes.AttributeNotFoundException;
 import com.example.ootd.exception.clothes.ClothesNotFountException;
 import com.querydsl.core.util.StringUtils;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -92,8 +96,51 @@ public class ClothesServiceImpl implements ClothesService {
 
   @Override
   @Transactional(readOnly = true)
-  public PageResponse<ClothesDto> findByCondition(ClothesSearchRequest request) {
-    return null;
+  public PageResponse<ClothesDto> findByCondition(ClothesSearchCondition condition) {
+
+    log.debug("의상 목록 조회 시작: {}", condition);
+
+    List<Clothes> clothes = clothesRepository.findByCondition(condition);
+
+    // 다음 페이지 없는 경우
+    if (clothes.size() <= condition.limit()) {
+
+      PageResponse<ClothesDto> pageResponse = PageResponse.<ClothesDto>builder()
+          .data(clothesMapper.toDtoList(clothes))
+          .hasNext(false)
+          .nextCursor(null)
+          .nextIdAfter(null)
+          .sortBy("createdAt")
+          .sortDirection("DESCENDING")
+          .totalCount(
+              clothesRepository.countByCondition(condition.typeEqual(), condition.ownerId()))
+          .build();
+
+      log.info("의상 목록 조회 완료: dataCount={}", clothes.size());
+
+      return pageResponse;
+    }
+
+    // 다음 페이지 있는 경우
+    clothes.remove(clothes.size() - 1); // 다음 페이지 확인용 요소 삭제
+    Clothes lastClothes = clothes.get(clothes.size() - 1);
+    String nextCursor = lastClothes.getCreatedAt().toString();
+    UUID nextIdAfter = lastClothes.getId();
+
+    PageResponse<ClothesDto> pageResponse = PageResponse.<ClothesDto>builder()
+        .data(clothesMapper.toDtoList(clothes))
+        .hasNext(true)
+        .nextCursor(nextCursor)
+        .nextIdAfter(nextIdAfter)
+        .sortBy("createdAt")
+        .sortDirection("DESCENDING")
+        .totalCount(
+            clothesRepository.countByCondition(condition.typeEqual(), condition.ownerId()))
+        .build();
+
+    log.info("의상 목록 조회 완료: dataCount={}", clothes.size());
+
+    return pageResponse;
   }
 
   @Override
@@ -105,28 +152,6 @@ public class ClothesServiceImpl implements ClothesService {
     clothesRepository.delete(clothes);
 
     log.info("의상 삭제 완료");
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public RecommendationDto recommend(UUID weatherId) {
-    return null;
-  }
-
-  private void setClothesAttributes(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
-    for (ClothesAttributeDto dto : attributeDtoList) {
-
-      Attribute attribute = attributeRepository.findById(dto.definitionId())
-          .orElseThrow(() -> AttributeNotFoundException.withId(dto.definitionId()));
-
-      ClothesAttribute clothesAttribute = ClothesAttribute.builder()
-          .clothes(clothes)
-          .attribute(attribute)
-          .value(dto.value())
-          .build();
-
-      clothes.addClothesAttribute(clothesAttribute);
-    }
   }
 
   private Clothes getClothesById(UUID clothesId) {
@@ -153,21 +178,97 @@ public class ClothesServiceImpl implements ClothesService {
     }
   }
 
+  // TODO: 테스트 후 수정
   private void updateAttribute(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
-    if (attributeDtoList != null) {
-      for (ClothesAttributeDto dto : attributeDtoList) {
 
-        Attribute attribute = attributeRepository.findById(dto.definitionId())
-            .orElseThrow(() -> AttributeNotFoundException.withId(dto.definitionId()));
+    if (attributeDtoList == null) {
+      return;
+    }
 
-        ClothesAttribute clothesAttribute = ClothesAttribute.builder()
-            .clothes(clothes)
-            .attribute(attribute)
-            .value(dto.value())
-            .build();
+    // 1. Map<attributeId, value> 형태로 요청 데이터를 정리
+    Map<UUID, String> incomingAttrMap = attributeDtoList.stream()
+        .collect(Collectors.toMap(
+            ClothesAttributeDto::definitionId,
+            ClothesAttributeDto::value,
+            (v1, v2) -> v2 // 중복 키가 있을 경우 마지막 키 사용 (중복 방지)
+        ));
 
-        clothes.updateClothesAttribute(clothesAttribute);
+    // 2. 기존 속성 리스트
+    Set<ClothesAttribute> currentAttributes = clothes.getClothesAttributes();
+
+    // 3. 삭제 대상: 요청에 없는 attributeId → 제거
+    currentAttributes.removeIf(existing ->
+        !incomingAttrMap.containsKey(existing.getAttribute().getId())
+    );
+
+    Map<UUID, Attribute> attributeMap = getAttributeMap(attributeDtoList);
+
+    // 4. 새로 추가할 속성만 Clothes에 추가
+    for (Map.Entry<UUID, String> entry : incomingAttrMap.entrySet()) {
+      UUID attributeId = entry.getKey();
+      String newValue = entry.getValue();
+
+      // 기존 속성 찾기
+      ClothesAttribute existing = currentAttributes.stream()
+          .filter(attr -> attr.getAttribute().getId().equals(attributeId))
+          .findFirst()
+          .orElse(null);
+
+      if (existing != null) {
+        // value가 다르면 업데이트
+        if (!existing.getValue().equals(newValue)) {
+          existing.updateValue(newValue);
+        }
+      } else {
+        Attribute attribute = attributeMap.get(attributeId);
+        ClothesAttribute newAttr = new ClothesAttribute(clothes, attribute, newValue);
+        clothes.addClothesAttribute(newAttr);
       }
     }
+  }
+
+
+  private void setClothesAttributes(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
+
+    Map<UUID, Attribute> attributeMap = getAttributeMap(attributeDtoList);
+
+    for (ClothesAttributeDto dto : attributeDtoList) {
+
+      ClothesAttribute clothesAttribute = getClothesAttribute(dto, attributeMap, clothes);
+
+      clothes.addClothesAttribute(clothesAttribute);
+    }
+  }
+
+  private Map<UUID, Attribute> getAttributeMap(List<ClothesAttributeDto> attributeDtoList) {
+
+    List<UUID> clothesAttributeIdList = attributeDtoList.stream()
+        .map(ClothesAttributeDto::definitionId)
+        .toList();
+
+    List<Attribute> attributeList = attributeRepository.findAllById(clothesAttributeIdList);
+
+    return attributeList.stream()
+        .collect(Collectors.toMap(Attribute::getId, Function.identity()));
+  }
+
+  private ClothesAttribute getClothesAttribute(ClothesAttributeDto dto,
+      Map<UUID, Attribute> attributeMap, Clothes clothes) {
+
+    Attribute attribute = attributeMap.get(dto.definitionId());
+
+    if (attribute == null) {
+      throw AttributeNotFoundException.withId(dto.definitionId());
+    }
+    // 해당 속성에 value(속성 내용)가 없는 경우 예외처리
+    if (!attribute.getDetails().contains(dto.value())) {
+      throw AttributeDetailNotFoundException.withValue(dto.value());
+    }
+
+    return ClothesAttribute.builder()
+        .clothes(clothes)
+        .attribute(attribute)
+        .value(dto.value())
+        .build();
   }
 }

@@ -1,5 +1,6 @@
 package com.example.ootd.domain.follow.dto;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -7,7 +8,7 @@ import lombok.Builder;
 public record FollowListCondition(
     String cursor,
     UUID idAfter,
-    int limit,
+    @NotNull int limit,
     String nameLike,
     String orderBy,
     Direction direction

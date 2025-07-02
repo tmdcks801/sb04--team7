@@ -106,7 +106,7 @@ public class ClothesServiceImpl implements ClothesService {
     if (clothes.size() <= condition.limit()) {
 
       PageResponse<ClothesDto> pageResponse = PageResponse.<ClothesDto>builder()
-          .data(clothesMapper.toDtoList(clothes))
+          .data(clothesMapper.toDto(clothes))
           .hasNext(false)
           .nextCursor(null)
           .nextIdAfter(null)
@@ -128,7 +128,7 @@ public class ClothesServiceImpl implements ClothesService {
     UUID nextIdAfter = lastClothes.getId();
 
     PageResponse<ClothesDto> pageResponse = PageResponse.<ClothesDto>builder()
-        .data(clothesMapper.toDtoList(clothes))
+        .data(clothesMapper.toDto(clothes))
         .hasNext(true)
         .nextCursor(nextCursor)
         .nextIdAfter(nextIdAfter)
@@ -178,55 +178,82 @@ public class ClothesServiceImpl implements ClothesService {
     }
   }
 
-  // TODO: 테스트 후 수정
-  private void updateAttribute(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
-
-    if (attributeDtoList == null) {
+  // 속성 수정
+  private void updateAttribute(Clothes clothes, List<ClothesAttributeDto> dtoList) {
+    if (dtoList == null || dtoList.isEmpty()) {
       return;
     }
 
-    // 1. Map<attributeId, value> 형태로 요청 데이터를 정리
-    Map<UUID, String> incomingAttrMap = attributeDtoList.stream()
+    Map<UUID, String> incomingAttrMap = toIncomingAttributeMap(dtoList);
+    Map<UUID, Attribute> attributeMap = getAttributeMap(dtoList);
+    Set<ClothesAttribute> currentAttributes = clothes.getClothesAttributes();
+
+    removeDeletedAttributes(currentAttributes, incomingAttrMap.keySet());
+    updateExistingAttributes(currentAttributes, incomingAttrMap, attributeMap);
+    addNewAttributes(clothes, currentAttributes, incomingAttrMap, attributeMap);
+  }
+
+  // 요청 데이터 map으로 변환
+  private Map<UUID, String> toIncomingAttributeMap(List<ClothesAttributeDto> dtoList) {
+    return dtoList.stream()
         .collect(Collectors.toMap(
             ClothesAttributeDto::definitionId,
             ClothesAttributeDto::value,
-            (v1, v2) -> v2 // 중복 키가 있을 경우 마지막 키 사용 (중복 방지)
+            (v1, v2) -> v2
         ));
+  }
 
-    // 2. 기존 속성 리스트
-    Set<ClothesAttribute> currentAttributes = clothes.getClothesAttributes();
+  // 삭제 대상 속성 제거
+  private void removeDeletedAttributes(Set<ClothesAttribute> currentAttributes, Set<UUID> incomingIds) {
+    currentAttributes.removeIf(attr -> !incomingIds.contains(attr.getAttribute().getId()));
+  }
 
-    // 3. 삭제 대상: 요청에 없는 attributeId → 제거
-    currentAttributes.removeIf(existing ->
-        !incomingAttrMap.containsKey(existing.getAttribute().getId())
-    );
+  // 기존 속성 업데이트
+  private void updateExistingAttributes(Set<ClothesAttribute> currentAttributes,
+      Map<UUID, String> incomingAttrMap,
+      Map<UUID, Attribute> attributeMap) {
+    for (ClothesAttribute existing : currentAttributes) {
+      UUID id = existing.getAttribute().getId();
+      String newValue = incomingAttrMap.get(id);
 
-    Map<UUID, Attribute> attributeMap = getAttributeMap(attributeDtoList);
+      if (!existing.getValue().equals(newValue)) {
+        Attribute attribute = attributeMap.get(id);
+        validateAttributeValue(attribute, newValue);
+        existing.updateValue(newValue);
+      }
+    }
+  }
 
-    // 4. 새로 추가할 속성만 Clothes에 추가
+  // 새로운 속성 추가
+  private void addNewAttributes(Clothes clothes,
+      Set<ClothesAttribute> currentAttributes,
+      Map<UUID, String> incomingAttrMap,
+      Map<UUID, Attribute> attributeMap) {
+
+    Set<UUID> existingIds = currentAttributes.stream()
+        .map(attr -> attr.getAttribute().getId())
+        .collect(Collectors.toSet());
+
     for (Map.Entry<UUID, String> entry : incomingAttrMap.entrySet()) {
-      UUID attributeId = entry.getKey();
-      String newValue = entry.getValue();
+      UUID id = entry.getKey();
 
-      // 기존 속성 찾기
-      ClothesAttribute existing = currentAttributes.stream()
-          .filter(attr -> attr.getAttribute().getId().equals(attributeId))
-          .findFirst()
-          .orElse(null);
-
-      if (existing != null) {
-        // value가 다르면 업데이트
-        if (!existing.getValue().equals(newValue)) {
-          existing.updateValue(newValue);
-        }
-      } else {
-        Attribute attribute = attributeMap.get(attributeId);
-        ClothesAttribute newAttr = new ClothesAttribute(clothes, attribute, newValue);
+      if (!existingIds.contains(id)) {
+        ClothesAttributeDto dto = new ClothesAttributeDto(id, entry.getValue());
+        ClothesAttribute newAttr = getClothesAttribute(dto, attributeMap, clothes);
         clothes.addClothesAttribute(newAttr);
       }
     }
   }
 
+  // 값 유효성 검증
+  private void validateAttributeValue(Attribute attribute, String value) {
+    if (attribute == null) {
+      throw AttributeNotFoundException.withId(null);
+    }
+    if (!attribute.getDetails().contains(value)) {
+      throw AttributeDetailNotFoundException.withValue(value);
+    }
+  }
 
   private void setClothesAttributes(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
 

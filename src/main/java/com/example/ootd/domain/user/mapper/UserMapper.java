@@ -2,6 +2,7 @@ package com.example.ootd.domain.user.mapper;
 
 
 import com.example.ootd.domain.user.User;
+import com.example.ootd.domain.user.dto.AuthorDto;
 import com.example.ootd.domain.user.dto.ProfileDto;
 import com.example.ootd.domain.user.dto.UserCreateRequest;
 import com.example.ootd.domain.user.dto.UserDto;
@@ -9,14 +10,15 @@ import com.example.ootd.domain.user.dto.UserPagedResponse;
 import com.example.ootd.domain.user.dto.UserSearchCondition;
 import java.util.List;
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.Builder;
+
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring", builder = @Builder(disableBuilder = false))
 public interface UserMapper {
@@ -63,10 +65,15 @@ public interface UserMapper {
 
   @Mapping(source = "condition.sortBy", target = "sortBy")
   @Mapping(source = "condition.sortDirection", target = "sortDirection")
-  UserPagedResponse toPaginatedResponse(List<UserDto> data, String nextCursor, UUID nextIdAfter, boolean hasNext, Long totalCount, UserSearchCondition condition);
+  UserPagedResponse toPaginatedResponse(List<UserDto> data, String nextCursor, UUID nextIdAfter,
+      boolean hasNext, Long totalCount, UserSearchCondition condition);
 
 
   @Mapping(target = "userId", source = "id")
   @Mapping(target = "profileImageUrl", source = "image.url")
   ProfileDto toProfileDto(User user);
+
+  @Mapping(target = "userId", source = "id")
+  @Mapping(target = "profileImageUrl", source = "image.url")
+  AuthorDto toAuthorDto(User user);
 }

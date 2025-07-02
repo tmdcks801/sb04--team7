@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -26,7 +27,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
   private final NotificationMapper notificationMapper;
 
   @Override
-  @Transactional//안쓰긴 하는데 나중에 카프카로 바꾸면 씀
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public NotificationDto createNotification(NotificationDto dto) {
 
     try {

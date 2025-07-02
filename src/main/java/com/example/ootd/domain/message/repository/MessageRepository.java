@@ -14,4 +14,6 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
   List<Message> findByDmKeyAndIdGreaterThan(String dmKey, UUID cursor, Pageable pageable);
 
   List<Message> findByDmKeyAndIdLessThan(String dmKey, UUID cursor, Pageable pageable);
+
+  Long countByDmKey(String dmKey);
 }

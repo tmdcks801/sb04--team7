@@ -15,8 +15,8 @@ public interface FollowMapper {
     @Mapping(source = "follow.follower", target = "follower")
     FollowDto toDto(Follow follow);
 
-    @Mapping(source = "user.id", target = "userId")
-    @Mapping(source = "user.name", target = "name")
-//    @Mapping(source = "user.profileImageUrl", target = "profileImageUrl")
+    @Mapping(source = "id", target = "userId")
+    @Mapping(source = "name", target = "name")
+    @Mapping(source = "image.url", target = "profileImageUrl")
     UserSummary toUserSummary(User user);
 }

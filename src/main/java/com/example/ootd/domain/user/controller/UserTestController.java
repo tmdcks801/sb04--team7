@@ -1,4 +1,4 @@
-package com.example.ootd.domain.user;
+package com.example.ootd.domain.user.controller;
 
 
 import com.example.ootd.security.CustomUserDetails;
@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionInformation;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserTestController {
   private final SessionRegistry sessionRegistry;
+  private final JavaMailSender mailSender;
 
   @GetMapping("/me")
   public String whoAmI(Authentication authentication) {
@@ -74,4 +77,16 @@ public class UserTestController {
     return "현재 사용자의 세션이 강제로 만료(로그아웃)되었습니다.";
   }
 
+  @GetMapping("/sendEmail")
+  public String send(){
+    String tempPassword = "temp";
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setTo("kevinheo0413@gmail.com");
+    message.setSubject("[OOTD] 임시 비밀번호 안내");
+    message.setText("임시 비밀번호는 다음과 같습니다:\n\n" + tempPassword + "\n\n로그인 후 비밀번호를 꼭 변경해주세요.");
+
+    mailSender.send(message);
+
+    return "메일을 보냈습니다.";
+  }
 }

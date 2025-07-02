@@ -7,15 +7,39 @@ spring:
       maxRequestSize: 30MB  # 한 번에 최대 업로드 가능 용량
   datasource:
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000  # 30초
+      idle-timeout: 600000       # 10분
+      max-lifetime: 1800000      # 30분
+      maximum-pool-size: 20      # 커넥션 풀 크기 증가
+      minimum-idle: 10
+      validation-timeout: 5000
   jpa:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
   profiles:
     active:
       - dev
   config:
     import: optional:file:.env[.properties]
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ootdboo1@gmail.com
+    password: ${GOOGLE_APP_PWD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 management:
   endpoints:
     web:
@@ -35,6 +59,20 @@ kakao:
 weather:
   api:
     key: ${WEATHER_API_KEY}
+  batch:
+    enabled: true
+    grid-size: 10
+    chunk-size: 10        # 청크 크기
+    regions-per-partition: 5  # 파티션당 지역 수
+    numOfRows: 1000
+    thread-pool:
+      core-size: 5
+      max-size: 10
+    schedule:
+      cron: "0 30 2,5,8,11,14,17,20,23 * * *"
+  regions:
+    file:
+      path: classpath:regions.csv
 
 info:
   name: ootd
@@ -68,9 +106,20 @@ ootd:
 logging:
   level:
     root: info
+    # Spring Retry 관련 로그 끄기
+    org.springframework.retry: WARN  # 또는 ERROR, OFF
+    org.springframework.retry.support.RetryTemplate: WARN
+    # Spring Batch 관련 로그도 끄기
+    org.springframework.batch: WARN
+    org.springframework.batch.core.step: WARN
+    org.springframework.batch.item: WARN
 app:
   jwt:
     secret: "F811B1184C98D8543B1351D93948481900aDYQ82347641"
     access-token-expiration: 900000
     refresh-token-expiration: 604800000
-
+mongo:
+  host: ${MONGO_HOST}
+  port: ${MONGO_PORT}
+  db: ${MONGO_DB}
+  collection: ${MONGO_COLLECTION}

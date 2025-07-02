@@ -5,5 +5,6 @@ public enum PrecipitationType {
   RAIN,
   RAIN_SNOW,
   SNOW,
-  SHOWER
+  SHOWER;
+
 }

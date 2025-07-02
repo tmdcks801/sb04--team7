@@ -3,8 +3,6 @@ package com.example.ootd.domain.image.service.impl;
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.image.service.S3Service;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,8 +32,7 @@ public class S3ServiceImpl implements S3Service {
 
     try {
       String originalFileName = file.getOriginalFilename();
-      String encodedFileName = URLEncoder.encode(originalFileName, StandardCharsets.UTF_8);
-      String fileName = UUID.randomUUID() + "_" + encodedFileName;
+      String fileName = UUID.randomUUID() + "_" + originalFileName;
 
       PutObjectRequest putObjectRequest = PutObjectRequest.builder()
           .bucket(bucket)

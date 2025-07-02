@@ -14,9 +14,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -56,6 +59,9 @@ public class Clothes {
   @Column(nullable = false)
   private ClothesType type;
 
+  @OneToMany(mappedBy = "clothes", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+  private Set<ClothesAttribute> clothesAttributes = new HashSet<>();
+
   @Column(nullable = false, updatable = false)
   @CreatedDate
   private LocalDateTime createdAt;  // 등록일
@@ -70,5 +76,35 @@ public class Clothes {
     this.image = image;
     this.name = name;
     this.type = type;
+  }
+
+  public void updateName(String name) {
+    if (this.name.equals(name)) {
+      return;
+    }
+    this.name = name;
+  }
+
+  public void updateType(ClothesType type) {
+    if (this.type.equals(type)) {
+      return;
+    }
+    this.type = type;
+  }
+
+  public void updateImage(Image image) {
+    this.image = image;
+  }
+
+  public void addClothesAttribute(ClothesAttribute clothesAttribute) {
+    this.clothesAttributes.add(clothesAttribute);
+  }
+
+  public void removeClothesAttribute(ClothesAttribute clothesAttribute) {
+
+    if (!this.clothesAttributes.contains(clothesAttribute)) {
+      return;
+    }
+    this.clothesAttributes.remove(clothesAttribute);
   }
 }

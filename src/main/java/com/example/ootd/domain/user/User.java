@@ -2,6 +2,7 @@ package com.example.ootd.domain.user;
 
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.location.Location;
+import com.example.ootd.domain.user.dto.ProfileUpdateRequest;
 import com.example.ootd.security.Provider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -91,6 +93,24 @@ public class User {
   @Column
   private LocalDateTime tempPasswordExpiration;
 
+  @Builder
+  public User(String name, String email, String password, UserRole role, Boolean isLocked,
+      Provider provider, String providerId, Gender gender, LocalDate birthDate,
+      int temperatureSensitivity, boolean isTempPassword, LocalDateTime tempPasswordExpiration) {
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.role = role != null ? role : UserRole.ROLE_USER;
+    this.isLocked = isLocked != null ? isLocked : false;
+    this.provider = provider;
+    this.providerId = providerId;
+    this.gender = gender != null ? gender : Gender.OTHER;
+    this.birthDate = birthDate != null ? birthDate : LocalDate.now();
+    this.temperatureSensitivity = temperatureSensitivity != 0 ? temperatureSensitivity : 3;
+    this.isTempPassword = isTempPassword;
+    this.tempPasswordExpiration = tempPasswordExpiration;
+  }
+
   public User(String name, String email, String password) {
     this.name = name;
     this.email = email;
@@ -106,13 +126,50 @@ public class User {
     this.tempPasswordExpiration = null;
   }
 
+  public User(String name, String email, String providerId, Provider provider){
+    this.name = name;
+    this.email = email;
+    this.password = null;
+    this.role = UserRole.ROLE_USER;
+    this.isLocked = false;
+    this.provider = provider;
+    this.providerId = providerId;
+    this.gender = Gender.OTHER;
+    this.birthDate = LocalDate.now();
+    this.temperatureSensitivity = 3;
+    this.isTempPassword = false;
+     this.tempPasswordExpiration = null;
+  }
+
 
   public void resetPassword(String tempPassword){
     this.isTempPassword = true;
     this.tempPasswordExpiration = LocalDateTime.now().plusMinutes(10);
     this.password = tempPassword;
   }
+  
+  public void updateRole(UserRole role){
+    this.role = role;
+  }
 
+  public void updateProfile(ProfileUpdateRequest request, Image image){
+    this.image = image;
+    this.name = request.name();
+    this.gender = request.gender();
+    this.birthDate = request.birthDate();
+    this.location = request.location();
+    this.temperatureSensitivity = request.temperatureSensitivity();
+  }
+
+  public void updatePassword(String password){
+    this.password = password;
+    this.isTempPassword = false;
+    this.tempPasswordExpiration = null;
+  }
+
+  public void updateLockStatus(boolean isLocked) {
+    this.isLocked = isLocked;
+  }
   // 테스트 코드 작성할 때 location이 없으면 제약 조건 위반 에러가 발생해 잠시 만들어뒀습니다 !
   public User(String name, String email, String password, Location location) {
     this.name = name;
@@ -126,5 +183,6 @@ public class User {
     this.gender = Gender.OTHER;
     this.birthDate = LocalDate.now(); // TODO: 변경
     this.temperatureSensitivity = 3;
+
   }
 }

@@ -1,0 +1,28 @@
+<configuration>
+  <springProperty scope="context" name="mongo.uri" source="mongo.uri"/>
+  <springProperty scope="context" name="mongo.collection" source="mongo.collection"/>
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level --- [%thread] %-40.40logger{39} : %msg%n
+      </pattern>
+    </encoder>
+  </appender>
+
+  <appender name="MONGODB" class="com.example.test.LogConfig">
+    <uri>${mongo.uri}</uri>
+    <collectionName>${mongo.collection}</collectionName>
+  </appender>
+
+  <!-- info 이상의 로그 -->
+  <logger name="com.example" level="INFO" additivity="true">
+    <appender-ref ref="MONGODB"/>
+  </logger>
+  <!-- 콘솔에 출력되는건 여기 조절-->
+  <logger name="org.mongodb.driver" level="INFO" additivity="true">
+    <appender-ref ref="CONSOLE"/>
+  </logger>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+  </root>
+</configuration>

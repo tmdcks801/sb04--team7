@@ -33,8 +33,9 @@ public class NotificationPublisherImpl implements NotificationPublisherInterface
   @Override
   @Async("notificationExecutor")
   @Retryable(
-      value = {Exception.class},          // 일단 모든 예외
+      retryFor = Exception.class,          // 일단 모든 예외
       maxAttempts = 3,                      // 실패시 일단은 두번 추가 시도, 1,2,4초 텀 두고
+      recover = "recoverNotification",
       backoff = @Backoff(delay = 1_000,
           multiplier = 2.0,
           maxDelay = 10_000)
@@ -46,7 +47,7 @@ public class NotificationPublisherImpl implements NotificationPublisherInterface
   }
 
   @Recover
-  public void recover(Exception ex, NotificationRequest req) {
+  public void recoverNotification(Exception ex, NotificationRequest req) {
     log.error("알림 만들기에러 발생", ex, req);
   }
 

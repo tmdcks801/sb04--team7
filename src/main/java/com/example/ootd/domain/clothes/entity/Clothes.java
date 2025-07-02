@@ -18,8 +18,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -60,7 +60,7 @@ public class Clothes {
   private ClothesType type;
 
   @OneToMany(mappedBy = "clothes", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-  private List<ClothesAttribute> clothesAttributes = new ArrayList<>();
+  private Set<ClothesAttribute> clothesAttributes = new HashSet<>();
 
   @Column(nullable = false, updatable = false)
   @CreatedDate
@@ -96,19 +96,7 @@ public class Clothes {
     this.image = image;
   }
 
-  public void updateClothesAttribute(ClothesAttribute clothesAttribute) {
-    if (this.clothesAttributes.contains(clothesAttribute)) {
-      removeClothesAttribute(clothesAttribute);
-    } else {
-      addClothesAttribute(clothesAttribute);
-    }
-  }
-
   public void addClothesAttribute(ClothesAttribute clothesAttribute) {
-
-    if (this.clothesAttributes.contains(clothesAttribute)) {
-      return;
-    }
     this.clothesAttributes.add(clothesAttribute);
   }
 

@@ -61,12 +61,14 @@ public class GlobalExceptionHandler {
         .body(response);
   }
 
-  private HttpStatus determineHttpStatus(OotdException e) { // ErrorCode 생성시 HttpStatus 를 같이 넘기는 것이 더 깔끔한것 같음 (개선안)
+  private HttpStatus determineHttpStatus(
+      OotdException e) { // ErrorCode 생성시 HttpStatus 를 같이 넘기는 것이 더 깔끔한것 같음 (개선안)
     ErrorCode errorCode = e.getErrorCode();
     return switch (errorCode) {
       case AUTHENTICATION_FAILED -> HttpStatus.UNAUTHORIZED;
       case CLOTHES_NOT_FOUND, FEED_NOT_FOUND, IMAGE_NOT_FOUND, FOLLOWER_NOT_FOUND,
-          FOLLOWEE_NOT_FOUND, FOLLOW_USER_NOT_FOUND, FOLLOW_NOT_FOUND, ATTRIBUTE_NOT_FOUND, USER_NOT_FOUND -> HttpStatus.NOT_FOUND;
+           FOLLOWEE_NOT_FOUND, FOLLOW_USER_NOT_FOUND, FOLLOW_NOT_FOUND, ATTRIBUTE_NOT_FOUND,
+           USER_NOT_FOUND, ATTRIBUTE_DETAIL_NOT_FOUND -> HttpStatus.NOT_FOUND;
       case ALREADY_FOLLOWED_USER -> HttpStatus.CONFLICT;
       case INTERNAL_SERVER_ERROR, INVALID_REQUEST -> HttpStatus.INTERNAL_SERVER_ERROR;
     };

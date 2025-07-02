@@ -21,11 +21,12 @@ public class NotificationEventHandler {
 
   private final SsePushServiceInterface ssePushServiceInterface;
 
-  @Async("sseExecutor")
+  @Async("sseExecutor")//일단 문제 없는거 같음...
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
   @Retryable(
-      value = {Exception.class},          // 일단 모든 예외
+      retryFor = Exception.class,          // 일단 모든 예외
       maxAttempts = 3,                      // 실패시 일단은 두번 추가 시도, 1,2,4초 텀 두고
+      recover = "recoverHandler",
       backoff = @Backoff(delay = 1_000,
           multiplier = 2.0,
           maxDelay = 10_000)
@@ -35,7 +36,7 @@ public class NotificationEventHandler {
   }
 
   @Recover
-  public void recover(Exception ex, NotificationDto dto) {
+  public void recoverHandler(Exception ex, NotificationDto dto) {
     log.error("알림 푸시 시 발생", ex, dto);
   }
 }

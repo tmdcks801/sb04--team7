@@ -1,5 +1,6 @@
 package com.example.ootd.domain.image.entity;
 
+import com.example.ootd.domain.image.event.ImageDeleteListner;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -23,7 +24,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "images")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners({AuditingEntityListener.class, ImageDeleteListner.class})
 public class Image {
 
   @Id

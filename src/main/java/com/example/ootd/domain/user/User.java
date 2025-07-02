@@ -147,7 +147,7 @@ public class User {
     this.tempPasswordExpiration = LocalDateTime.now().plusMinutes(10);
     this.password = tempPassword;
   }
-
+  
   public void updateRole(UserRole role){
     this.role = role;
   }
@@ -167,7 +167,22 @@ public class User {
     this.tempPasswordExpiration = null;
   }
 
-  public void updateLockStatus(boolean isLocked){
+  public void updateLockStatus(boolean isLocked) {
     this.isLocked = isLocked;
+  }
+  // 테스트 코드 작성할 때 location이 없으면 제약 조건 위반 에러가 발생해 잠시 만들어뒀습니다 !
+  public User(String name, String email, String password, Location location) {
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.location = location;
+    this.role = UserRole.ROLE_USER;
+    this.isLocked = false;
+    this.provider = null;
+    this.providerId = null;
+    this.gender = Gender.OTHER;
+    this.birthDate = LocalDate.now(); // TODO: 변경
+    this.temperatureSensitivity = 3;
+
   }
 }

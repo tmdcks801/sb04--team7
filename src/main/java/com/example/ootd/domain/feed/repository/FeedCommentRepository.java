@@ -15,9 +15,9 @@ public interface FeedCommentRepository extends JpaRepository<FeedComment, UUID> 
       SELECT fc
         FROM FeedComment fc
        WHERE fc.feed.id = :feedId 
-             AND fc.createdAt < :cursor
-             AND fc.id > :idAfter
-       ORDER BY fc.createdAt desc, fc.id asc
+             AND ((fc.createdAt > :cursor)
+                    OR (fc.createdAt = :cursor AND fc.id > :idAfter))
+       ORDER BY fc.createdAt asc, fc.id asc
       """)
   List<FeedComment> findByCondition(
       @Param("feedId") UUID feedId,
@@ -31,5 +31,5 @@ public interface FeedCommentRepository extends JpaRepository<FeedComment, UUID> 
         FROM FeedComment fc
        WHERE fc.feed.id = :feedId
       """)
-  long countByCondition(@Param("feedId") UUID feedId);
+  long countByFeedId(@Param("feedId") UUID feedId);
 }

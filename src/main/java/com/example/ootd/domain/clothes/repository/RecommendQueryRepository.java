@@ -1,13 +1,15 @@
 package com.example.ootd.domain.clothes.repository;
 
+import com.example.ootd.domain.clothes.entity.Clothes;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RecommendQueryRepository {
+public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
 
   /**
    * 옷 추천 쿼리

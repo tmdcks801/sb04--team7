@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -35,6 +36,7 @@ public class MessageServiceImp implements MessageServiceInterface {
   private final UserRepository userRepository;
 
   @Override
+  @Transactional
   public DirectMessageDto sendMessage(UUID senderId, UUID receiverId, String content) {
 
     User sender = userRepository.findById(senderId)
@@ -55,6 +57,7 @@ public class MessageServiceImp implements MessageServiceInterface {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public PageResponse getMessage(MessagePaginationDto req) {
     String dmKey = Message.makeDmKey(req.sender(), req.receiver());
 

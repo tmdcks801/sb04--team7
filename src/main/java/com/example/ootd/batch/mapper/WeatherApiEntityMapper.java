@@ -77,8 +77,8 @@ public class WeatherApiEntityMapper {
       // Temperature 객체 생성
       Temperature temperature = Temperature.builder()
           .temperatureCurrent(currentTemp)
-          .temperatureMin(parseDouble(categoryMap.get("TMN")))  // 있으면 사용, 없으면 null
-          .temperatureMax(parseDouble(categoryMap.get("TMX")))  // 있으면 사용, 없으면 null
+          .temperatureMin(parseDoubleOrNull(categoryMap.get("TMN")))  // 있으면 사용, 없으면 null
+          .temperatureMax(parseDoubleOrNull(categoryMap.get("TMX")))  // 있으면 사용, 없으면 null
           .build();
 
       // Humidity 객체 생성 (기본값 50.0)
@@ -104,7 +104,7 @@ public class WeatherApiEntityMapper {
       return Weather.builder()
           .id(UUID.randomUUID())
           .regionName(regionName)
-          .forecastedAt(LocalDateTime.now())
+          .forecastedAt(forecastedAt)
           .forecastAt(forecastAt)
           .temperature(temperature)
           .humidity(humidity)
@@ -132,6 +132,25 @@ public class WeatherApiEntityMapper {
     } catch (NumberFormatException e) {
       log.debug("Failed to parse double from '{}': {}", val, e.getMessage());
       return 0.0;
+    }
+  }
+
+  // TMN/TMX를 위한 null 가능한 parseDouble 메서드
+  private Double parseDoubleOrNull(String val) {
+    if (val == null || val.isBlank()) {
+      return null;
+    }
+    try {
+      String cleanValue = val.trim().replaceAll("[^0-9.-]", "");
+      if (cleanValue.isEmpty()) {
+        return null;
+      }
+      Double result = Double.parseDouble(cleanValue);
+      // 0.0이면 null로 캘소 (의미없는 데이터)
+      return result == 0.0 ? null : result;
+    } catch (NumberFormatException e) {
+      log.debug("Failed to parse double from '{}': {}", val, e.getMessage());
+      return null;
     }
   }
 

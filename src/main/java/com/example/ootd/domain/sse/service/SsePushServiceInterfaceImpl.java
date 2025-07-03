@@ -1,5 +1,6 @@
 package com.example.ootd.domain.sse.service;
 
+import com.example.ootd.domain.notification.dto.NotificationBulk;
 import com.example.ootd.domain.notification.dto.NotificationDto;
 import com.example.ootd.domain.notification.entity.Notification;
 import com.example.ootd.domain.notification.mapper.NotificationMapper;
@@ -59,8 +60,7 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
 
     list.forEach(em -> sendNotification(em, dto));
   }
-
-
+  
   //알림보내기
   private void sendNotification(SseEmitter emitter, NotificationDto dto) {
     try {

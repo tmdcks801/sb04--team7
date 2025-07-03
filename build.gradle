@@ -32,12 +32,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.kafka:spring-kafka'
     implementation("org.springframework.boot:spring-boot-starter-websocket")
-<<<<<<< HEAD
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-=======
-    // Batch
     implementation 'org.springframework.boot:spring-boot-starter-batch'
->>>>>>> 991153ebce43a8a6d803acb93835f19ed19c1f48
 
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'

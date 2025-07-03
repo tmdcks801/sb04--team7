@@ -1,11 +1,13 @@
 package com.example.ootd.domain.notification.service.impli;
 
+import com.example.ootd.domain.notification.dto.NotificationBulk;
 import com.example.ootd.domain.notification.dto.NotificationDto;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.dto.NotificationRequest;
 import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
 import com.example.ootd.domain.notification.service.inter.NotificationServiceInterface;
 import com.example.ootd.domain.user.repository.UserRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,9 @@ public class NotificationPublisherImpl implements NotificationPublisherInterface
   private final ApplicationEventPublisher eventPublisher;
   private final NotificationServiceInterface notificationService;
   private final UserRepository userRepository;
+  private final int pageSize = 600; //bulk안에 들어갈 수
+  private final int batchSize = 600;
+
 
   @Override
   @Async("notificationExecutor")
@@ -68,16 +73,23 @@ public class NotificationPublisherImpl implements NotificationPublisherInterface
   )
   @Transactional
   public void publishToMany(NotificationEvent event, List<UUID> userIdList) {
-    userIdList.stream()
-        .map(id -> new NotificationRequest(
-            id,
-            event.title(),
-            event.content(),
-            event.level()))
-        .forEach(req -> {
-          NotificationDto dto = notificationService.createNotification(req);
-          eventPublisher.publishEvent(dto);
-        });
+
+    List<NotificationDto> batch = new ArrayList<>(batchSize);
+    for (UUID id : userIdList) {
+      NotificationRequest req = new NotificationRequest(
+          id, event.title(),
+          event.content(), event.level());
+
+      NotificationDto dto = notificationService.createNotification(req);
+      batch.add(dto);
+      if (batch.size() == batchSize) {//batchSize 차면 이벤트 발행
+        eventPublisher.publishEvent(new NotificationBulk(List.copyOf(batch)));
+        batch = new ArrayList<>(batchSize);
+      }
+    }
+    if (!batch.isEmpty()) {// 안차고 남은거 이벤트 발행
+      eventPublisher.publishEvent(new NotificationBulk(List.copyOf(batch)));
+    }
   }
 
   @Override
@@ -90,16 +102,16 @@ public class NotificationPublisherImpl implements NotificationPublisherInterface
           multiplier = 2.0,
           maxDelay = 10_000)
   )
-  @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
+  @Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)//한번에 한개만 되도록하기?
   public void publishToAll(NotificationEvent event) {
 
     UUID cursor = null;
     boolean hasMore;
 
     do {
-      Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Direction.ASC, "id"));
-      List<UUID> userIds = userRepository.findIdsAfter(cursor, pageable);
-
+      Pageable pageable = PageRequest.of(0, pageSize, Sort.by(Sort.Direction.ASC, "id"));
+      List<UUID> userIds = userRepository.findIdsAfter(cursor, pageable);//db oom해결?
+      List<NotificationDto> dtoList = new ArrayList<>();
       userIds.forEach(id -> {
         NotificationRequest req = new NotificationRequest(
             id,
@@ -108,18 +120,20 @@ public class NotificationPublisherImpl implements NotificationPublisherInterface
             event.level()
         );
         try {
+          //dto 만들고 한번에 모아서 bulk로 보내기
           NotificationDto dto = notificationService.createNotification(req);
-          eventPublisher.publishEvent(dto);
+          dtoList.add(dto);
         } catch (Exception e) {
-          log.error("Notification publish failed for userId={}", id, e);
+          log.error("모두에게 알림 발송중 오류", e);
         }
       });
-
+      //한번에 최대 pageSize 까지 알람 보내기
+      eventPublisher.publishEvent(new NotificationBulk(dtoList));
       if (userIds.isEmpty()) {
         hasMore = false;
       } else {
         cursor = userIds.get(userIds.size() - 1);
-        hasMore = userIds.size() == 1000;
+        hasMore = userIds.size() == pageSize;
       }
     } while (hasMore);
   }

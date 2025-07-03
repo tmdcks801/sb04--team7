@@ -1,8 +1,10 @@
 package com.example.ootd.domain.notification.handler;
 
+import com.example.ootd.domain.notification.dto.NotificationBulk;
 import com.example.ootd.domain.notification.dto.NotificationDto;
 import com.example.ootd.domain.notification.dto.NotificationRequest;
 import com.example.ootd.domain.sse.service.SsePushServiceInterface;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -34,6 +36,15 @@ public class NotificationEventHandler {
   public void handle(NotificationDto dto) {
     ssePushServiceInterface.push(dto);
   }
+
+
+  //벌크로 한번에 보내면 내부적으로 하나씩 처리
+  @Async("sseExecutor")
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+  public void handle(NotificationBulk bulk) {
+    bulk.notificationDtoList().forEach(ssePushServiceInterface::push);//리스트에 있는거 하나씩
+  }
+
 
   @Recover
   public void recoverHandler(Exception ex, NotificationDto dto) {

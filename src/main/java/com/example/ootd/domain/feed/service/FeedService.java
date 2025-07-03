@@ -5,7 +5,7 @@ import com.example.ootd.domain.feed.dto.data.FeedDto;
 import com.example.ootd.domain.feed.dto.request.CommentCreateRequest;
 import com.example.ootd.domain.feed.dto.request.FeedCommentSearchRequest;
 import com.example.ootd.domain.feed.dto.request.FeedCreateRequest;
-import com.example.ootd.domain.feed.dto.request.FeedSearchRequest;
+import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.dto.request.FeedUpdateRequest;
 import com.example.ootd.dto.PageResponse;
 import java.util.UUID;
@@ -25,7 +25,7 @@ public interface FeedService {
   FeedDto updateFeed(UUID feedId, FeedUpdateRequest request);
 
   // 피드 목록 조회
-  PageResponse<FeedDto> findFeedByCondition(FeedSearchRequest request);
+  PageResponse<FeedDto> findFeedByCondition(FeedSearchCondition request);
 
   // 피드 삭제
   void deleteFeed(UUID feedId);

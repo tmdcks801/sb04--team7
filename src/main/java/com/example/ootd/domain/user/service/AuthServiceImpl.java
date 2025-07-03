@@ -114,6 +114,7 @@ public class AuthServiceImpl implements AuthService{
 
     user.resetPassword(encodedTmpPwd);
     userRepository.save(user);
+    jwtSessionRepository.deleteAllByUser_Id(user.getId());
 
     sendEmailAsync(user.getEmail(), tmpPwd)
         .whenComplete((result, ex) -> {

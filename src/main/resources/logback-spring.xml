@@ -1,7 +1,5 @@
 <configuration>
-  <springProperty scope="context" name="mongo.host" source="mongo.host"/>
-  <springProperty scope="context" name="mongo.port" source="mongo.port"/>
-  <springProperty scope="context" name="mongo.db" source="mongo.db"/>
+  <springProperty scope="context" name="mongo.uri" source="mongo.uri"/>
   <springProperty scope="context" name="mongo.collection" source="mongo.collection"/>
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
@@ -11,13 +9,10 @@
   </appender>
 
   <appender name="MONGODB" class="com.example.ootd.config.LogConfig">
-    <host>${mongo.host}</host>
-    <port>${mongo.port}</port>
-    <dbName>${mongo.db}</dbName>
+    <uri>${mongo.uri}</uri>
     <collectionName>${mongo.collection}</collectionName>
   </appender>
 
-  <!-- info 이상의 로그 -->
   <logger name="com.example" level="INFO" additivity="true">
     <appender-ref ref="MONGODB"/>
   </logger>
@@ -29,4 +24,6 @@
   <root level="INFO">
     <appender-ref ref="CONSOLE"/>
   </root>
+
+
 </configuration>

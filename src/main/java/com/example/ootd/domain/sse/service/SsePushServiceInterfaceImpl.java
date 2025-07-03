@@ -12,10 +12,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
 
@@ -30,37 +33,50 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
 
   @Override //로그인할때 쓰면 될거같음, 타이밍 맞는지는 합치고 생각
   public SseEmitter subscribe(UUID receiverId, UUID lastEventId) {
-    SseEmitter emitter = new SseEmitter(TIMEOUT);
-    addEmitter(receiverId, emitter);
+    try {
+      SseEmitter emitter = new SseEmitter(TIMEOUT);
+      addEmitter(receiverId, emitter);
 
-    emitter.onCompletion(() -> removeEmitter(receiverId, emitter));
-    emitter.onTimeout(() -> removeEmitter(receiverId, emitter));
-    emitter.onError(e -> removeEmitter(receiverId, emitter));
+      emitter.onCompletion(() -> removeEmitter(receiverId, emitter));
+      emitter.onTimeout(() -> removeEmitter(receiverId, emitter));
+      emitter.onError(e -> removeEmitter(receiverId, emitter));
 
-    if (lastEventId != null) {
-      List<Notification> missed = repository
-          .findAllByReceiverIdAndIdGreaterThanOrderByCreatedAtAsc(receiverId, lastEventId);
+      if (lastEventId != null) {
+        repository.findById(lastEventId)
+            .map(Notification::getCreatedAt)
+            .ifPresent(lastCreatedAt -> {
+              List<Notification> missed =
+                  repository.findAllByReceiverIdAndCreatedAtGreaterThanOrderByCreatedAtAsc(
+                      receiverId, lastCreatedAt);
 
-      missed.stream()
-          .map(notificationMapper::toDto)
-          .forEach(dto -> sendNotification(emitter, dto));
+              missed.stream()
+                  .map(notificationMapper::toDto)
+                  .forEach(dto -> sendNotification(emitter, dto));
+            });
+      }
+
+      sendHeartbeat(emitter);
+      return emitter;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
-
-    sendHeartbeat(emitter);
-
-    return emitter;
   }
 
   @Override
+  @Async("ssePushExecutor")
   public void push(NotificationDto dto) { //핸들러에서 씀, 구독중인거한테 알림보내기
-    CopyOnWriteArrayList<SseEmitter> list = emitters.get(dto.receiverId());
-    if (list == null) {
-      return;
-    }
+    try {
+      CopyOnWriteArrayList<SseEmitter> list = emitters.get(dto.receiverId());
+      if (list == null) {
+        return;
+      }
 
-    list.forEach(em -> sendNotification(em, dto));
+      list.forEach(em -> sendNotification(em, dto));
+    } catch (Exception e) {
+      log.warn("알림 푸시 오류", e); //실패하면 재시도 안하고 로그만
+    }
   }
-  
+
   //알림보내기
   private void sendNotification(SseEmitter emitter, NotificationDto dto) {
     try {
@@ -85,15 +101,23 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
 
   //더하기
   private void addEmitter(UUID receiverId, SseEmitter emitter) {
-    emitters.computeIfAbsent(receiverId, k -> new CopyOnWriteArrayList<>())
-        .add(emitter);
+    try {
+      emitters.computeIfAbsent(receiverId, k -> new CopyOnWriteArrayList<>())
+          .add(emitter);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   //뺴기
   private void removeEmitter(UUID receiverId, SseEmitter emitter) {
-    CopyOnWriteArrayList<SseEmitter> list = emitters.get(receiverId);
-    if (list != null) {
-      list.remove(emitter);
+    try {
+      CopyOnWriteArrayList<SseEmitter> list = emitters.get(receiverId);
+      if (list != null) {
+        list.remove(emitter);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 }

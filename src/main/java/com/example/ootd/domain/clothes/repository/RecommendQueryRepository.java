@@ -1,6 +1,5 @@
 package com.example.ootd.domain.clothes.repository;
 
-import com.example.ootd.domain.clothes.dto.data.SuitableClothes;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.Query;
@@ -100,6 +99,6 @@ public interface RecommendQueryRepository {
         WHERE c.user_id = :userId
         ORDER BY score DESC
         """, nativeQuery = true)
-    List<SuitableClothes> findClothesRecommendations(@Param("weatherId") UUID weatherId,
+    List<Object[]> findClothesRecommendations(@Param("weatherId") UUID weatherId,
                                               @Param("userId") UUID userId);
 }

@@ -5,7 +5,7 @@ import com.example.ootd.domain.clothes.repository.ClothesRepository;
 import com.example.ootd.domain.feed.dto.data.CommentDto;
 import com.example.ootd.domain.feed.dto.data.FeedDto;
 import com.example.ootd.domain.feed.dto.request.CommentCreateRequest;
-import com.example.ootd.domain.feed.dto.request.FeedCommentSearchRequest;
+import com.example.ootd.domain.feed.dto.request.FeedCommentSearchCondition;
 import com.example.ootd.domain.feed.dto.request.FeedCreateRequest;
 import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.dto.request.FeedUpdateRequest;
@@ -74,7 +74,7 @@ public class FeedServiceImpl implements FeedService {
   }
 
   @Override
-  public FeedDto updateFeed(UUID feedId, FeedUpdateRequest request) {
+  public FeedDto updateFeed(UUID feedId, FeedUpdateRequest request, UUID userId) {
 
     log.debug("피드 수정 시작: feedId={}, {}", feedId, request);
 
@@ -91,7 +91,7 @@ public class FeedServiceImpl implements FeedService {
 
   @Override
   @Transactional(readOnly = true)
-  public PageResponse<FeedDto> findFeedByCondition(FeedSearchCondition condition) {
+  public PageResponse<FeedDto> findFeedByCondition(FeedSearchCondition condition, UUID userId) {
 
     return null;
   }
@@ -108,12 +108,12 @@ public class FeedServiceImpl implements FeedService {
   }
 
   @Override
-  public FeedDto likeFeed(UUID feedId) {
+  public FeedDto likeFeed(UUID feedId, UUID userId) {
     return null;
   }
 
   @Override
-  public FeedDto deleteFeedLike(UUID feedId) {
+  public FeedDto deleteFeedLike(UUID feedId, UUID userId) {
     return null;
   }
 
@@ -124,7 +124,7 @@ public class FeedServiceImpl implements FeedService {
 
   @Override
   @Transactional(readOnly = true)
-  public PageResponse<CommentDto> findCommentByCondition(FeedCommentSearchRequest request) {
+  public PageResponse<CommentDto> findCommentByCondition(FeedCommentSearchCondition request) {
     return null;
   }
 

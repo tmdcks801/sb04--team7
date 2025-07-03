@@ -1,5 +1,7 @@
 package com.example.ootd.domain.feed.dto.request;
 
+import com.example.ootd.domain.weather.entity.PrecipitationType;
+import com.example.ootd.domain.weather.entity.SkyStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
@@ -14,8 +16,8 @@ public record FeedSearchCondition(
     @NotBlank(message = "정렬 방향은 필수입니다.")
     String sortDirection,
     String keywordLike,
-    String skyStatusEqual,
-    String precipitationTypeEqual,
+    SkyStatus skyStatusEqual,
+    PrecipitationType precipitationTypeEqual,
     UUID authorIdEqual
 ) {
 

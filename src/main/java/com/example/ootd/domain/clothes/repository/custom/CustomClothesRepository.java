@@ -1,4 +1,4 @@
-package com.example.ootd.domain.clothes.repository;
+package com.example.ootd.domain.clothes.repository.custom;
 
 import com.example.ootd.domain.clothes.dto.request.ClothesSearchCondition;
 import com.example.ootd.domain.clothes.entity.Clothes;

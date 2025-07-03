@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface WeatherRepository extends JpaRepository<Weather, UUID> {
 
+  // 지역별 최신 예보 데이터 중 자정 시간대 데이터 조회
   @Query("""
       SELECT w FROM Weather w
       WHERE w.regionName = :regionName
@@ -20,11 +21,31 @@ public interface WeatherRepository extends JpaRepository<Weather, UUID> {
           FROM Weather w2
           WHERE w2.regionName = :regionName
         )
-        AND FUNCTION('HOUR', w.forecastAt) = 0
-        AND FUNCTION('MINUTE', w.forecastAt) = 0
+        AND EXTRACT(HOUR FROM w.forecastAt) = 0
+        AND EXTRACT(MINUTE FROM w.forecastAt) = 0
       """)
   List<Weather> findMidnightWeathersByRegionNameWithLatestForecastedAt(String regionName);
 
+  // 지역별 최신 예보 데이터 조회 (오늘/내일/모래 날씨용)
+  @Query("""
+      SELECT w FROM Weather w
+      WHERE w.regionName = :regionName
+        AND w.forecastedAt = (
+          SELECT MAX(w2.forecastedAt)
+          FROM Weather w2
+          WHERE w2.regionName = :regionName
+        )
+        AND w.forecastAt >= :startDate
+        AND w.forecastAt <= :endDate
+      ORDER BY w.forecastAt ASC
+      """)
+  List<Weather> findWeathersByRegionAndDateRange(
+      @Param("regionName") String regionName,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate
+  );
+
+  // 특정 지역과 예보 시간으로 조회
   Optional<Weather> findByRegionNameAndForecastAt(String regionName, LocalDateTime forecastAt);
 
   @Modifying

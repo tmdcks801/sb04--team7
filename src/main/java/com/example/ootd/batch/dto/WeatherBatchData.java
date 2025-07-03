@@ -38,5 +38,6 @@ public class WeatherBatchData implements java.io.Serializable {
   }
 
   public void setPreviousItems(List<Item> previousItems) {
+    this.previousItems = previousItems;
   }
 }

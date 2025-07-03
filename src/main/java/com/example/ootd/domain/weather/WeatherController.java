@@ -4,6 +4,8 @@ import com.example.ootd.domain.location.dto.WeatherAPILocation;
 import com.example.ootd.domain.location.service.LocationService;
 import com.example.ootd.domain.weather.dto.WeatherDto;
 import com.example.ootd.domain.weather.service.WeatherService;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +22,11 @@ public class WeatherController {
   private final WeatherService weatherService;
 
   @GetMapping
-  public ResponseEntity<WeatherDto> getWeatherByLocation(
+  public ResponseEntity<List<WeatherDto>> getWeatherByLocation(
       @RequestParam(required = true) double longitude,
       @RequestParam(required = true) double latitude) {
     return ResponseEntity.ok(
-        weatherService.getWeather(latitude, longitude));
+        weatherService.getThreeDayWeather(latitude, longitude, LocalDateTime.now()));
   }
 
   @GetMapping("/location")

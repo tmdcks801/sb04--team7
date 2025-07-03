@@ -45,12 +45,19 @@ public class LocationServiceImpl implements LocationService {
 
     List<String> locationNames = documents.stream()
         .findFirst()
-        .map(doc -> List.of(
-            doc.region_1depth_name(),
-            doc.region_2depth_name(),
-            doc.region_3depth_name(),
-            doc.region_4depth_name()
-        ))
+        .map(doc -> {
+          List<String> names = List.of(
+              doc.region_1depth_name(),
+              doc.region_2depth_name(),
+              doc.region_3depth_name(),
+              doc.region_4depth_name()
+          );
+          log.info("Kakao API에서 파싱된 지역명: {}", names);
+          log.info("1단계: '{}', 2단계: '{}', 3단계: '{}', 4단계: '{}'", 
+              doc.region_1depth_name(), doc.region_2depth_name(), 
+              doc.region_3depth_name(), doc.region_4depth_name());
+          return names;
+        })
         .orElse(List.of("알 수 없음"));
 
     // DB에 저장

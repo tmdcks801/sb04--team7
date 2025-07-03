@@ -68,12 +68,23 @@ public class WeatherReader implements ItemReader<WeatherBatchData> {
         log.info("[Partition {}] Fetching weather data for region: {} (nx: {}, ny: {})",
             partitionId, region.getRegionName(), region.getNx(), region.getNy());
 
-        List<WeatherApiResponse.Item> items = weatherApiClient.getVillageForecast(
+        // 1차 API 호출: 현재 예보 데이터
+        List<WeatherApiResponse.Item> currentItems = weatherApiClient.getVillageForecast(
             region.getNx(), region.getNy(), numOfRows
         );
 
-        // 시간별로 그룹화
-        Map<String, List<WeatherApiResponse.Item>> groupedByTime = items.stream()
+        // 2차 API 호출: 전날 + TMN/TMX 데이터 (어제 02:00 기준 48시간)
+        List<WeatherApiResponse.Item> previousItems = weatherApiClient.getTemperatureMinMax(
+            region.getNx(), region.getNy()
+        );
+
+        // API 호출 제한을 위한 대기
+        if (apiDelayMs > 0) {
+          Thread.sleep(apiDelayMs);
+        }
+
+        // 현재 예보 데이터를 시간별로 그룹화
+        Map<String, List<WeatherApiResponse.Item>> groupedByTime = currentItems.stream()
             .collect(Collectors.groupingBy(item ->
                 item.fcstDate() + item.fcstTime()
             ));
@@ -82,14 +93,13 @@ public class WeatherReader implements ItemReader<WeatherBatchData> {
         groupedByTime.forEach((timeKey, timeItems) -> {
           WeatherBatchData weatherData = new WeatherBatchData();
           weatherData.setRegionName(region.getRegionName());
+          weatherData.setNx(region.getNx());
+          weatherData.setNy(region.getNy());
           weatherData.setItems(timeItems);
+          // 전날 비교용 데이터와 TMN/TMX 데이터 추가
+          weatherData.setPreviousItems(previousItems);
           allWeatherData.add(weatherData);
         });
-
-        // API 호출 제한을 위한 대기
-        if (apiDelayMs > 0) {
-          Thread.sleep(apiDelayMs);
-        }
 
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();

@@ -36,14 +36,33 @@ public class WeatherApiClient {
     // 현재 시각 기준으로 가장 최근 발표 시각 계산
     BaseDateTime baseDateTime = calculateBaseDateTime(now);
 
+    return callWeatherApi(nx, ny, numOfRows, baseDateTime.date(), baseDateTime.time());
+  }
+
+  //TMN/TMX 가져오는 메서드어제 02:00 기준으로 48시간 데이터를 가져와서 오늘 날짜의 TMN/TMX를 찾음
+  public List<WeatherApiResponse.Item> getTemperatureMinMax(int nx, int ny) {
+    LocalDate yesterday = LocalDate.now().minusDays(1);
+    String baseDate = yesterday.format(DateTimeFormatter.BASIC_ISO_DATE);
+    String baseTime = "0200";
+    int numOfRows = 600; // 48시간 데이터
+
+    log.debug("TMN/TMX 데이터 요청 - baseDate: {}, baseTime: {}, numOfRows: {}",
+        baseDate, baseTime, numOfRows);
+
+    return callWeatherApi(nx, ny, numOfRows, baseDate, baseTime);
+  }
+
+  // 공통 날씨 API 호출 메서드
+  private List<WeatherApiResponse.Item> callWeatherApi(int nx, int ny, int numOfRows,
+      String baseDate, String baseTime) {
     String fullUrl = UriComponentsBuilder
         .fromHttpUrl(FULL_BASE_URL)
         .queryParam("serviceKey", weatherApiKey)
         .queryParam("numOfRows", numOfRows)
         .queryParam("pageNo", 1)
         .queryParam("dataType", "JSON")
-        .queryParam("base_date", baseDateTime.date())
-        .queryParam("base_time", baseDateTime.time())
+        .queryParam("base_date", baseDate)
+        .queryParam("base_time", baseTime)
         .queryParam("nx", nx)
         .queryParam("ny", ny)
         .build(false)
@@ -73,10 +92,13 @@ public class WeatherApiClient {
         throw new RuntimeException("날씨 API 오류: " + response.response().header().resultMsg());
       }
 
-      return response.response().body().items().item();
+      List<WeatherApiResponse.Item> items = response.response().body().items().item();
+      log.debug("API 응답 데이터 개수: {}", items != null ? items.size() : 0);
+
+      return items;
 
     } catch (Exception e) {
-      log.error("날씨 API 호출 실패", e);
+      log.error("날씨 API 호출 실패 - baseDate: {}, baseTime: {}", baseDate, baseTime, e);
       throw new RuntimeException("날씨 정보를 가져올 수 없습니다.", e);
     }
   }

@@ -3,8 +3,12 @@ package com.example.ootd.domain.feed.mapper;
 import com.example.ootd.domain.clothes.mapper.OotdMapper;
 import com.example.ootd.domain.feed.dto.data.FeedDto;
 import com.example.ootd.domain.feed.entity.Feed;
+import com.example.ootd.domain.feed.entity.FeedLike;
 import com.example.ootd.domain.user.mapper.UserMapper;
 import com.example.ootd.domain.weather.mapper.WeatherSummaryMapper;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -17,4 +21,10 @@ public interface FeedMapper {
   @Mapping(target = "ootds", source = "feed.feedClothes")
   @Mapping(target = "likedByMe", source = "likedByMe")
   FeedDto toDto(Feed feed, boolean likedByMe);
+
+  default List<FeedDto> toDto(List<Feed> feeds, Map<UUID, FeedLike> likedByMeMap) {
+    return feeds.stream()
+        .map(feed -> toDto(feed, likedByMeMap.containsKey(feed.getId())))
+        .toList();
+  }
 }

@@ -1,18 +1,18 @@
-package com.example.ootd.domain.clothes.repository.impl;
+package com.example.ootd.domain.clothes.repository.custom.impl;
 
 import com.example.ootd.domain.clothes.dto.request.ClothesAttributeSearchCondition;
 import com.example.ootd.domain.clothes.entity.Attribute;
 import com.example.ootd.domain.clothes.entity.QAttribute;
-import com.example.ootd.domain.clothes.repository.CustomAttributeRepository;
+import com.example.ootd.domain.clothes.repository.custom.CustomAttributeRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 @Repository
 @RequiredArgsConstructor
@@ -61,7 +61,7 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
   // 속성명, 속성 내용 검색
   private BooleanExpression getWhere(String keywordLike) {
 
-    if (StringUtils.isNullOrEmpty(keywordLike)) {
+    if (StringUtils.hasText(keywordLike)) {
       return null;
     }
 
@@ -77,7 +77,7 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
 
     boolean isDesc = "DESCENDING".equalsIgnoreCase(condition.sortDirection());
 
-    if (!StringUtils.isNullOrEmpty(condition.cursor())) {
+    if (!StringUtils.hasText(condition.cursor())) {
       switch (condition.sortBy()) {
         case "name":
           String cursorName = condition.cursor();
@@ -137,7 +137,7 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
           return qAttribute.createdAt.asc();
         }
       default:
-        return qAttribute.name.asc(); // 기본적으로 속성명 오름차순으로 정렬되도록 함
+        return qAttribute.name.asc(); // 기본 정렬: 속성명 오름차순
     }
   }
 }

@@ -21,7 +21,6 @@ public class RecommendController {
 
   @GetMapping
   public ResponseEntity<RecommendationDto> recommend(@RequestParam("weatherId") UUID weatherId) {
-    log.info("옷 추천 요청: weatherId={}", weatherId);
     RecommendationDto recommendation = recommendService.recommend(weatherId);
     log.debug("옷 추천 완료: {}", recommendation);
     return ResponseEntity.ok(recommendation);

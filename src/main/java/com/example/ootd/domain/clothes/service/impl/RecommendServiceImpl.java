@@ -84,7 +84,7 @@ public class RecommendServiceImpl implements RecommendService {
       addBestClothes(recommendedClothes, clothesByType, ClothesType.ETC);
     }
     
-    log.info("추천 완료: {}개 의상 선택됨", recommendedClothes.size());
+    log.debug("추천 완료: {}개 의상 선택됨", recommendedClothes.size());
     
     return RecommendationDto.builder()
         .weatherId(weatherId)

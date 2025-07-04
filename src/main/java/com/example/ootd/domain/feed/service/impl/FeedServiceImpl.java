@@ -35,7 +35,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -223,8 +222,7 @@ public class FeedServiceImpl implements FeedService {
 
     log.debug("피드 댓글 목록 조회 시작: {}", condition);
 
-    List<FeedComment> comments = feedCommentRepository.findByCondition(feedId, condition.cursor(),
-        condition.idAfter(), PageRequest.ofSize(condition.limit()));
+    List<FeedComment> comments = feedCommentRepository.findByCondition(condition);
     List<CommentDto> commentDtos = commentMapper.toDto(comments);
 
     boolean hasNext = (comments.size() > condition.limit());

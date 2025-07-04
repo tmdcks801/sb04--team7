@@ -152,7 +152,7 @@ public class FeedController {
   @GetMapping(path = "/{feedId}/comments")
   public ResponseEntity<PageResponse<CommentDto>> findComment(
       @PathVariable UUID feedId,
-      @RequestBody FeedCommentSearchCondition condition
+      @ModelAttribute FeedCommentSearchCondition condition
   ) {
 
     log.info("피드 댓글 목록 조회 요청: feedId={}, request={}", feedId, condition);

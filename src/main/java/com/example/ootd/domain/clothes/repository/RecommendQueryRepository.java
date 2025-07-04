@@ -14,9 +14,10 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
   /**
    * 옷 추천 쿼리
    * 1. SELECT
-   *  clothes -> id, name, type, image_id
+   *  clothes -> id, name, type, image_url
    *  weather -> temperature_current, precipitation_amount, humidity_current, wind_speed
    *  user -> temperature_sensitivity
+   *  clothes_attributes -> thickness
    * 2. CASE
    * 점수 계산
    * 3. FROM
@@ -46,12 +47,13 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
             c.id, 
             c.name, 
             c.type, 
-            c.image_id,
+            i.url as image_url,
             w.temperature_current, 
             w.precipitation_amount, 
             w.humidity_current, 
             w.wind_speed,
             u.temperature_sensitivity,
+            ca.value as thickness,
 
             -- 점수 계산
             CASE
@@ -94,6 +96,7 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
         END AS score
             
         FROM clothes c
+        LEFT JOIN images i ON c.image_id = i.id
         JOIN weather w ON w.id = :weatherId
         JOIN users u ON u.id = :userId
         LEFT JOIN clothes_attributes ca ON c.id = ca.clothes_id

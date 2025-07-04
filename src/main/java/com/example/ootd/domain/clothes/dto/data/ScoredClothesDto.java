@@ -12,12 +12,13 @@ public record ScoredClothesDto(
     UUID id,
     String name,
     ClothesType type,
-    UUID imageId,
+    String imageUrl,
     Double temperatureCurrent,
     Double precipitationAmount,
     Double humidityCurrent,
     Double windSpeed,
     Integer temperatureSensitivity,
+    String thickness,
     Integer score
 ) {
 }

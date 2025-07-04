@@ -1,6 +1,7 @@
 package com.example.ootd.domain.clothes.service.impl;
 
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
+import com.example.ootd.domain.clothes.dto.data.ClothesAttributeWithDefDto;
 import com.example.ootd.domain.clothes.dto.data.RecommendationDto;
 import com.example.ootd.domain.clothes.dto.data.ScoredClothesDto;
 import com.example.ootd.domain.clothes.entity.ClothesType;
@@ -101,13 +102,14 @@ public class RecommendServiceImpl implements RecommendService {
         .id(UUID.fromString(row[0].toString()))
         .name(row[1].toString())
         .type(ClothesType.valueOf(row[2].toString()))
-        .imageId(row[3] != null ? UUID.fromString(row[3].toString()) : null)
+        .imageUrl(row[3] != null ? row[3].toString() : null)
         .temperatureCurrent(((Number) row[4]).doubleValue())
         .precipitationAmount(((Number) row[5]).doubleValue())
         .humidityCurrent(((Number) row[6]).doubleValue())
         .windSpeed(((Number) row[7]).doubleValue())
         .temperatureSensitivity(((Number) row[8]).intValue())
-        .score(((Number) row[9]).intValue())
+        .thickness(row[9] != null ? row[9].toString() : null)
+        .score(((Number) row[10]).intValue())
         .build();
   }
   
@@ -131,8 +133,8 @@ public class RecommendServiceImpl implements RecommendService {
         .id(scoredClothes.id())
         .name(scoredClothes.name())
         .type(scoredClothes.type())
-        .imageUrl("") // TODO: 이미지 URL은 추후 추가
-        .attributes(List.of()) // TODO: 의상 속성은 추후 추가
+        .imageUrl(scoredClothes.imageUrl())
+        .attributes(createThicknessAttribute(scoredClothes.thickness()))
         .build();
   }
   
@@ -162,6 +164,22 @@ public class RecommendServiceImpl implements RecommendService {
     return feltTemperature >= 20.0;
   }
 
+  /**
+   * 두께감 속성 생성
+   */
+  private List<ClothesAttributeWithDefDto> createThicknessAttribute(String thickness) {
+    if (thickness == null || thickness.trim().isEmpty()) {
+      return List.of();
+    }
+    
+    return List.of(
+        ClothesAttributeWithDefDto.builder()
+            .definitionName("두께감")
+            .value(thickness)
+            .build()
+    );
+  }
+  
   /**
    * 현재 인증된 사용자 ID 조회
    */

@@ -1,4 +1,4 @@
-package com.example.ootd.domain.feed.repository;
+package com.example.ootd.domain.feed.repository.custom;
 
 import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.entity.Feed;

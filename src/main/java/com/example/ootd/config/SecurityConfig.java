@@ -19,6 +19,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
@@ -59,15 +60,16 @@ public class SecurityConfig {
         )
         .csrf(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth    .requestMatchers(
-            "/",
-                "/assets/**",
-                "/static/**",
-                "/favicon.ico",
-                "/closet-hanger-logo.png",
-                "/index.html",
-                "/vite.svg"
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth.requestMatchers(
+                    "/",
+                    "/assets/**",
+                    "/static/**",
+                    "/favicon.ico",
+                    "/closet-hanger-logo.png",
+                    "/index.html",
+                    "/vite.svg"
                 ).permitAll()
             .requestMatchers("/oauth2/callback").permitAll()
             .requestMatchers("/api/auth/me").permitAll()
@@ -94,7 +96,8 @@ public class SecurityConfig {
   }
 
   @Bean
-  public AuthenticationManager authManager(HttpSecurity http, PasswordEncoder passwordEncoder, CustomUserDetailsService userDetailsService)
+  public AuthenticationManager authManager(HttpSecurity http, PasswordEncoder passwordEncoder,
+      CustomUserDetailsService userDetailsService)
       throws Exception {
 
     AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
@@ -106,21 +109,23 @@ public class SecurityConfig {
   }
 
   @Bean
-  public SessionRegistry sessionRegistry(){
+  public SessionRegistry sessionRegistry() {
     return new SessionRegistryImpl();
   }
 
   @Bean
-  public PasswordEncoder passwordEncoder(){
+  public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
   @Bean
-  public RoleHierarchy roleHierarchy(){
+  public RoleHierarchy roleHierarchy() {
     String hierarchyString = """
         ROLE_ADMIN > ROLE_USER
         """;
 
     return RoleHierarchyImpl.fromHierarchy(hierarchyString);
   }
+
+
 }

@@ -13,6 +13,5 @@ public class FeedNotFoundException extends FeedException {
     FeedNotFoundException exception = new FeedNotFoundException();
     exception.addDetail("feedId", feedId);
     return exception;
-    
   }
 }

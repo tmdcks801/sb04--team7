@@ -62,9 +62,6 @@ public class Feed {
   @Column
   private int commentCount; // 댓글 수
 
-  @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<FeedComment> comments = new ArrayList<>(); // 댓글 목록
-
   @Column(nullable = false, updatable = false)
   @CreatedDate
   private LocalDateTime createdAt;  // 생성일
@@ -91,5 +88,21 @@ public class Feed {
       return;
     }
     this.content = content;
+  }
+
+  public void increaseLikeCount() {
+    this.likeCount++;
+  }
+
+  public void decreaseLikeCount() {
+    this.likeCount--;
+  }
+
+  public void increaseCommentCount() {
+    this.commentCount++;
+  }
+
+  public void decreaseCommentCount() {
+    this.commentCount--;
   }
 }

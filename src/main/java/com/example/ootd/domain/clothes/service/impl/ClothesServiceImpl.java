@@ -179,6 +179,7 @@ public class ClothesServiceImpl implements ClothesService {
   }
 
   // 속성 수정
+  // TODO: 리팩토링 필요
   private void updateAttribute(Clothes clothes, List<ClothesAttributeDto> dtoList) {
     if (dtoList == null || dtoList.isEmpty()) {
       return;
@@ -203,12 +204,12 @@ public class ClothesServiceImpl implements ClothesService {
         ));
   }
 
-  // 삭제 대상 속성 제거
+  // 삭제 대상 속성 제거, 같은 id의 속성이 이미 존재할 경우
   private void removeDeletedAttributes(Set<ClothesAttribute> currentAttributes, Set<UUID> incomingIds) {
     currentAttributes.removeIf(attr -> !incomingIds.contains(attr.getAttribute().getId()));
   }
 
-  // 기존 속성 업데이트
+  // 기존 속성 업데이트, 요청한 속성이 이미 존재하고 value만 달라지는 경우 value만 수정
   private void updateExistingAttributes(Set<ClothesAttribute> currentAttributes,
       Map<UUID, String> incomingAttrMap,
       Map<UUID, Attribute> attributeMap) {
@@ -224,7 +225,7 @@ public class ClothesServiceImpl implements ClothesService {
     }
   }
 
-  // 새로운 속성 추가
+  // 새로운 속성 추가, 없는 속성일 경우 새로운 속성을 더함
   private void addNewAttributes(Clothes clothes,
       Set<ClothesAttribute> currentAttributes,
       Map<UUID, String> incomingAttrMap,
@@ -245,7 +246,7 @@ public class ClothesServiceImpl implements ClothesService {
     }
   }
 
-  // 값 유효성 검증
+  // 값 유효성 검증, 속성 details에 요청한 value가 있는지 검증
   private void validateAttributeValue(Attribute attribute, String value) {
     if (attribute == null) {
       throw AttributeNotFoundException.withId(null);
@@ -254,6 +255,7 @@ public class ClothesServiceImpl implements ClothesService {
       throw AttributeDetailNotFoundException.withValue(value);
     }
   }
+
 
   private void setClothesAttributes(Clothes clothes, List<ClothesAttributeDto> attributeDtoList) {
 

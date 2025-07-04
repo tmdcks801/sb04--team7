@@ -42,7 +42,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
   }
 
   @Override
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public NotificationDto createNotification(NotificationRequest req) {
     try {
       Notification notification = Notification.createNotification(req);

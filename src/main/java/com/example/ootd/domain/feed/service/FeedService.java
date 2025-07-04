@@ -3,7 +3,7 @@ package com.example.ootd.domain.feed.service;
 import com.example.ootd.domain.feed.dto.data.CommentDto;
 import com.example.ootd.domain.feed.dto.data.FeedDto;
 import com.example.ootd.domain.feed.dto.request.CommentCreateRequest;
-import com.example.ootd.domain.feed.dto.request.FeedCommentSearchRequest;
+import com.example.ootd.domain.feed.dto.request.FeedCommentSearchCondition;
 import com.example.ootd.domain.feed.dto.request.FeedCreateRequest;
 import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.dto.request.FeedUpdateRequest;
@@ -22,10 +22,10 @@ public interface FeedService {
   FeedDto createFeed(FeedCreateRequest request);
 
   // 피드 수정
-  FeedDto updateFeed(UUID feedId, FeedUpdateRequest request);
+  FeedDto updateFeed(UUID feedId, FeedUpdateRequest request, UUID userId);
 
   // 피드 목록 조회
-  PageResponse<FeedDto> findFeedByCondition(FeedSearchCondition request);
+  PageResponse<FeedDto> findFeedByCondition(FeedSearchCondition request, UUID userId);
 
   // 피드 삭제
   void deleteFeed(UUID feedId);
@@ -34,17 +34,18 @@ public interface FeedService {
    * 피드 좋아요
    */
   // 피드 좋아요
-  FeedDto likeFeed(UUID feedId);
+  FeedDto likeFeed(UUID feedId, UUID userId);
 
   // 피드 좋아요 취소
-  FeedDto deleteFeedLike(UUID feedId);
+  FeedDto deleteFeedLike(UUID feedId, UUID userId);
 
   /**
    * 피드 댓글
    */
   // 피드 댓글 등록
-  CommentDto createComment(UUID feedId, CommentCreateRequest request);
+  CommentDto createComment(CommentCreateRequest request);
 
   // 피드 댓글 조회
-  PageResponse<CommentDto> findCommentByCondition(FeedCommentSearchRequest request);
+  PageResponse<CommentDto> findCommentByCondition(UUID feedId,
+      FeedCommentSearchCondition condition);
 }

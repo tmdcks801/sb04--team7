@@ -1,18 +1,18 @@
-package com.example.ootd.domain.clothes.repository.impl;
+package com.example.ootd.domain.clothes.repository.custom.impl;
 
 import com.example.ootd.domain.clothes.dto.request.ClothesSearchCondition;
 import com.example.ootd.domain.clothes.entity.Clothes;
 import com.example.ootd.domain.clothes.entity.ClothesType;
 import com.example.ootd.domain.clothes.entity.QClothes;
-import com.example.ootd.domain.clothes.repository.CustomClothesRepository;
+import com.example.ootd.domain.clothes.repository.custom.CustomClothesRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 @Repository
 @RequiredArgsConstructor
@@ -74,7 +74,7 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
   // 커서(cursor) 세팅
   private BooleanExpression cursorCondition(String cursor, UUID idAfter) {
 
-    if (StringUtils.isNullOrEmpty(cursor)) {
+    if (StringUtils.hasText(cursor)) {
 
       return afterCondition(idAfter);
     }

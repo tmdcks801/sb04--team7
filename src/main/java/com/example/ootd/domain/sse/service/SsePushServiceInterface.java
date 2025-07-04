@@ -1,6 +1,8 @@
 package com.example.ootd.domain.sse.service;
 
+import com.example.ootd.domain.notification.dto.NotificationBulk;
 import com.example.ootd.domain.notification.dto.NotificationDto;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 

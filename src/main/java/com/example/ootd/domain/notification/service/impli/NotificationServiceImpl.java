@@ -3,18 +3,25 @@ package com.example.ootd.domain.notification.service.impli;
 import com.example.ootd.domain.notification.dto.NotificationDto;
 import com.example.ootd.domain.notification.dto.NotificationRequest;
 import com.example.ootd.domain.notification.entity.Notification;
+import com.example.ootd.domain.notification.enums.NotificationLevel;
 import com.example.ootd.domain.notification.mapper.NotificationMapper;
 import com.example.ootd.domain.notification.repository.NotificationRepository;
 import com.example.ootd.domain.notification.service.inter.NotificationServiceInterface;
 import com.example.ootd.dto.PageResponse;
+import com.mongodb.bulk.BulkWriteError;
 import com.mongodb.bulk.BulkWriteResult;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.BulkOperationException;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
@@ -142,31 +149,60 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)//벌크용 몽고db에 한번에 쓰기
   public List<NotificationDto> createAll(List<NotificationRequest> reqs) {
 
-    BulkOperations ops =
-        mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Notification.class); // 병렬 작업
+    List<NotificationRequest> waitList = new ArrayList<>(reqs);//넣는거 대기
+    List<NotificationDto> success = new ArrayList<>();//넣는데 성공한거, 반환용
 
-    reqs.forEach(r -> ops.insert(toDocument(r)));
-    try {
-      BulkWriteResult result = ops.execute(); //큐에있는 작업 실행
-    } catch (RuntimeException e) {
-      log.error("벌크 저장중 오류", e);
-      throw e;
+    for (int attempt = 0; attempt < 2 && !waitList.isEmpty(); attempt++) {//2번시도
+
+      BulkOperations ops = mongoTemplate
+          .bulkOps(BulkOperations.BulkMode.UNORDERED, Notification.class);
+
+      waitList.forEach(r -> ops.insert(toDocument(r)));
+
+      try {
+        BulkWriteResult wr = ops.execute();
+        success.addAll(
+            waitList.stream()
+                .map(this::toDocument)
+                .map(notificationMapper::toDto)
+                .toList()
+        );
+        waitList.clear();//다 넣고, 비우기
+
+      } catch (BulkOperationException ex) { //실패한거 있으면 해당 인덱스 반환
+        /* ---------- ② 실패 건만 추려 재시도 ---------- */
+        log.warn("알림 벌크 저장 작업 1차 실패");
+        Set<Integer> failedIdx = new HashSet<>();
+
+        for (BulkWriteError error : ex.getErrors()) {   // BulkWriteError 목록 순회
+          failedIdx.add(error.getIndex());        // 실패한 문서의 index 추출
+        }
+
+        List<NotificationRequest> nextRound = new ArrayList<>();//실패란거 처리
+        for (int i = 0; i < waitList.size(); i++) {
+          NotificationRequest req = waitList.get(i);
+          if (req.level() == NotificationLevel.INFO) {//info레벨 이상
+            log.error("알림생성 실패", req);
+          } else {
+            if (failedIdx.contains(i)) {
+              nextRound.add(req);                    // 재시도 대상
+            } else {                                 // 성공 건
+              success.add(notificationMapper.toDto(toDocument(req)));
+            }
+          }
+        }
+        waitList = nextRound;                         // 재시도 목록 또 넣기
+      }
     }
-
-    return reqs.stream()
-        .map(this::toDocument)
-        .map(notificationMapper::toDto)
-        .toList();
+    if (!waitList.isEmpty()) {
+      log.error("Bulk 작업 2회 시도 후에도 {}건 실패 ", waitList.size());
+      throw new IllegalStateException("알림 벌크 저장 실패");
+    }
+    return success;
   }
 
   private Notification toDocument(NotificationRequest req) {
     return Notification.createNotification(req);
   }
 
-  private void executeBulkInsert(List<NotificationRequest> batch) {
-    BulkOperations ops =
-        mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Notification.class);
-    batch.forEach(r -> ops.insert(toDocument(r)));
-    ops.execute();
-  }
 }

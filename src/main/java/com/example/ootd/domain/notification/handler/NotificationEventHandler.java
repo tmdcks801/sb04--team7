@@ -28,6 +28,7 @@ public class NotificationEventHandler {
 //  )   //push가 비동기라 애는 비동기 필요없음
   public void handle(NotificationDto dto) {
     try {
+      log.debug("알림발행");
       ssePushServiceInterface.push(dto);
     } catch (Exception ex) {
       log.error("알람 푸시 실패", dto, ex);

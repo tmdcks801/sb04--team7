@@ -41,10 +41,9 @@ public class MessageController {
 
   @GetMapping
   public ResponseEntity<PageResponse> getMessage(
-      @AuthenticationPrincipal Jwt jwt, //이거 보니 토큰에 있어서 따로 떼오는거로 나중에 변경
+      @AuthenticationPrincipal(expression = "user.id") UUID ownerId,
       @Valid @ModelAttribute MessagePaginationRequest request) {
-
-    UUID ownerId = UUID.fromString(jwt.getClaimAsString("userId"));
+    
     MessagePaginationDto messagePaginationDto = new MessagePaginationDto//아이디 넣어야해서 냅둠
         (ownerId, request.userId(), request.cursor(),
             request.isAfter(), request.limit());

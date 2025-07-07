@@ -27,6 +27,19 @@ public enum ErrorCode {
   FOLLOW_USER_NOT_FOUND("사용자를 찾을 수 없습니다."),
   FOLLOW_NOT_FOUND("팔로우를 찾을 수 없습니다."),
 
+  // Weather 에러
+  WEATHER_NOT_FOUND("날씨 정보를 찾을 수 없습니다."),
+  WEATHER_API_ERROR("날씨 API 호출에 실패했습니다."),
+  WEATHER_DATA_INSUFFICIENT("충분한 날씨 데이터가 없습니다."),
+  INVALID_COORDINATES("잘못된 좌표값입니다."),
+  WEATHER_REGION_NOT_FOUND("해당 지역의 날씨 정보를 찾을 수 없습니다."),
+
+  // Location 에러
+  LOCATION_NOT_FOUND("위치 정보를 찾을 수 없습니다."),
+  LOCATION_API_ERROR("위치 API 호출에 실패했습니다."),
+  LOCATION_COORDINATE_OUT_OF_RANGE("한국 외 지역 좌표입니다."),
+  LOCATION_REGION_INFO_INSUFFICIENT("지역 정보가 부족합니다."),
+
   // Server 에러
   INTERNAL_SERVER_ERROR("서버 내부 오류가 발생했습니다."),
   INVALID_REQUEST("잘못된 요청입니다."),

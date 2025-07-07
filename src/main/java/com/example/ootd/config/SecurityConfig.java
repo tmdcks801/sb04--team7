@@ -70,7 +70,8 @@ public class SecurityConfig {
                     "/closet-hanger-logo.png",
                     "/index.html",
                     "/vite.svg",
-                    "/actuator/health"
+                    "/actuator/health",
+                    "/actuator/prometheus"
                 ).permitAll()
             .requestMatchers("/oauth2/callback").permitAll()
             .requestMatchers("/api/auth/me").permitAll()

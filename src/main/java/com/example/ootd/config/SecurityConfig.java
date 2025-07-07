@@ -69,7 +69,8 @@ public class SecurityConfig {
                     "/favicon.ico",
                     "/closet-hanger-logo.png",
                     "/index.html",
-                    "/vite.svg"
+                    "/vite.svg",
+                    "/actuator/health"
                 ).permitAll()
             .requestMatchers("/oauth2/callback").permitAll()
             .requestMatchers("/api/auth/me").permitAll()

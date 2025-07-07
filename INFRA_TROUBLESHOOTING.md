@@ -176,6 +176,33 @@ aws elbv2 modify-target-group \
 2. 새 Docker 이미지 빌드 및 ECR 푸시
 3. ECS 서비스 강제 재배포로 HTTP 401 오류 해결
 
+### HTTP 503 Service Unavailable 오류 (2025-07-07 10:30)
+**문제**: HTTP 401 오류 해결 후 503 Service Unavailable 오류 발생
+**원인**: Spring Boot Actuator 헬스체크에서 Redis와 Mail 컴포넌트 실패
+```
+2025-07-07T01:36:41.639Z WARN --- [boundedElastic-2] o.s.b.a.d.r.RedisReactiveHealthIndicator : Redis health check failed
+2025-07-07T01:36:41.638Z WARN --- [http-nio-8080-exec-5] o.s.b.actuate.mail.MailHealthIndicator : Mail health check failed
+```
+
+**해결**: application-prod.yml에 Redis와 Mail 헬스체크 비활성화
+```yaml
+management:
+  health:
+    redis:
+      enabled: false
+    mail:
+      enabled: false
+```
+
+### 배포에 성공했지만, 10분마다 헬스체크 오류나서 재배포되는 상황
+**문제**: 배포에는 성공했지만 헬스체크 오류가 나서 10분마다 서버가 재배포.
+**원인**: Dockerfile에 헬스체크 경로를 /actuator/health로 변경.
+
+
+**교훈**: 
+- Spring Boot Actuator는 모든 컴포넌트 헬스체크가 성공해야 전체 health 엔드포인트가 성공
+- 프로덕션 환경에서 사용하지 않는 컴포넌트의 헬스체크는 비활성화 필요
+
 ## 기록
 
 ### 1. 보안 모범 사례

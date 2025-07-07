@@ -47,7 +47,7 @@ EXPOSE 8080
 
 # 헬스체크 추가 - 단순히 포트 연결 확인
 HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=5 \
-  CMD curl -f http://localhost:8080/ || exit 1
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # 애플리케이션 실행
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

@@ -1,5 +1,6 @@
 package com.example.ootd.security.oauth2;
 
+import com.example.ootd.domain.sse.service.SsePushServiceInterface;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.security.jwt.JwtService;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Member;
 import java.net.URLEncoder;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -20,7 +22,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+//여기에 하나
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -31,7 +35,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
   @Value("${app.jwt.refresh-token-expiration}")
   private long refreshTokenExpiration;
   private final ObjectMapper mapper = new ObjectMapper();
-  @Override
+  private final SsePushServiceInterface ssePushServiceInterface;
+
+  @Override//여기sse구독
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException, ServletException {
     SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -41,6 +47,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+
+    //여기서 sse로직
+    UUID lastEventId = null;
+    String lastIdHeader = request.getHeader("Last-Event-ID");
+    if (StringUtils.hasText(lastIdHeader)) {
+      try {
+        lastEventId = UUID.fromString(lastIdHeader);
+      } catch (IllegalArgumentException ignore) {//일단 무시
+      }
+    }
+    ssePushServiceInterface.subscribe(user.getId(), lastEventId);//여기까지
 
     JwtSession session = jwtService.generateJwtSession(user);
 

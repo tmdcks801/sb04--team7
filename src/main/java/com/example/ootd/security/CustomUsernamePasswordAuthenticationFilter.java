@@ -1,5 +1,6 @@
 package com.example.ootd.security;
 
+import com.example.ootd.domain.sse.service.SsePushServiceInterface;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.dto.LoginDto;
 import com.example.ootd.exception.ErrorCode;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +31,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
@@ -37,16 +40,14 @@ public class CustomUsernamePasswordAuthenticationFilter extends
     UsernamePasswordAuthenticationFilter {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private final SessionRegistry sessionRegistry;
+  private final SsePushServiceInterface ssePushServiceInterface;
   private final JwtService jwtService;
   private final AuthenticationManager manager;
   @Value("${app.jwt.refresh-token-expiration}")
   private long refreshTokenExpiration;
 
   /**
-   * 필터 초기 설정
-   * - Authentication Manager 설정
-   * - 경로 설정
+   * 필터 초기 설정 - Authentication Manager 설정 - 경로 설정
    */
   @PostConstruct
   public void init() {
@@ -57,30 +58,27 @@ public class CustomUsernamePasswordAuthenticationFilter extends
   }
 
   /**
-   * 로그인 요청시 호출됨
-   * - 요청 body 에서 이메일, 비밀번호 파싱 후 AuthenticationManager 에 위임
+   * 로그인 요청시 호출됨 - 요청 body 에서 이메일, 비밀번호 파싱 후 AuthenticationManager 에 위임
    */
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request,
       HttpServletResponse response) throws AuthenticationException {
     try {
       LoginDto loginDto = objectMapper.readValue(request.getInputStream(), LoginDto.class);
-      UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password());
+      UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+          loginDto.email(), loginDto.password());
 
       return this.getAuthenticationManager().authenticate(token);
-    } catch (IOException e){
+    } catch (IOException e) {
       log.info("AUTHENTICATION FAILED : reason={}", e.getMessage());
       throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
     }
   }
 
   /**
-   * 로그인 성공시 호출
-   * - SecurityContext에 인증 객체 저장
-   * - 세션에도 사용자 정보 저장
-   * - JwtSession 생성
+   * 로그인 성공시 호출 - SecurityContext에 인증 객체 저장 - 세션에도 사용자 정보 저장 - JwtSession 생성
    */
-  @Override
+  @Override//여기sse구독
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       FilterChain chain, Authentication authResult) throws IOException, ServletException {
     SecurityContextHolder.getContext().setAuthentication(authResult);
@@ -95,6 +93,17 @@ public class CustomUsernamePasswordAuthenticationFilter extends
 //      sessionObj.setAttribute("userId", user.getId());
 //      sessionRegistry.registerNewSession(sessionObj.getId(), authResult.getPrincipal());
 //    }
+
+    //여기서 sse로직
+    UUID lastEventId = null;
+    String lastIdHeader = request.getHeader("Last-Event-ID");
+    if (StringUtils.hasText(lastIdHeader)) {
+      try {
+        lastEventId = UUID.fromString(lastIdHeader);
+      } catch (IllegalArgumentException ignore) {//일단 무시
+      }
+    }
+    ssePushServiceInterface.subscribe(user.getId(), lastEventId);//여기까지
 
     JwtSession session = jwtService.generateJwtSession(user);
 

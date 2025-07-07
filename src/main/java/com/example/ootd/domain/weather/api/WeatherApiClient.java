@@ -1,5 +1,6 @@
 package com.example.ootd.domain.weather.api;
 
+import com.example.ootd.exception.weather.WeatherApiException;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -84,12 +85,17 @@ public class WeatherApiClient {
       if (response == null || response.response() == null
           || response.response().body() == null
           || response.response().body().items() == null) {
-        throw new RuntimeException("날씨 API 응답이 비어있습니다.");
+        WeatherApiException exception = new WeatherApiException((Throwable) null);
+        exception.addDetail("responseEmpty", true);
+        throw exception;
       }
 
       // API 응답 상태 확인
       if (!"00".equals(response.response().header().resultCode())) {
-        throw new RuntimeException("날씨 API 오류: " + response.response().header().resultMsg());
+        WeatherApiException exception = new WeatherApiException((Throwable) null);
+        exception.addDetail("resultCode", response.response().header().resultCode());
+        exception.addDetail("resultMsg", response.response().header().resultMsg());
+        throw exception;
       }
 
       List<WeatherApiResponse.Item> items = response.response().body().items().item();
@@ -97,9 +103,12 @@ public class WeatherApiClient {
 
       return items;
 
+    } catch (WeatherApiException e) {
+      // 이미 처리된 날씨 API 예외는 그대로 전파
+      throw e;
     } catch (Exception e) {
       log.error("날씨 API 호출 실패 - baseDate: {}, baseTime: {}", baseDate, baseTime, e);
-      throw new RuntimeException("날씨 정보를 가져올 수 없습니다.", e);
+      throw new WeatherApiException(e);
     }
   }
 

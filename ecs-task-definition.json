@@ -113,7 +113,7 @@
             "healthCheck": {
                 "command": [
                     "CMD-SHELL",
-                    "curl -f http://localhost:8080/health/check || exit 1"
+                    "curl -f http://localhost:8080/actuator/health || exit 1"
                 ],
                 "interval": 60,
                 "timeout": 30,

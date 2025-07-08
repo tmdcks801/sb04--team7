@@ -28,7 +28,6 @@ public class RecommendServiceImpl implements RecommendService {
   private final RecommendQueryRepository recommendQueryRepository;
 
   @Override
-  @Transactional(readOnly = true)
   public RecommendationDto recommend(UUID weatherId) {
     log.info("옷 추천 요청: weatherId={}", weatherId);
     

@@ -118,7 +118,7 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
         END +
         -- 비오는 날 보정 (모든 온도 구간 적용)
         CASE
-               WHEN w.precipitaion_amount > 0 THEN
+               WHEN w.precipitation_amount > 0 THEN
                CASE
                     WHEN color_ca_value IN ('블랙', '네이비', '다크 그레이') THEN 3
                     WHEN color_ca_value IN ('화이트', '베이지', '크림', '그레이') THEN -3

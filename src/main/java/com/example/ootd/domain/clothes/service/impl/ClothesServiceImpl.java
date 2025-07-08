@@ -56,8 +56,6 @@ public class ClothesServiceImpl implements ClothesService {
     User user = userRepository.findById(userId)
         .orElseThrow(); // TODO: null 처리
 
-    // TODO: 중복 속성 저장 예외처리
-    
     // Clothes 등록
     Clothes clothes = Clothes.builder()
         .image(clothesImage)

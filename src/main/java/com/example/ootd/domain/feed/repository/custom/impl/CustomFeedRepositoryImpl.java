@@ -4,6 +4,8 @@ import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.entity.Feed;
 import com.example.ootd.domain.feed.entity.QFeed;
 import com.example.ootd.domain.feed.repository.custom.CustomFeedRepository;
+import com.example.ootd.domain.user.QUser;
+import com.example.ootd.domain.weather.entity.QWeather;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -21,6 +23,8 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
   private final QFeed qFeed = QFeed.feed;
+  private final QUser qUser = QUser.user;
+  private final QWeather qWeather = QWeather.weather;
 
   @Override
   public List<Feed> findByCondition(FeedSearchCondition condition) {
@@ -28,6 +32,8 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
     return jpaQueryFactory
         .select(qFeed).distinct()
         .from(qFeed)
+        .leftJoin(qFeed.user, qUser).fetchJoin()
+        .leftJoin(qFeed.weather, qWeather).fetchJoin()
         .where(
             getWhere(condition),
             cursorCondition(condition)

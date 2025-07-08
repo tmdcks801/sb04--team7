@@ -5,6 +5,7 @@ import com.example.ootd.domain.clothes.entity.Clothes;
 import com.example.ootd.domain.clothes.entity.ClothesType;
 import com.example.ootd.domain.clothes.entity.QClothes;
 import com.example.ootd.domain.clothes.repository.custom.CustomClothesRepository;
+import com.example.ootd.domain.image.entity.QImage;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
@@ -20,12 +21,14 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
   private final QClothes qClothes = QClothes.clothes;
+  private final QImage qImage = QImage.image;
 
   @Override
   public List<Clothes> findByCondition(ClothesSearchCondition condition) {
     return jpaQueryFactory
         .select(qClothes).distinct()
         .from(qClothes)
+        .leftJoin(qClothes.image, qImage).fetchJoin()
         .where(
             getWhere(condition.typeEqual(), condition.ownerId()),
             cursorCondition(condition.cursor(), condition.idAfter())

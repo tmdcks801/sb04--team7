@@ -45,11 +45,11 @@ public class S3ServiceImplTest {
   }
 
   @Nested
-  @DisplayName("save() - S3에 사진 저장")
+  @DisplayName("save() - 사진 저장")
   class saveTest {
 
     @Test
-    @DisplayName("저장 성공")
+    @DisplayName("S3에 사진 저장 성공")
     void saveSuccess() throws IOException {
 
       // given
@@ -74,7 +74,7 @@ public class S3ServiceImplTest {
     }
 
     @Test
-    @DisplayName("저장 실패")
+    @DisplayName("S3에 사진 저장 실패")
     void saveFailed() throws IOException {
 
       // given
@@ -92,11 +92,11 @@ public class S3ServiceImplTest {
   }
 
   @Nested
-  @DisplayName("delete() - S3에 사진 삭제")
+  @DisplayName("delete() - 사진 삭제")
   class deleteTest {
 
     @Test
-    @DisplayName("삭제 성공")
+    @DisplayName("S3에 저장된 사진 삭제 성공")
     void deleteSuccess() {
 
       // given
@@ -114,7 +114,7 @@ public class S3ServiceImplTest {
     }
 
     @Test
-    @DisplayName("삭제 실패")
+    @DisplayName("S3에 저장된 사진 삭제 실패")
     void deleteFailed() {
 
       // given

@@ -82,6 +82,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       FilterChain chain, Authentication authResult) throws IOException, ServletException {
     SecurityContextHolder.getContext().setAuthentication(authResult);
+
     new HttpSessionSecurityContextRepository().saveContext(SecurityContextHolder.getContext(),
         request, response);
 

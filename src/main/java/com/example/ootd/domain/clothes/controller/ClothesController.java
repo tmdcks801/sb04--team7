@@ -52,7 +52,7 @@ public class ClothesController {
   public ResponseEntity<ClothesDto> create(
       @RequestPart("request") ClothesCreateRequest request,
       @RequestPart(value = "image", required = false) MultipartFile image,
-      @AuthenticationPrincipal PrincipalUser principalUser) { // Jwt 사용 시 null이 넘어와서 임시방편으로 CustomUserDetails 사용
+      @AuthenticationPrincipal PrincipalUser principalUser) {
 
     UUID userId = principalUser.getUser().getId();
 

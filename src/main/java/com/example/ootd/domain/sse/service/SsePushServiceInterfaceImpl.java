@@ -5,6 +5,12 @@ import com.example.ootd.domain.notification.dto.NotificationDto;
 import com.example.ootd.domain.notification.entity.Notification;
 import com.example.ootd.domain.notification.mapper.NotificationMapper;
 import com.example.ootd.domain.notification.repository.NotificationRepository;
+import com.example.ootd.exception.ErrorCode;
+import com.example.ootd.exception.SSE.SseException;
+import com.example.ootd.exception.SSE.SsePushException;
+import com.example.ootd.exception.SSE.SseRemoveError;
+import com.example.ootd.exception.SSE.SseSendException;
+import com.example.ootd.exception.SSE.SseSubscribeException;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
@@ -59,8 +65,8 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
 
       sendHeartbeat(emitter);
       return emitter;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    } catch (SseSubscribeException e) {
+      throw new SseSubscribeException(ErrorCode.FAIL_SSE_SUBSCRIBE, e);
     }
   }
 
@@ -75,8 +81,8 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
       }
 
       list.forEach(em -> sendNotification(em, dto));
-    } catch (Exception e) {
-      log.warn("알림 푸시 오류", e); //실패하면 재시도 안하고 로그만
+    } catch (SsePushException e) {
+      throw new SsePushException(ErrorCode.FAIL_SSE_PUSH, e);
     }
   }
 
@@ -88,7 +94,7 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
           .name("notification")
           .data(dto));
     } catch (IOException ex) {
-      emitter.completeWithError(ex);
+      throw new SseException(ErrorCode.FAIL_SSE_PUSH, ex);
     }
   }
 
@@ -99,6 +105,7 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
           .name("heartbeat")
           .data("ping"));
     } catch (IOException ignore) {
+      throw new SseException(ErrorCode.FAIL_SSE_HEARTBEAT, ignore);
     }
   }
 
@@ -107,8 +114,8 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
     try {
       emitters.computeIfAbsent(receiverId, k -> new CopyOnWriteArrayList<>())
           .add(emitter);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    } catch (SseSendException e) {
+      throw new SseSendException(ErrorCode.FAIL_SSE_ADD);
     }
   }
 
@@ -119,8 +126,8 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
       if (list != null) {
         list.remove(emitter);
       }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    } catch (SseRemoveError e) {
+      throw new SseRemoveError(ErrorCode.FAIL_SSE_REMOVE, e);
     }
   }
 }

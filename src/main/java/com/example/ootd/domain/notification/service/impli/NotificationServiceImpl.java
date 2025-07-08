@@ -8,6 +8,11 @@ import com.example.ootd.domain.notification.mapper.NotificationMapper;
 import com.example.ootd.domain.notification.repository.NotificationRepository;
 import com.example.ootd.domain.notification.service.inter.NotificationServiceInterface;
 import com.example.ootd.dto.PageResponse;
+import com.example.ootd.exception.ErrorCode;
+import com.example.ootd.exception.notification.FailReadNotification;
+import com.example.ootd.exception.notification.NotFoundNotification;
+import com.example.ootd.exception.notification.NotificationCreateError;
+import com.example.ootd.exception.notification.NotificationPaginationError;
 import com.mongodb.bulk.BulkWriteError;
 import com.mongodb.bulk.BulkWriteResult;
 import java.time.Instant;
@@ -59,10 +64,10 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
       Notification notification = Notification.createNotification(req);
       repository.save(notification);
       return notificationMapper.toDto(notification);
-    } catch (Exception e) {
+    } catch (NotificationCreateError e) {
       log.warn("알림 오류", e);
-      throw new IllegalArgumentException(
-          "알림 오류", e);
+      throw new NotificationCreateError(
+          ErrorCode.FAIL_CREATE_NOTIFICATION);
     }
 
   }
@@ -75,10 +80,10 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
           new IllegalArgumentException("Notification 없음 " + notificationId));
       ;
       return notificationMapper.toDto(notification);
-    } catch (IllegalArgumentException e) {
+    } catch (NotificationCreateError e) {
       log.warn("알림 오류", e);
-      throw new IllegalArgumentException(
-          "알림 오류", e);
+      throw new NotificationCreateError(
+          ErrorCode.FAIL_CREATE_NOTIFICATION);
     }
   }
 
@@ -125,10 +130,10 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
           "DESC",
           totalCount
       );
-    } catch (Exception e) {
+    } catch (NotificationPaginationError e) {
       log.warn("알림 오류", e);
-      throw new IllegalArgumentException(
-          "알림 오류", e);
+      throw new NotificationPaginationError(
+          ErrorCode.FAIL_GET_PAGINATION_NOTIFICATION, e);
     }
   }
 
@@ -137,12 +142,12 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
   public void readNotification(UUID notificationId) {
     try {
       Notification notification = repository.findById(notificationId).orElseThrow(() ->
-          new IllegalArgumentException("Notification 없음 " + notificationId));
+          new NotFoundNotification(ErrorCode.NOT_FOUND_NOTIFICATION));
       repository.delete(notification);
-    } catch (IllegalArgumentException e) {
+    } catch (FailReadNotification e) {
       log.warn("알림 오류", e);
-      throw new IllegalArgumentException(
-          "알림 오류", e);
+      throw new FailReadNotification(
+          ErrorCode.FAIL_READ_NOTIFICATION, e);
     }
   }
 
@@ -170,8 +175,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
         waitList.clear();//다 넣고, 비우기
 
       } catch (BulkOperationException ex) { //실패한거 있으면 해당 인덱스 반환
-        /* ---------- ② 실패 건만 추려 재시도 ---------- */
-        log.warn("알림 벌크 저장 작업 1차 실패");
+        log.warn("알림 벌크 작업 1차 실패");
         Set<Integer> failedIdx = new HashSet<>();
 
         for (BulkWriteError error : ex.getErrors()) {   // BulkWriteError 목록 순회
@@ -196,7 +200,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
     }
     if (!waitList.isEmpty()) {
       log.error("Bulk 작업 2회 시도 후에도 {}건 실패 ", waitList.size());
-      throw new IllegalStateException("알림 벌크 저장 실패");
+      throw new NotificationCreateError(ErrorCode.FAIL_CREATE_BULK_NOTIFICATION);
     }
     return success;
   }

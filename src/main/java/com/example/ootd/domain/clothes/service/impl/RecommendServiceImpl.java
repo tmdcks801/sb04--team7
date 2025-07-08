@@ -8,6 +8,7 @@ import com.example.ootd.domain.clothes.entity.ClothesType;
 import com.example.ootd.domain.clothes.repository.RecommendQueryRepository;
 import com.example.ootd.domain.clothes.service.RecommendService;
 import com.example.ootd.security.CustomUserDetails;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecommendServiceImpl implements RecommendService {
 
   private final RecommendQueryRepository recommendQueryRepository;
+  private final CacheManager cacheManager;
 
+  @Cacheable(value = "recommendations",
+              key = "#userId + '-' + T(java.time.LocalDateTime).now()")
   @Override
   public RecommendationDto recommend(UUID weatherId) {
     log.info("옷 추천 요청: weatherId={}", weatherId);
@@ -91,6 +98,18 @@ public class RecommendServiceImpl implements RecommendService {
         .userId(userId)
         .clothes(recommendedClothes)
         .build();
+  }
+
+  // 사용자 옷 추가/삭제시 호출
+  public void evictUserCache(UUID userId) {
+    Cache cache = cacheManager.getCache("recommendations");
+
+    // 오늘과 어제 캐시 모두 삭제
+    LocalDate today = LocalDate.now();
+    LocalDate yesterday = today.minusDays(1);
+
+    cache.evict(userId + "_" + today);
+    cache.evict(userId + "_" + yesterday);
   }
 
   /**

@@ -46,7 +46,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 
 
-  private enum OAuth2Provider {
+  enum OAuth2Provider {
     GOOGLE {
       @Override
       User getOrCreateUser(Map<String, Object> attributes, UserRepository userRepository){
@@ -65,7 +65,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
       User getOrCreateUser(Map<String, Object> attributes, UserRepository userRepository){
 
         String providerId = attributes.get("id").toString();
-        String nickname = (String) ((LinkedHashMap<?, ?>) attributes.get("properties")).get("nickname");
+        String nickname = (String) ((Map<?, ?>)  attributes.get("properties")).get("nickname");
         String email = nickname + "@kakao.com";
 
         return userRepository.findByEmail(email).orElseGet(() -> {

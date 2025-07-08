@@ -8,6 +8,9 @@ import com.example.ootd.domain.message.repository.MessageRepository;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.dto.PageResponse;
+import com.example.ootd.exception.ErrorCode;
+import com.example.ootd.exception.message.FailGetMessageExecption;
+import com.example.ootd.exception.message.FailSendMessageException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -45,9 +48,9 @@ public class MessageServiceImp implements MessageServiceInterface {
       DirectMessageDto dto = messageMapper.toDto(message);
       messagingTemplate.convertAndSend("/sub/direct-messages_" + message.getDmKey(), dto);
       return dto;
-    } catch (IllegalArgumentException e) {
+    } catch (FailSendMessageException e) {
       log.error("메세지 전송중 오류");
-      throw new RuntimeException(e);
+      throw new FailSendMessageException(ErrorCode.FAIL_SEND_MESSAGE);
     }
   }
 
@@ -92,8 +95,8 @@ public class MessageServiceImp implements MessageServiceInterface {
       return new PageResponse(
           data, hasNext, nextCursor, null,
           "id", dir.name(), totalCount);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    } catch (FailGetMessageExecption e) {
+      throw new FailGetMessageExecption(ErrorCode.FAIL_GET_MESSAGE);
     }
 
   }

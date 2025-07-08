@@ -45,7 +45,26 @@ public enum ErrorCode {
   INVALID_REQUEST("잘못된 요청입니다."),
 
   // User 에러
-  USER_NOT_FOUND("사용자 이메일을 찾을 수 없습니다.");
+  USER_NOT_FOUND("사용자 이메일을 찾을 수 없습니다."),
+
+  //메세지 에러
+  FAIL_SEND_MESSAGE("메세지 전송 실패"),
+  FAIL_GET_MESSAGE("메세지 조회 실패"),
+
+  //알림 에러
+  FAIL_CREATE_NOTIFICATION("알림 생성 실패 "),
+  FAIL_CREATE_BULK_NOTIFICATION("벌크 알림 생성 실패 "),
+  NOT_FOUND_NOTIFICATION("알람 찾기 실패"),
+  FAIL_READ_NOTIFICATION("알람 읽기 실패"),
+  FAIL_GET_PAGINATION_NOTIFICATION("알람 페이지네이션 오류"),
+
+  //sse
+  FAIL_SSE_SUBSCRIBE("SSE 구독 실패"),
+  FAIL_SSE_PUSH("SSE 푸시 실패"),
+  FAIL_SSE_HEARTBEAT("SSE 연명 실패"),
+  FAIL_SSE_ADD("더하기 실패"),
+  FAIL_SSE_REMOVE("SSE 구독 취소 실패");
+
 
   private final String message;
 

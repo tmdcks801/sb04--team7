@@ -82,13 +82,16 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,loggers,caches
+        include: health,info,metrics,loggers,caches,prometheus
   endpoint:
     health:
       show-details: always
   observations:
     annotations:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 kakao:
   api:

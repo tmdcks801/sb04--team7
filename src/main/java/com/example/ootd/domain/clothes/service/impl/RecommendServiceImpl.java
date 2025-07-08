@@ -109,7 +109,8 @@ public class RecommendServiceImpl implements RecommendService {
         .windSpeed(((Number) row[7]).doubleValue())
         .temperatureSensitivity(((Number) row[8]).intValue())
         .thickness(row[9] != null ? row[9].toString() : null)
-        .score(((Number) row[10]).intValue())
+        .color(row[10] != null ? row[10].toString() : null)
+        .score(((Number) row[11]).intValue())
         .build();
   }
   

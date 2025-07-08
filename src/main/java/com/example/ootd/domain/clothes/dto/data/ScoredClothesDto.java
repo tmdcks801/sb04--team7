@@ -19,6 +19,7 @@ public record ScoredClothesDto(
     Double windSpeed,
     Integer temperatureSensitivity,
     String thickness,
+    String color,
     Integer score
 ) {
 }

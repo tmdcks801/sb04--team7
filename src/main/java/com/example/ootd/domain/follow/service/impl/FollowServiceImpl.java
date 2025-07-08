@@ -17,6 +17,9 @@ import com.example.ootd.domain.follow.entity.Follow;
 import com.example.ootd.domain.follow.mapper.FollowMapper;
 import com.example.ootd.domain.follow.repository.FollowRepository;
 import com.example.ootd.domain.follow.service.FollowService;
+import com.example.ootd.domain.notification.dto.NotificationRequest;
+import com.example.ootd.domain.notification.enums.NotificationLevel;
+import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.exception.OotdException;
@@ -36,6 +39,7 @@ public class FollowServiceImpl implements FollowService {
   private final FollowRepository followRepository;
   private final UserRepository userRepository;
   private final FollowMapper followMapper;
+  private final NotificationPublisherInterface notificationPublisher;
 
   /**
    * 팔로우 생성
@@ -67,6 +71,15 @@ public class FollowServiceImpl implements FollowService {
         .build();
 
     Follow savedFollow = followRepository.save(follow);
+
+    // 팔로우 알림 생성
+    NotificationRequest notificationRequest = new NotificationRequest(
+        followee.getId(),
+        "새로운 팔로워",
+        follower.getName() + "님이 회원님을 팔로우했습니다.",
+        NotificationLevel.INFO
+    );
+    notificationPublisher.publish(notificationRequest);
 
     return followMapper.toDto(savedFollow);
   }

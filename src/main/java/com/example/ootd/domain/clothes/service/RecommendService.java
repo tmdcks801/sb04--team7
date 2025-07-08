@@ -7,4 +7,6 @@ public interface RecommendService {
 
   // 옷 추천
   RecommendationDto recommend(UUID weatherId);
+
+  void safeEvictUserCache(UUID userId);
 }

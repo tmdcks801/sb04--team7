@@ -13,6 +13,7 @@ import com.example.ootd.domain.clothes.mapper.ClothesMapper;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
 import com.example.ootd.domain.clothes.repository.ClothesRepository;
 import com.example.ootd.domain.clothes.service.ClothesService;
+import com.example.ootd.domain.clothes.service.RecommendService;
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.image.service.ImageService;
 import com.example.ootd.domain.user.User;
@@ -45,6 +46,7 @@ public class ClothesServiceImpl implements ClothesService {
   private final UserRepository userRepository;
   private final AttributeRepository attributeRepository;
   private final ClothesMapper clothesMapper;
+  private final RecommendService recommendService;
 
   @Override
   public ClothesDto create(ClothesCreateRequest request, MultipartFile image, UUID userId) {
@@ -68,6 +70,9 @@ public class ClothesServiceImpl implements ClothesService {
 
     clothesRepository.save(clothes);
 
+    // 의상 등록시 캐시 삭제
+    recommendService.safeEvictUserCache(userId);
+
     ClothesDto response = clothesMapper.toDto(clothes);
 
     log.info("의상 등록 완료: {}", response);
@@ -86,6 +91,9 @@ public class ClothesServiceImpl implements ClothesService {
     updateType(clothes, request.type());
     updateImage(clothes, image);
     updateAttribute(clothes, request.attributes());
+
+    // 의상 정보 변경시 캐시 삭제
+    recommendService.safeEvictUserCache(clothes.getUser().getId());
 
     ClothesDto response = clothesMapper.toDto(clothes);
 
@@ -149,7 +157,13 @@ public class ClothesServiceImpl implements ClothesService {
     log.debug("의상 삭제 시작: clothesId={}", clothesId);
 
     Clothes clothes = getClothesById(clothesId);
+
+    UUID userId = clothes.getUser().getId();
+
     clothesRepository.delete(clothes);
+
+    // 의상 삭제시 캐시 삭제
+    recommendService.safeEvictUserCache(userId);
 
     log.info("의상 삭제 완료");
   }

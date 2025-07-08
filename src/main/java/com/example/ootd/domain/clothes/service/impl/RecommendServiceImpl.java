@@ -8,6 +8,7 @@ import com.example.ootd.domain.clothes.entity.ClothesType;
 import com.example.ootd.domain.clothes.repository.RecommendQueryRepository;
 import com.example.ootd.domain.clothes.service.RecommendService;
 import com.example.ootd.security.CustomUserDetails;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,9 +30,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecommendServiceImpl implements RecommendService {
 
   private final RecommendQueryRepository recommendQueryRepository;
+  private final CacheManager cacheManager;
 
+  @Cacheable(value = "recommendations",
+              key = "#userId + '-' + T(java.time.LocalDateTime).now()")
   @Override
-  @Transactional(readOnly = true)
   public RecommendationDto recommend(UUID weatherId) {
     log.info("옷 추천 요청: weatherId={}", weatherId);
     
@@ -94,6 +100,27 @@ public class RecommendServiceImpl implements RecommendService {
         .build();
   }
 
+  // 사용자 옷 추가/삭제시 호출
+  public void evictUserCache(UUID userId) {
+    Cache cache = cacheManager.getCache("recommendations");
+
+    // 오늘과 어제 캐시 모두 삭제
+    LocalDate today = LocalDate.now();
+    LocalDate yesterday = today.minusDays(1);
+
+    cache.evict(userId + "_" + today);
+    cache.evict(userId + "_" + yesterday);
+  }
+
+  @Override
+  public void safeEvictUserCache(UUID userId) {
+    try {
+      this.evictUserCache(userId);
+    } catch (Exception e) {
+      log.warn("캐시 삭제 실패 (데이터 변경은 완료됨): userId={}", userId, e);
+    }
+  }
+
   /**
    * Object[] 쿼리 결과를 ScoredClothesDto로 변환
    */
@@ -109,7 +136,8 @@ public class RecommendServiceImpl implements RecommendService {
         .windSpeed(((Number) row[7]).doubleValue())
         .temperatureSensitivity(((Number) row[8]).intValue())
         .thickness(row[9] != null ? row[9].toString() : null)
-        .score(((Number) row[10]).intValue())
+        .color(row[10] != null ? row[10].toString() : null)
+        .score(((Number) row[11]).intValue())
         .build();
   }
   

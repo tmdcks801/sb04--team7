@@ -9,7 +9,7 @@ import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.dto.request.FeedUpdateRequest;
 import com.example.ootd.domain.feed.service.FeedService;
 import com.example.ootd.dto.PageResponse;
-import com.example.ootd.security.CustomUserDetails;
+import com.example.ootd.security.PrincipalUser;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -41,10 +41,10 @@ public class FeedController {
   @GetMapping
   public ResponseEntity<PageResponse<FeedDto>> findFeed(
       @ModelAttribute @Valid FeedSearchCondition condition,
-      @AuthenticationPrincipal CustomUserDetails userDetails
+      @AuthenticationPrincipal PrincipalUser principalUser
   ) {
 
-    UUID userId = userDetails.getUser().getId();
+    UUID userId = principalUser.getUser().getId();
 
     log.info("피드 목록 조회 요청: userId={}, request={}", userId, condition);
 
@@ -89,10 +89,10 @@ public class FeedController {
   public ResponseEntity<FeedDto> updateFeed(
       @PathVariable UUID feedId,
       @RequestBody FeedUpdateRequest request,
-      @AuthenticationPrincipal CustomUserDetails userDetails
+      @AuthenticationPrincipal PrincipalUser principalUser
   ) {
 
-    UUID userId = userDetails.getUser().getId();
+    UUID userId = principalUser.getUser().getId();
 
     log.info("피드 수정 요청: feedId={}, userId={}, request={}", feedId, userId, request);
 
@@ -111,10 +111,10 @@ public class FeedController {
   @PostMapping(path = "/{feedId}/like")
   public ResponseEntity<FeedDto> createLike(
       @PathVariable UUID feedId,
-      @AuthenticationPrincipal CustomUserDetails userDetails
+      @AuthenticationPrincipal PrincipalUser principalUser
   ) {
 
-    UUID userId = userDetails.getUser().getId();
+    UUID userId = principalUser.getUser().getId();
 
     log.info("피드 좋아요 등록 요청: feedId={}, userId={}", feedId, userId);
 
@@ -130,10 +130,10 @@ public class FeedController {
   @DeleteMapping(path = "/{feedId}/like")
   public ResponseEntity<FeedDto> deleteLike(
       @PathVariable UUID feedId,
-      @AuthenticationPrincipal CustomUserDetails userDetails
+      @AuthenticationPrincipal PrincipalUser principalUser
   ) {
 
-    UUID userId = userDetails.getUser().getId();
+    UUID userId = principalUser.getUser().getId();
 
     log.info("피드 좋아요 삭제 요청: feedId={}, userId={}", feedId, userId);
 
@@ -167,11 +167,16 @@ public class FeedController {
   }
 
   @PostMapping(path = "/{feedId}/comments")
-  public ResponseEntity<CommentDto> createComment(@RequestBody CommentCreateRequest request) {
+  public ResponseEntity<CommentDto> createComment(
+      @RequestBody CommentCreateRequest request,
+      @AuthenticationPrincipal PrincipalUser principalUser) {
+
+    UUID userId = principalUser.getUser().getId();
 
     log.info("피드 댓글 등록 요청: {}", request);
 
-    CommentDto response = feedService.createComment(request);
+    CommentDto response = feedService.createComment(request, userId
+    );
 
     log.debug("피드 댓글 등록 응답: {}", response);
 

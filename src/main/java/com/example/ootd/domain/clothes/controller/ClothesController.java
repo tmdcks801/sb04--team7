@@ -6,7 +6,7 @@ import com.example.ootd.domain.clothes.dto.request.ClothesSearchCondition;
 import com.example.ootd.domain.clothes.dto.request.ClothesUpdateRequest;
 import com.example.ootd.domain.clothes.service.ClothesService;
 import com.example.ootd.dto.PageResponse;
-import com.example.ootd.security.CustomUserDetails;
+import com.example.ootd.security.PrincipalUser;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -52,9 +52,9 @@ public class ClothesController {
   public ResponseEntity<ClothesDto> create(
       @RequestPart("request") ClothesCreateRequest request,
       @RequestPart(value = "image", required = false) MultipartFile image,
-      @AuthenticationPrincipal CustomUserDetails userDetails) { // Jwt 사용 시 null이 넘어와서 임시방편으로 CustomUserDetails 사용
+      @AuthenticationPrincipal PrincipalUser principalUser) { // Jwt 사용 시 null이 넘어와서 임시방편으로 CustomUserDetails 사용
 
-    UUID userId = userDetails.getUser().getId();
+    UUID userId = principalUser.getUser().getId();
 
     log.info("의상 등록 요청: userId={}, request={}", userId, request);
 

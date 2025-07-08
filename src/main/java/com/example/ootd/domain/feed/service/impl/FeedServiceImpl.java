@@ -191,12 +191,12 @@ public class FeedServiceImpl implements FeedService {
   }
 
   @Override
-  public CommentDto createComment(CommentCreateRequest request) {
+  public CommentDto createComment(CommentCreateRequest request, UUID userId) {
 
     log.debug("피드 댓글 등록 시작: {}", request);
 
     Feed feed = getFeedById(request.feedId());
-    User user = userRepository.findById(request.authorId())
+    User user = userRepository.findById(userId)
         .orElseThrow(); // TODO: null 예외처리
 
     FeedComment comment = FeedComment.builder()

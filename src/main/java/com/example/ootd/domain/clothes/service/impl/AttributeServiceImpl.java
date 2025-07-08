@@ -75,43 +75,32 @@ public class AttributeServiceImpl implements AttributeService {
 
     List<Attribute> attributes = attributeRepository.findByCondition(condition);
 
-    // 다음 페이지 없는 경우
-    if (attributes.size() <= condition.limit()) {
-
-      PageResponse<ClothesAttributeDefDto> pageResponse = PageResponse.<ClothesAttributeDefDto>builder()
-          .data(attributeMapper.toDtoList(attributes))
-          .hasNext(false)
-          .nextCursor(null)
-          .nextIdAfter(null)
-          .sortBy(condition.sortBy())
-          .sortDirection(condition.sortDirection())
-          .totalCount(attributeRepository.countByKeyword(condition.keywordLike()))
-          .build();
-
-      log.info("의상 속성 정의 조회 완료: dataCount={}", attributes.size());
-
-      return pageResponse;
-    }
+    boolean hasNext = (attributes.size() > condition.limit());
+    String nextCursor = null;
+    UUID nextIdAfter = null;
+    long totalCount = attributeRepository.countByKeyword(condition.keywordLike());
 
     // 다음 페이지 있는 경우
-    attributes.remove(attributes.size() - 1); // 다음 페이지 확인용 마지막 요소 삭제
-    Attribute lastAttribute = attributes.get(attributes.size() - 1);  // 페이지 마지막 속성
-    String nextCursor = setNextCursor(lastAttribute, condition.sortBy());
-    UUID nextIdAfter = lastAttribute.getId();
+    if (hasNext) {
+      attributes.remove(attributes.size() - 1);   // 다음 페이지 확인용 마지막 요소 삭제
+      Attribute lastAttribute = attributes.get(attributes.size() - 1);
+      nextCursor = setNextCursor(lastAttribute, condition.sortBy());
+      nextIdAfter = lastAttribute.getId();
+    }
 
-    PageResponse<ClothesAttributeDefDto> pageResponse = PageResponse.<ClothesAttributeDefDto>builder()
+    PageResponse<ClothesAttributeDefDto> response = PageResponse.<ClothesAttributeDefDto>builder()
         .data(attributeMapper.toDtoList(attributes))
-        .hasNext(true)
+        .hasNext(hasNext)
         .nextCursor(nextCursor)
         .nextIdAfter(nextIdAfter)
         .sortBy(condition.sortBy())
         .sortDirection(condition.sortDirection())
-        .totalCount(attributeRepository.countByKeyword(condition.keywordLike()))
+        .totalCount(totalCount)
         .build();
 
     log.info("의상 속성 정의 조회 완료: dataCount={}", attributes.size());
 
-    return pageResponse;
+    return response;
   }
 
   @Override

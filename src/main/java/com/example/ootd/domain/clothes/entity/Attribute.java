@@ -79,4 +79,9 @@ public class Attribute {
   private void persistDetails() {
     this.detailsRaw = StringListConverter.serialize(details);
   }
+
+  // 속성 내용 중 vlaue가 존재할 경우 true 반환
+  public boolean isValidValue(String value) {
+    return details != null && details.contains(value);
+  }
 }

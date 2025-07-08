@@ -25,6 +25,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -59,6 +60,7 @@ public class Clothes {
   @Column(nullable = false)
   private ClothesType type;
 
+  @BatchSize(size = 100)
   @OneToMany(mappedBy = "clothes", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private Set<ClothesAttribute> clothesAttributes = new HashSet<>();
 

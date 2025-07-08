@@ -19,6 +19,10 @@ import com.example.ootd.domain.feed.repository.FeedCommentRepository;
 import com.example.ootd.domain.feed.repository.FeedLikeRepository;
 import com.example.ootd.domain.feed.repository.FeedRepository;
 import com.example.ootd.domain.feed.service.FeedService;
+import com.example.ootd.domain.follow.repository.FollowRepository;
+import com.example.ootd.domain.notification.dto.NotificationEvent;
+import com.example.ootd.domain.notification.enums.NotificationLevel;
+import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.domain.weather.entity.Weather;
@@ -50,8 +54,10 @@ public class FeedServiceImpl implements FeedService {
   private final UserRepository userRepository;
   private final WeatherRepository weatherRepository;
   private final ClothesRepository clothesRepository;
+  private final FollowRepository followRepository;
   private final FeedMapper feedMapper;
   private final CommentMapper commentMapper;
+  private final NotificationPublisherInterface notificationPublisher;
 
   @Override
   public FeedDto createFeed(FeedCreateRequest request) {
@@ -81,6 +87,14 @@ public class FeedServiceImpl implements FeedService {
     }
 
     feedRepository.save(feed);
+
+    // 팔로워에게 알림 발송
+    List<UUID> followerIds = followRepository.findFollowersByFolloweeId(request.authorId());
+    notificationPublisher.publishToMany(
+        new NotificationEvent("새 피드 알림", author.getName() + "님이 새 피드를 등록했습니다.",
+            NotificationLevel.INFO),
+        followerIds
+    );
 
     FeedDto dto = feedMapper.toDto(feed, false);
 
@@ -191,12 +205,12 @@ public class FeedServiceImpl implements FeedService {
   }
 
   @Override
-  public CommentDto createComment(CommentCreateRequest request) {
+  public CommentDto createComment(CommentCreateRequest request, UUID userId) {
 
     log.debug("피드 댓글 등록 시작: {}", request);
 
     Feed feed = getFeedById(request.feedId());
-    User user = userRepository.findById(request.authorId())
+    User user = userRepository.findById(userId)
         .orElseThrow(); // TODO: null 예외처리
 
     FeedComment comment = FeedComment.builder()

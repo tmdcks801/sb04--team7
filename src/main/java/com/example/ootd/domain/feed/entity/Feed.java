@@ -23,6 +23,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -50,6 +51,7 @@ public class Feed {
   @JoinColumn(name = "weather_id", columnDefinition = "uuid")
   private Weather weather;
 
+  @BatchSize(size = 100)
   @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<FeedClothes> feedClothes = new ArrayList<>();  // 피드에 등록된 옷(중간 테이블)
 

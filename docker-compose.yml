@@ -8,8 +8,6 @@ services:
     ports:
       - "9090:9090"
     restart: unless-stopped
-    mem_limit: 400m
-    memswap_limit: 400m
 
   grafana:
     image: grafana/grafana
@@ -23,8 +21,6 @@ services:
     depends_on:
       - prometheus
     restart: unless-stopped
-    mem_limit: 300m
-    memswap_limit: 300m
 
 volumes:
   grafana-storage:

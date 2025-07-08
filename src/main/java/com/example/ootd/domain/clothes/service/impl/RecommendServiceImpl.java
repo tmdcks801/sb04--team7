@@ -112,6 +112,15 @@ public class RecommendServiceImpl implements RecommendService {
     cache.evict(userId + "_" + yesterday);
   }
 
+  @Override
+  public void safeEvictUserCache(UUID userId) {
+    try {
+      this.evictUserCache(userId);
+    } catch (Exception e) {
+      log.warn("캐시 삭제 실패 (데이터 변경은 완료됨): userId={}", userId, e);
+    }
+  }
+
   /**
    * Object[] 쿼리 결과를 ScoredClothesDto로 변환
    */

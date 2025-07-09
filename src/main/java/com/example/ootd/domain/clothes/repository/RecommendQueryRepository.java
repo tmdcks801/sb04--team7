@@ -67,8 +67,8 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
                      ELSE 0
                  END +
                  CASE
-                     WHEN color_ca_value IN ('화이트', '베이지', '크림', '그레이') THEN 11
-                     WHEN color_ca_value IN ('블랙', '네이비', '다크 그레이') THEN 4
+                     WHEN color_ca.value IN ('화이트', '베이지', '크림', '그레이') THEN 11
+                     WHEN color_ca.value IN ('블랙', '네이비', '다크 그레이') THEN 4
                      ELSE 1
                  END
                  --- 체감 온도 + 민감 온도 >= 20도
@@ -81,8 +81,8 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
                     ELSE 0
                  END +
                  CASE
-                    WHEN color_ca_value IN ('화이트', '베이지', '크림', '그레이') THEN 12
-                    WHEN color_ca_value IN ('블랙', '네이비', '다크 그레이') THEN 8
+                    WHEN color_ca.value IN ('화이트', '베이지', '크림', '그레이') THEN 12
+                    WHEN color_ca.value IN ('블랙', '네이비', '다크 그레이') THEN 8
                     ELSE 6
                  END   
                 
@@ -96,8 +96,8 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
                     ELSE 0
                   END +
                   CASE
-                    WHEN color_ca_value IN ('블랙', '네이비', '다크 그레이') THEN 13
-                    WHEN color_ca_value IN ('화이트', '베이지', '크림', '그레이') THEN 11
+                    WHEN color_ca.value IN ('블랙', '네이비', '다크 그레이') THEN 13
+                    WHEN color_ca.value IN ('화이트', '베이지', '크림', '그레이') THEN 11
                     ELSE 8
                   END
                --- 체감 온도 + 민감 온도 < 10도
@@ -110,8 +110,8 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
                     ELSE 0
                   END +
                   CASE
-                    WHEN color_ca_value IN ('블랙', '네이비', '다크 크레이') THEN 13
-                    WHEN color_ca_value IN ('화이트', '베이지', '크림', '그레이') THEN 7
+                    WHEN color_ca.value IN ('블랙', '네이비', '다크 크레이') THEN 13
+                    WHEN color_ca.value IN ('화이트', '베이지', '크림', '그레이') THEN 7
                     ELSE 4
                   END
                ELSE 60
@@ -120,8 +120,8 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
         CASE
                WHEN w.precipitation_amount > 0 THEN
                CASE
-                    WHEN color_ca_value IN ('블랙', '네이비', '다크 그레이') THEN 3
-                    WHEN color_ca_value IN ('화이트', '베이지', '크림', '그레이') THEN -3
+                    WHEN color_ca.value IN ('블랙', '네이비', '다크 그레이') THEN 3
+                    WHEN color_ca.value IN ('화이트', '베이지', '크림', '그레이') THEN -3
                     ELSE 0
                END
         END AS score

@@ -11,9 +11,11 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
 @Slf4j
 @RequiredArgsConstructor
+@Repository
 public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
 
   private final JPAQueryFactory queryFactory;
@@ -44,7 +46,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
 
     // 팔로우하는 사람의 ID로 필터링
     if( followingId != null) {
-      booleanBuilder.and(follow.followee.id.eq(followingId));
+      booleanBuilder.and(follow.follower.id.eq(followingId));
     }
 
     // 커서 이후의 ID로 필터링
@@ -99,7 +101,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
 
     // 팔로우하는 사람의 ID로 필터링
     if (followerId != null) {
-      booleanBuilder.and(follow.follower.id.eq(followerId));
+      booleanBuilder.and(follow.followee.id.eq(followerId));
     }
 
     // 커서 이후의 ID로 필터링

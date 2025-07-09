@@ -10,8 +10,8 @@ import com.example.ootd.domain.weather.entity.Weather;
 import com.example.ootd.domain.weather.mapper.WeatherMapper;
 import com.example.ootd.domain.weather.repository.WeatherRepository;
 import com.example.ootd.exception.weather.InvalidCoordinatesException;
-import com.example.ootd.exception.weather.WeatherNotFoundException;
 import com.example.ootd.exception.weather.WeatherDataInsufficientException;
+import com.example.ootd.exception.weather.WeatherNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -41,14 +41,14 @@ public class WeatherServiceImpl implements WeatherService {
       LocalDateTime targetTime) {
     try {
       // 좌표 입력 로깅
-      log.info("3일간 날씨 요청 - latitude: {}, longitude: {}, targetTime: {}",
+      log.debug("3일간 날씨 요청 - latitude: {}, longitude: {}, targetTime: {}",
           latitude, longitude, targetTime);
 
       // 좌표 유효성 검사
       if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
         throw new InvalidCoordinatesException(latitude, longitude);
       }
-      
+
       // 1. 위경도로 지역명 조회
       WeatherAPILocation location = locationService.getGridAndLocation(latitude, longitude);
       List<String> locationNames = location.locationNames();
@@ -61,26 +61,27 @@ public class WeatherServiceImpl implements WeatherService {
 
       // 2. 지역명 생성: 시도 + 군구 (예: 부산 남구)
       String regionName = locationNames.get(0) + " " + locationNames.get(1);
-      log.info("사용할 지역명: {}", regionName);
+      log.debug("사용할 지역명: {}", regionName);
 
       // 3. 3일간 날짜 범위 설정
       LocalDateTime startDate = targetTime.toLocalDate().atStartOfDay();
       LocalDateTime endDate = targetTime.toLocalDate().plusDays(2).atTime(LocalTime.MAX);
-      log.info("날짜 범위: {} ~ {}", startDate, endDate);
+      log.debug("날짜 범위: {} ~ {}", startDate, endDate);
 
       // 4. 해당 기간의 날씨 데이터 조회
       List<Weather> allWeatherData = weatherRepository.findWeathersByRegionAndDateRange(
           regionName, startDate, endDate);
 
-      log.info("조회된 날씨 데이터 개수: {}", allWeatherData.size());
+      log.debug("조회된 날씨 데이터 개수: {}", allWeatherData.size());
       if (!allWeatherData.isEmpty()) {
-        log.info("조회된 날씨 데이터 범위: {} ~ {}",
+        log.debug("조회된 날씨 데이터 범위: {} ~ {}",
             allWeatherData.get(0).getForecastAt(),
             allWeatherData.get(allWeatherData.size() - 1).getForecastAt());
       }
 
       if (allWeatherData.isEmpty()) {
-        WeatherNotFoundException exception = new WeatherNotFoundException(regionName, startDate + " ~ " + endDate);
+        WeatherNotFoundException exception = new WeatherNotFoundException(regionName,
+            startDate + " ~ " + endDate);
         throw exception;
       }
 
@@ -91,7 +92,7 @@ public class WeatherServiceImpl implements WeatherService {
         LocalDate targetDate = targetTime.toLocalDate().plusDays(dayOffset);
         LocalDateTime targetDateTime = targetDate.atTime(targetTime.toLocalTime());
 
-        log.info("{}일 후 날씨 추출 시도: {}", dayOffset, targetDate);
+        log.debug("{}일 후 날씨 추출 시도: {}", dayOffset, targetDate);
 
         // 오늘은 정확한 데이터, 내일/모래는 최악값 사용
         boolean isToday = (dayOffset == 0);
@@ -105,16 +106,17 @@ public class WeatherServiceImpl implements WeatherService {
         }
       }
 
-      log.info("최종 반환할 날씨 데이터 개수: {}", result.size());
-      
+      log.debug("최종 반환할 날씨 데이터 개수: {}", result.size());
+
       // 데이터 충분성 검사
       if (result.size() < 3) {
         throw new WeatherDataInsufficientException(3, result.size());
       }
-      
+
       return result;
 
-    } catch (InvalidCoordinatesException | WeatherNotFoundException | WeatherDataInsufficientException e) {
+    } catch (InvalidCoordinatesException | WeatherNotFoundException |
+             WeatherDataInsufficientException e) {
       // 예상된 비즈니스 예외는 그대로 전파
       throw e;
     } catch (Exception e) {

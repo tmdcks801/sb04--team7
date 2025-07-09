@@ -11,14 +11,18 @@ import com.example.ootd.domain.notification.enums.NotificationLevel;
 import com.example.ootd.domain.notification.mapper.NotificationMapper;
 import com.example.ootd.domain.notification.repository.NotificationRepository;
 import com.example.ootd.domain.notification.service.impli.NotificationServiceImpl;
+import com.example.ootd.dto.PageResponse;
 import com.example.ootd.exception.ErrorCode;
 import com.example.ootd.exception.notification.*;
 import com.mongodb.bulk.BulkWriteResult;
+import java.time.Instant;
 import java.util.*;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.*;
 import org.springframework.data.mongodb.core.BulkOperations.BulkMode;
 
@@ -64,7 +68,7 @@ public class NotificationServiceTest {
       when(repository.save(entity)).thenThrow(new RuntimeException("mongo down"));
 
       assertThatThrownBy(() -> service.createNotification(dto))
-          .isInstanceOf(IllegalArgumentException.class);
+          .isInstanceOf(NotificationCreateError.class);
     }
   }
 
@@ -161,6 +165,66 @@ public class NotificationServiceTest {
 
     assertThat(result).hasSize(2);
     verify(bulkOps, times(1)).execute();
+  }
+
+  @Test
+  void getPageNation_firstPage_success() {
+    // given
+    UUID receiverId = UUID.randomUUID();
+    int limit = 2;
+    
+    Notification ent1 = mock(Notification.class);
+    Notification ent2 = mock(Notification.class);
+    NotificationDto dto1 = mock(NotificationDto.class);
+    NotificationDto dto2 = mock(NotificationDto.class);
+
+    Instant lastCreatedAt = Instant.now().minusSeconds(30);
+    UUID lastId = UUID.randomUUID();
+    when(dto2.createdAt()).thenReturn(lastCreatedAt);
+    when(dto2.id()).thenReturn(lastId);
+
+    when(mapper.toDto(ent1)).thenReturn(dto1);
+    when(mapper.toDto(ent2)).thenReturn(dto2);
+
+    when(repository.findByReceiverIdOrderByCreatedAtDesc(eq(receiverId), any(Pageable.class)))
+        .thenReturn(List.of(ent1, ent2));
+    when(repository.countByReceiverId(receiverId)).thenReturn(5);
+
+    PageResponse res = service.getPageNation(receiverId, null, limit);
+
+    assertThat(res.data()).hasSize(2);
+    assertThat(res.hasNext()).isTrue();
+    assertThat(res.nextCursor()).isEqualTo(lastCreatedAt.toString());
+    assertThat(res.nextIdAfter()).isEqualTo(lastId);
+
+    verify(repository).findByReceiverIdOrderByCreatedAtDesc(eq(receiverId), any(Pageable.class));
+  }
+
+  @Test
+  void getPageNation_lastPage_success() {
+
+    UUID receiverId = UUID.randomUUID();
+    int limit = 3;
+    String cursor = Instant.now().minusSeconds(3600).toString();
+
+    Notification ent = mock(Notification.class);
+    NotificationDto dto = mock(NotificationDto.class);
+    when(mapper.toDto(ent)).thenReturn(dto);
+
+    when(repository.findByReceiverIdAndCreatedAtBeforeOrderByCreatedAtDesc(
+        eq(receiverId), any(Instant.class), any(Pageable.class)))
+        .thenReturn(List.of(ent));
+    when(repository.countByReceiverId(receiverId)).thenReturn(4);
+
+    PageResponse res = service.getPageNation(receiverId, cursor, limit);
+
+    assertThat(res.data()).hasSize(1);
+    assertThat(res.hasNext()).isFalse();
+    assertThat(res.nextCursor()).isNull();
+    assertThat(res.nextIdAfter()).isNull();
+
+    verify(repository).findByReceiverIdAndCreatedAtBeforeOrderByCreatedAtDesc(
+        eq(receiverId), any(Instant.class), any(Pageable.class));
   }
 
 }

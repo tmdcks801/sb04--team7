@@ -49,17 +49,17 @@ public class NotificationController {
     return ResponseEntity.noContent().build();
   }
 
-  private final NotificationPublisherInterface notificationPublisherInterface;
-  private final SsePushServiceInterface ssePushServiceInterface;
-
-  @PostMapping//테스트용
-  @PermitAll
-  public ResponseEntity<Void> publish(@RequestBody @Validated NotificationRequest req) {
-
-    ssePushServiceInterface.subscribe(req.receiverId(), null);
-    notificationPublisherInterface.publish(req);
-    return ResponseEntity.accepted().build();
-  }
+//  private final NotificationPublisherInterface notificationPublisherInterface;
+//  private final SsePushServiceInterface ssePushServiceInterface;
+//
+//  @PostMapping//테스트용
+//  @PermitAll
+//  public ResponseEntity<Void> publish(@RequestBody @Validated NotificationRequest req) {
+//
+//    ssePushServiceInterface.subscribe(req.receiverId(), null);
+//    notificationPublisherInterface.publish(req);
+//    return ResponseEntity.accepted().build();
+//  }
 
 
 }

@@ -27,10 +27,10 @@ public class JwtSession {
   @OneToOne(optional = false)
   private User user;
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false, unique = true, columnDefinition = "TEXT")
   private String accessToken;
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false, unique = true, columnDefinition = "TEXT")
   private String refreshToken;
 
 

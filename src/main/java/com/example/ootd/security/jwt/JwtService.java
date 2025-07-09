@@ -69,6 +69,7 @@ public class JwtService {
     return jwtSessionRepository.save(session);
   }
 
+  @Transactional
   public JwtSession rotateRefreshToken(String token){
 
     JwtSession session = jwtSessionRepository.findByRefreshToken(token)
@@ -115,6 +116,7 @@ public class JwtService {
     }
   }
 
+  @Transactional
   public void invalidateToken(String token) {
     JwtSession session = jwtSessionRepository.findByRefreshToken(token)
         .orElseThrow(() -> new OotdException(ErrorCode.AUTHENTICATION_FAILED));
@@ -169,7 +171,7 @@ public class JwtService {
       return Jwts.builder()
           .setSubject(user.getEmail())
           .claim("userId", user.getId().toString())
-          .claim("role", user.getRole().name())
+          .claim("role", user.getRole().name().replace("ROLE_", ""))
           .claim("name", user.getName())
           .claim("email", user.getEmail())
           .setIssuedAt(Date.from(now))

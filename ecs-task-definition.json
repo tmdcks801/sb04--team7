@@ -55,29 +55,29 @@
                 {
                     "name": "NOTIFICATIN_DB",
                     "value": "ootd"
-                },
-                {
-                    "name": "GOOGLE_APP_PWD",
-                    "value": "dummy_pwd"
-                },
-                {
-                    "name": "GOOGLE_CLIENT_ID",
-                    "value": "dummy_client_id"
-                },
-                {
-                    "name": "GOOGLE_CLIENT_SECRET",
-                    "value": "dummy_client_secret"
-                },
-                {
-                    "name": "KAKAO_API_KEY",
-                    "value": "dummy_kakao_key"
-                },
-                {
-                    "name": "WEATHER_API_KEY",
-                    "value": "dummy_weather_key"
                 }
             ],
             "secrets": [
+                {
+                    "name": "GOOGLE_APP_PWD",
+                    "valueFrom": "arn:aws:ssm:ap-northeast-2:826421662185:parameter/ootd/GOOGLE_APP_PWD"
+                },
+                {
+                    "name": "GOOGLE_CLIENT_ID",
+                    "valueFrom": "arn:aws:ssm:ap-northeast-2:826421662185:parameter/ootd/GOOGLE_CLIENT_ID"
+                },
+                {
+                    "name": "GOOGLE_CLIENT_SECRET",
+                    "valueFrom": "arn:aws:ssm:ap-northeast-2:826421662185:parameter/ootd/GOOGLE_CLIENT_SECRET"
+                },
+                {
+                    "name": "KAKAO_API_KEY",
+                    "valueFrom": "arn:aws:ssm:ap-northeast-2:826421662185:parameter/ootd/KAKAO_API_KEY"
+                },
+                {
+                    "name": "WEATHER_API_KEY",
+                    "valueFrom": "arn:aws:ssm:ap-northeast-2:826421662185:parameter/ootd/WEATHER_API_KEY"
+                },
                 {
                     "name": "SPRING_DATASOURCE_URL",
                     "valueFrom": "arn:aws:ssm:ap-northeast-2:826421662185:parameter/ootd/database/url"

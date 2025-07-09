@@ -2,7 +2,9 @@ package com.example.ootd.domain.clothes.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
+import lombok.Builder;
 
+@Builder
 public record ClothesAttributeSearchCondition(
     String cursor,
     UUID idAfter,

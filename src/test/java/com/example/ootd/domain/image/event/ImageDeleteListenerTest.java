@@ -16,8 +16,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@ActiveProfiles("test")
 @DataJpaTest
+@ActiveProfiles("test")
 @Import({S3Service.class, ImageDeleteListener.class})
 @EntityScan(basePackageClasses = Image.class)
 @EnableJpaRepositories(basePackageClasses = ImageRepository.class)

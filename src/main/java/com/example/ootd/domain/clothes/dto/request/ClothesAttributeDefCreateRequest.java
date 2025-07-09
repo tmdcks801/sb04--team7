@@ -4,7 +4,7 @@ import java.util.List;
 
 public record ClothesAttributeDefCreateRequest(
     String name,
-    List<String> selectableValue
+    List<String> selectableValues
 ) {
 
 }

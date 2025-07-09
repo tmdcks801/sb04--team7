@@ -8,7 +8,7 @@ import lombok.Builder;
 public record ClothesAttributeDefDto(
     UUID id,
     String name,
-    List<String> selectableValue
+    List<String> selectableValues
 ) {
 
 }

@@ -50,6 +50,6 @@ public class ImageServiceImpl implements ImageService {
     Image image = imageRepository.findById(id)
         .orElseThrow(() -> ImageNotFoundException.withId(id));
     s3Service.delete(image.getFileName());
-    imageRepository.deleteById(id);
+    imageRepository.delete(image);
   }
 }

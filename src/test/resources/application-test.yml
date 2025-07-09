@@ -9,10 +9,14 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+
+    show-sql: true
+
     open-in-view: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
+        format-sql: true
   servlet:
     multipart:
       maxFileSize: 5MB
@@ -40,4 +44,6 @@ app:
 
 logging:
   level:
-    root: warn
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: error

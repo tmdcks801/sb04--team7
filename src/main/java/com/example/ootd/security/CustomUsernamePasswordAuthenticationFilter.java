@@ -137,6 +137,6 @@ public class CustomUsernamePasswordAuthenticationFilter extends
         Map.of("reason", failed.getMessage())
     ).toString());
 
-    throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
+//    throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
   }
 }

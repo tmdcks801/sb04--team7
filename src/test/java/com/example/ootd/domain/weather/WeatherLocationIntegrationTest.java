@@ -87,9 +87,6 @@ class WeatherLocationIntegrationTest {
         weatherRepository.save(weather);
       }
     }
-
-    // 저장된 데이터 확인
-    System.out.println("저장된 총 Weather 개수: " + weatherRepository.count());
   }
 
   @Test
@@ -177,10 +174,6 @@ class WeatherLocationIntegrationTest {
         LocalDateTime.now());
     weatherRepository.save(additionalWeather);
 
-    // When - 테스트 완료 후 자동 롤백
-
-    // Then - 메서드 종료 후 @Transactional에 의해 자동 롤백되어 원래 상태로 복구됨
-    // 이는 다른 테스트에서 확인 가능
   }
 
   private Weather createTestWeatherWithFixedForecastedAt(String regionName,

@@ -4,9 +4,15 @@ import com.example.ootd.domain.weather.api.WeatherApiResponse;
 import com.example.ootd.domain.weather.api.WeatherApiResponse.Item;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class WeatherBatchData implements java.io.Serializable {
 
   private static final long serialVersionUID = 1L;

@@ -29,7 +29,8 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
       return Collections.emptyList();
     }
 
-    return Arrays.stream(dbData.split(DELIMITER))
+    // split(",", -1)로 변경하여 trailing empty strings도 보존
+    return Arrays.stream(dbData.split(DELIMITER, -1))
         .map(String::trim)
         .collect(Collectors.toList());
   }
@@ -51,7 +52,8 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
     if (dbData == null || dbData.isBlank()) {
       return Collections.emptyList();
     }
-    return Arrays.stream(dbData.split(DELIMITER))
+    // split(",", -1)로 변경하여 trailing empty strings도 보존
+    return Arrays.stream(dbData.split(DELIMITER, -1))
         .map(String::trim)
         .collect(Collectors.toList());
   }

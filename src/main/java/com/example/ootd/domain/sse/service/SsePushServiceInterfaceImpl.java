@@ -91,7 +91,7 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
     try {
       emitter.send(SseEmitter.event()
           .id(dto.id().toString())
-          .name("notification")
+          .name("notifications")
           .data(dto));
     } catch (IOException ex) {
       throw new SseException(ErrorCode.FAIL_SSE_PUSH, ex);

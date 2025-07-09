@@ -73,16 +73,20 @@ public class SecurityConfig {
                     "/actuator/health",
                     "/actuator/prometheus"
                 ).permitAll()
-            .requestMatchers("/oauth2/callback").permitAll()
-            .requestMatchers("/api/auth/me").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-            .requestMatchers("/test/me").hasRole("USER")
-            .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
-            .anyRequest().authenticated()
+                .requestMatchers("/oauth2/callback").permitAll()
+                .requestMatchers("/api/auth/me").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                .requestMatchers("/test/me").hasRole("USER")
+                .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+                .requestMatchers("/sub").permitAll()
+                .requestMatchers("/pub").permitAll()
+                .requestMatchers("/ws/**").permitAll()
+
+                .anyRequest().authenticated()
         )
         .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo ->
                 userInfo.userService(customOAuth2UserService))
@@ -129,13 +133,13 @@ public class SecurityConfig {
     return RoleHierarchyImpl.fromHierarchy(hierarchyString);
   }
 
-  @Bean
-  public WebSecurityCustomizer webSecurityCustomizer() {
-    return (web) -> web.ignoring()
-        .requestMatchers(
-            "/api/notifications"         // 정적 파일
-        );
-  }
+//  @Bean
+//  public WebSecurityCustomizer webSecurityCustomizer() {
+//    return (web) -> web.ignoring()
+//        .requestMatchers(
+//            "/api/notifications"         //알림 테스트용
+//        );
+//  }
 
 
 }

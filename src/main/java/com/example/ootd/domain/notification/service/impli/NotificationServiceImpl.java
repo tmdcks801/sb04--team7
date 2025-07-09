@@ -52,8 +52,8 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
       return notificationMapper.toDto(notification);
     } catch (Exception e) {
       log.warn("알림 오류", e);
-      throw new IllegalArgumentException(
-          "알림 오류", e);
+      throw new NotificationCreateError(
+          ErrorCode.FAIL_CREATE_NOTIFICATION);
     }
   }
 

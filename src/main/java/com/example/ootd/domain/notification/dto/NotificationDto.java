@@ -5,8 +5,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record NotificationDto(
-    UUID id, UUID receiverId, String content,
-    String title, NotificationLevel level, Instant createdAt
+    UUID id, Instant createdAt, UUID receiverId, String title, String content,
+    NotificationLevel level
 ) {
 
 }

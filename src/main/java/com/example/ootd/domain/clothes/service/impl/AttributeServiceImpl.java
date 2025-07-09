@@ -34,7 +34,7 @@ public class AttributeServiceImpl implements AttributeService {
 
     Attribute attribute = Attribute.builder()
         .name(request.name())
-        .details(request.selectableValue())
+        .details(request.selectableValues())
         .build();
 
     attributeRepository.save(attribute);
@@ -56,7 +56,7 @@ public class AttributeServiceImpl implements AttributeService {
     Attribute attribute = getAttributeById(definitionId);
 
     updateName(attribute, request.name());
-    updateDetails(attribute, request.selectableValue());
+    updateDetails(attribute, request.selectableValues());
 
     ClothesAttributeDefDto clothesAttributeDefDto = attributeMapper.toDto(attribute);
 
@@ -128,10 +128,10 @@ public class AttributeServiceImpl implements AttributeService {
     }
   }
 
-  private void updateDetails(Attribute attribute, List<String> selectableValue) {
+  private void updateDetails(Attribute attribute, List<String> selectableValues) {
 
-    if (!new HashSet<>(attribute.getDetails()).equals(new HashSet<>(selectableValue))) {
-      attribute.updateDetails(selectableValue);
+    if (!new HashSet<>(attribute.getDetails()).equals(new HashSet<>(selectableValues))) {
+      attribute.updateDetails(selectableValues);
     }
   }
 

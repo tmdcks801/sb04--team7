@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ImageDeleteListner {
+public class ImageDeleteListener {
 
   private final S3Service s3Service;
 

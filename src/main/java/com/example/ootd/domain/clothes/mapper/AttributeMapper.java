@@ -9,9 +9,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface AttributeMapper {
 
-  @Mapping(source = "attribute.details", target = "selectableValue")
+  @Mapping(source = "attribute.details", target = "selectableValues")
   ClothesAttributeDefDto toDto(Attribute attribute);
 
-  @Mapping(source = "attribute.details", target = "selectableValue")
+  @Mapping(source = "attribute.details", target = "selectableValues")
   List<ClothesAttributeDefDto> toDtoList(List<Attribute> attributes);
 }

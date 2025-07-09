@@ -9,10 +9,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -45,7 +45,7 @@ public class Attribute {
   private String detailsRaw; // 속성 내용, DB 저장용 문자열
 
   @Transient  // JPA가 해당 필드를 DB 컬럼과 매핑하지 않도록 하는 어노테이션
-  private List<String> details; // 속성 내용, 실제 로직에서 사용할 리스트
+  private List<String> details = new ArrayList<>(); // 속성 내용, 실제 로직에서 사용할 리스트
 
   @Column(nullable = false, updatable = false)
   @CreatedDate

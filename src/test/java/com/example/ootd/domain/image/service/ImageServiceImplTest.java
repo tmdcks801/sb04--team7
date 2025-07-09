@@ -112,5 +112,34 @@ public class ImageServiceImplTest {
   @DisplayName("delete() - 사진 삭제")
   class deleteTest {
 
+    @Test
+    @DisplayName("삭제 성공")
+    void deleteSuccess() {
+
+      // given
+      given(imageRepository.findById(imageId)).willReturn(Optional.of(testImage));
+
+      // when
+      imageService.delete(imageId);
+
+      // then
+      verify(imageRepository).findById(imageId);
+      verify(s3Service).delete(testImage.getFileName());
+      verify(imageRepository).delete(testImage);
+    }
+
+    @Test
+    @DisplayName("id에 해당하는 이미지가 없을 경우 예외처리")
+    void deleteImageNotFound() {
+
+      // given
+      given(imageRepository.findById(imageId)).willReturn(Optional.empty());
+
+      // when & then
+      assertThatThrownBy(() -> imageService.delete(imageId))
+          .isInstanceOf(ImageNotFoundException.class)
+          .hasMessageContaining("이미지를 찾을 수 없습니다.");
+      verify(imageRepository).findById(imageId);
+    }
   }
 }

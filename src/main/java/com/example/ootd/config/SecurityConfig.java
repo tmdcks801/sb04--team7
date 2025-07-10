@@ -76,6 +76,8 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/callback").permitAll()
                 .requestMatchers("/api/auth/me").permitAll()
                 .requestMatchers("/api/auth/sign-out").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/users/*/role").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").permitAll()

@@ -188,4 +188,5 @@ public class User {
     this.temperatureSensitivity = 3;
 
   }
+
 }

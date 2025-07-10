@@ -124,6 +124,7 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
                     WHEN color_ca.value IN ('화이트', '베이지', '크림', '그레이') THEN -3
                     ELSE 0
                END
+               ELSE 0
         END AS score
             
         FROM clothes c

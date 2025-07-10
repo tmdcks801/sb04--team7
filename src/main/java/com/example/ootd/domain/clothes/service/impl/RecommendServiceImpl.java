@@ -137,7 +137,7 @@ public class RecommendServiceImpl implements RecommendService {
         .temperatureSensitivity(((Number) row[8]).intValue())
         .thickness(row[9] != null ? row[9].toString() : null)
         .color(row[10] != null ? row[10].toString() : null)
-        .score(((Number) row[11]).intValue())
+        .score(((Number) row[11]).doubleValue())
         .build();
   }
   

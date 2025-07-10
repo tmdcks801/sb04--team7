@@ -48,6 +48,7 @@ public class Message {
     this.receiver = receiver;
     this.content = content;
     this.dmKey = makeDmKey(sender.getId(), receiver.getId());
+    this.createdAt = LocalDateTime.now();
   }
 
   public static Message createMessage(User sender, User receiver, String content) {

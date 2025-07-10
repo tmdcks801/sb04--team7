@@ -11,6 +11,7 @@ import com.example.ootd.domain.message.entity.Message;
 import com.example.ootd.domain.message.mapper.MessageMapper;
 import com.example.ootd.domain.message.repository.MessageRepository;
 import com.example.ootd.domain.message.service.MessageServiceImp;
+import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.dto.PageResponse;
@@ -38,6 +39,8 @@ class MessageServiceImpTest {
   MessageMapper messageMapper;
   @Mock
   UserRepository userRepository;
+  @Mock
+  NotificationPublisherInterface notificationPublisherInterface;
 
   @InjectMocks
   MessageServiceImp messageService;
@@ -61,11 +64,9 @@ class MessageServiceImpTest {
     DirectMessageDto expectedDto = mock(DirectMessageDto.class);
     when(messageMapper.toDto(any(Message.class))).thenReturn(expectedDto);
 
-    // when
     DirectMessageDto result =
         messageService.sendMessage(senderId, receiverId, "hello");
 
-    // then
     assertSame(expectedDto, result);
     verify(messageRepository).save(any(Message.class));
     verify(messagingTemplate)

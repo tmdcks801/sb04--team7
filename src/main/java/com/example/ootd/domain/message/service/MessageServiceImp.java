@@ -5,6 +5,9 @@ import com.example.ootd.domain.message.dto.MessagePaginationDto;
 import com.example.ootd.domain.message.entity.Message;
 import com.example.ootd.domain.message.mapper.MessageMapper;
 import com.example.ootd.domain.message.repository.MessageRepository;
+import com.example.ootd.domain.notification.dto.NotificationRequest;
+import com.example.ootd.domain.notification.enums.NotificationLevel;
+import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.dto.PageResponse;
@@ -33,6 +36,7 @@ public class MessageServiceImp implements MessageServiceInterface {
   private final SimpMessagingTemplate messagingTemplate;
   private final MessageMapper messageMapper;
   private final UserRepository userRepository;
+  private final NotificationPublisherInterface notificationPublisherInterface;
 
   @Override
   @Transactional
@@ -47,6 +51,9 @@ public class MessageServiceImp implements MessageServiceInterface {
       messageRepository.save(message);
       DirectMessageDto dto = messageMapper.toDto(message);
       messagingTemplate.convertAndSend("/sub/direct-messages_" + message.getDmKey(), dto);
+      notificationPublisherInterface.publish(
+          new NotificationRequest(receiverId, "메세지가 왔습니다", sender.getName() + "남으부터 메세지가 왔습니다",
+              NotificationLevel.INFO));//이벤트
       return dto;
     } catch (FailSendMessageException e) {
       log.error("메세지 전송중 오류");
@@ -59,45 +66,50 @@ public class MessageServiceImp implements MessageServiceInterface {
   public PageResponse getMessage(MessagePaginationDto req) {
     try {
       String dmKey = Message.makeDmKey(req.sender(), req.receiver());
+      int limit = Math.max(req.limit(), 1);
 
-      int limit = req.limit() > 0 ? req.limit() : 20;
-      Sort.Direction dir = req.isAfter() ? Sort.Direction.ASC : Sort.Direction.DESC;
+      Sort sort = Sort.by(Sort.Direction.DESC, "createdAt")
+          .and(Sort.by(Sort.Direction.DESC, "id"));
+      Pageable page = PageRequest.of(0, limit + 1, sort);
 
-      Pageable pageable = PageRequest.of(0, limit + 1, Sort.by(dir, "id"));
+      List<Message> msgs;
 
-      List<Message> messages;
       if (req.cursor() == null) {
-        messages = messageRepository.findByDmKey(dmKey, pageable);
+        msgs = messageRepository.findByDmKey(dmKey, page);
       } else if (req.isAfter()) {
-        messages = messageRepository.findByDmKeyAndIdGreaterThan(dmKey, req.cursor(), pageable);
+        Message pivot = messageRepository.findById(req.cursor())
+            .orElseThrow(() -> new IllegalArgumentException("잘못된 cursor"));
+        msgs = messageRepository.findNewerThan(
+            dmKey, pivot.getCreatedAt(), pivot.getId(), page);
+
+        Collections.reverse(msgs);
       } else {
-        messages = messageRepository.findByDmKeyAndIdLessThan(dmKey, req.cursor(), pageable);
+        Message pivot = messageRepository.findById(req.cursor())
+            .orElseThrow(() -> new IllegalArgumentException("잘못된 cursor"));
+        msgs = messageRepository.findOlderThan(
+            dmKey, pivot.getCreatedAt(), pivot.getId(), page);
       }
 
-      boolean hasNext = messages.size() > limit;
+      boolean hasNext = msgs.size() > limit;
       if (hasNext) {
-        messages = messages.subList(0, limit);
+        msgs = msgs.subList(0, limit);
       }
 
-      if (dir == Sort.Direction.DESC) {
-        Collections.reverse(messages);
-      }
-
-      List<DirectMessageDto> data = messages.stream()
+      List<DirectMessageDto> data = msgs.stream()
           .map(messageMapper::toDto)
-          .collect(Collectors.toList());
+          .toList();
 
-      UUID nextCursor = hasNext && !messages.isEmpty()
-          ? messages.get(messages.size() - 1).getId()
+      UUID nextCursor = hasNext && !msgs.isEmpty()
+          ? msgs.get(msgs.size() - 1).getId()
           : null;
-      long totalCount = messageRepository.countByDmKey(dmKey);
+
+      long total = messageRepository.countByDmKey(dmKey);
 
       return new PageResponse(
           data, hasNext, nextCursor, null,
-          "id", dir.name(), totalCount);
+          "createdAt", req.isAfter() ? "ASC" : "DESC", total);
     } catch (FailGetMessageExecption e) {
       throw new FailGetMessageExecption(ErrorCode.FAIL_GET_MESSAGE);
     }
-
   }
 }

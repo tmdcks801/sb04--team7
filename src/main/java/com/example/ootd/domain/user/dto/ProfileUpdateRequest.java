@@ -8,7 +8,7 @@ public record ProfileUpdateRequest(
     String name,
     Gender gender,
     LocalDate birthDate,
-     Location location,
+    Location location,
     int temperatureSensitivity
 ) {
 }

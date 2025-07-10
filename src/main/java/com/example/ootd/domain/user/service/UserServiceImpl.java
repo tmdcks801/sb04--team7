@@ -2,6 +2,10 @@ package com.example.ootd.domain.user.service;
 
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.image.service.ImageService;
+import com.example.ootd.domain.location.Location;
+import com.example.ootd.domain.location.dto.WeatherAPILocation;
+import com.example.ootd.domain.location.repository.LocationRepository;
+import com.example.ootd.domain.location.service.LocationService;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.dto.ChangePasswordRequest;
 import com.example.ootd.domain.user.dto.ProfileDto;
@@ -33,10 +37,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserServiceImpl implements UserService{
 
   private final UserRepository userRepository;
+  private final LocationRepository locationRepository;
   private final UserMapper mapper;
   private final JwtSessionRepository jwtSessionRepository;
   private final ImageService imageService;
   private final PasswordEncoder encoder;
+
+  private final LocationService locationService;
   @Override
   @Transactional
   public UserPagedResponse getUsers(UserSearchCondition condition) {
@@ -85,6 +92,8 @@ public class UserServiceImpl implements UserService{
   @Override
   @Transactional
   public UserDto changeUserRole(UserRoleUpdateRequest request, UUID userId){
+
+
     User user = userRepository.findById(userId).orElseThrow(() -> new OotdException(ErrorCode.USER_NOT_FOUND));
     user.updateRole(request.role());
 
@@ -97,9 +106,19 @@ public class UserServiceImpl implements UserService{
   @Override
   @Transactional
   public ProfileDto updateUserProfile(UUID userId, ProfileUpdateRequest req, MultipartFile image){
+
+
+    // locationRepository.save(req.location());
+    locationService.getGridAndLocation(req.location().getLatitude(), req.location().getLongitude());
+    Location location = locationRepository.findByLatitudeAndLongitude(req.location().getLatitude(), req.location().getLongitude());
+
+
     User user = userRepository.findById(userId).orElseThrow(() -> new OotdException(ErrorCode.USER_NOT_FOUND));
+
     Image profileImage = imageService.upload(image); // TODO : 비동기 처리 고려. 업로드 완료시 이벤트 발행?
     user.updateProfile(req, profileImage);
+    user.updateLocation(location); // TODO : 업데이트 로직 더 깔끔하게 작성
+
 
     return mapper.toProfileDto(user);
   }

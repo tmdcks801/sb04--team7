@@ -80,7 +80,6 @@ public class SecurityIntegrationTest {
       mockMvc.perform(get("/api/users/" + userId + "/profiles")
               .header("Authorization", "Bearer " + accessToken))
           .andExpect(status().isOk())
-          .andExpect(status().isOk())
           .andExpect(jsonPath("$.name").value(user.getName()));
     }
 

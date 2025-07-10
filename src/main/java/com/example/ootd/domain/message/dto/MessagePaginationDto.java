@@ -8,7 +8,7 @@ import org.springframework.lang.Nullable;
 public record MessagePaginationDto(
     @NotNull UUID sender,
     @NotNull UUID receiver,
-    @Nullable UUID cursor,
+    UUID cursor,
     boolean isAfter,
     @Positive int limit) {
 

@@ -5,6 +5,7 @@ import com.example.ootd.domain.user.Gender;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.UserRole;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -31,12 +32,14 @@ public class TestEntityFactory {
     return user;
   }
 
+
   // 테스트용 유저 객체 반환
   public static User createUserNoId(String uniqueSuffix) {
 
     return new User(
         "test-name-no-id" + uniqueSuffix,
         "testNoId" + uniqueSuffix + "@gmail.com",
+
         "test-password",
         UserRole.ROLE_USER,
         false,
@@ -48,6 +51,7 @@ public class TestEntityFactory {
         false,
         null
     );
+
   }
 
   // 테스트용 이미지 객체 반환

@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'com.example'
@@ -110,4 +111,108 @@ clean {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport // 테스트 실행 후 JaCoCo 리포트 생성
 }
+
+// JaCoCo 설정
+jacocoTestReport {
+    dependsOn test // 테스트가 완료된 후 실행
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+    executionData fileTree(dir: "$buildDir/jacoco", include: "**/*.exec")
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    // 자동 생성 클래스 제외
+                    '**/Q*',  // QueryDSL 생성 클래스
+                    '**/*MapperImpl*',  // MapStruct 구현체
+
+                    // Spring Boot 관련 클래스 제외
+                    '**/*Application*',  // Main Application 클래스
+                    '**/config/**',  // 설정 클래스들
+                    '**/*Config*',
+
+                    // DTO/Entity/Exception 제외
+                    '**/dto/**',  // DTO 패키지
+                    '**/entity/**',  // Entity 패키지
+                    '**/exception/**',  // Exception 패키지
+                    '**/*Dto*',
+                    '**/*Entity*',
+                    '**/*Exception*',
+                    '**/*Request*',
+                    '**/*Response*',
+
+                    // Enum 클래스 제외
+                    '**/*Type*',
+                    '**/*Status*',
+                    '**/*Role*',
+                    '**/*Level*',
+                    '**/Gender*',
+                    '**/Provider*',
+
+                    // 보안 관련 상수 클래스
+                    '**/BlackList*',
+                    '**/JwtSession*',
+
+                    // 특정 패키지 제외
+                    '**/converter/**',  // Converter 클래스들
+                    '**/util/**'  // Utility 클래스들
+            ])
+        }))
+    }
+}
+
+// JaCoCo 커버리지 검증
+jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+
+    // 검증에서 제외할 클래스들 (리포트와 동일한 제외 패턴 적용)
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    // 자동 생성 클래스 제외
+                    '**/Q*',
+                    '**/*MapperImpl*',
+
+                    // Spring Boot 관련 클래스 제외
+                    '**/*Application*',
+                    '**/config/**',
+                    '**/*Config*',
+
+                    // DTO/Entity/Exception 제외
+                    '**/dto/**',
+                    '**/entity/**',
+                    '**/exception/**',
+                    '**/*Dto*',
+                    '**/*Entity*',
+                    '**/*Exception*',
+                    '**/*Request*',
+                    '**/*Response*',
+
+                    // Enum 클래스 제외
+                    '**/*Type*',
+                    '**/*Status*',
+                    '**/*Role*',
+                    '**/*Level*',
+                    '**/Gender*',
+                    '**/Provider*',
+
+                    // 보안 관련 상수 클래스
+                    '**/BlackList*',
+                    '**/JwtSession*',
+
+                    // 특정 패키지 제외
+                    '**/converter/**',
+                    '**/util/**',
+
+                    // batch 관련 제외
+                    '**/batch/**'
+            ])
+        }))
+    }
+}
+

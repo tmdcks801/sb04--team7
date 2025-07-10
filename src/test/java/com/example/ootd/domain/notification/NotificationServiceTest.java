@@ -172,7 +172,7 @@ public class NotificationServiceTest {
     // given
     UUID receiverId = UUID.randomUUID();
     int limit = 2;
-    
+
     Notification ent1 = mock(Notification.class);
     Notification ent2 = mock(Notification.class);
     NotificationDto dto1 = mock(NotificationDto.class);

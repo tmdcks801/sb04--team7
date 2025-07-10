@@ -61,11 +61,9 @@ class MessageServiceImpTest {
     DirectMessageDto expectedDto = mock(DirectMessageDto.class);
     when(messageMapper.toDto(any(Message.class))).thenReturn(expectedDto);
 
-    // when
     DirectMessageDto result =
         messageService.sendMessage(senderId, receiverId, "hello");
 
-    // then
     assertSame(expectedDto, result);
     verify(messageRepository).save(any(Message.class));
     verify(messagingTemplate)

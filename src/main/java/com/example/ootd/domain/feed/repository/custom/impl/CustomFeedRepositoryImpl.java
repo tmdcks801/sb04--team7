@@ -12,7 +12,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -99,15 +98,15 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
         case "createdAt":
           LocalDateTime cursorCreatedAt = LocalDateTime.parse(condition.cursor());
           if (isDesc) {
-            // 내림차순일 경우 cursor값이 작거나, 같되 idAfter가 커야 함
+            // 내림차순일 경우 cursor값이 작거나, 같되 idAfter가 작아야 함
             return qFeed.createdAt.lt(cursorCreatedAt)
                 .or(qFeed.createdAt.eq(cursorCreatedAt)
-                    .and(afterCondition(condition.idAfter(), condition.sortDirection())));
+                    .and(qFeed.id.lt(condition.idAfter())));
           } else {
             // 오름차순일 경우 cursor값이 크거나, 같되 idAfter가 커야 함
             return qFeed.createdAt.gt(cursorCreatedAt)
                 .or(qFeed.createdAt.eq(cursorCreatedAt)
-                    .and(afterCondition(condition.idAfter(), condition.sortDirection())));
+                    .and(qFeed.id.gt(condition.idAfter())));
           }
         case "likeCount":
           long cursorLikeCount = Long.parseLong(condition.cursor());
@@ -115,33 +114,17 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
             // 내림차순일 경우 cursor값이 작거나, 같되 idAfter가 작아야 함
             return qFeed.likeCount.lt(cursorLikeCount)
                 .or(qFeed.likeCount.eq(cursorLikeCount)
-                    .and(afterCondition(condition.idAfter(), condition.sortDirection())));
+                    .and(qFeed.id.lt(condition.idAfter())));
           } else {
             // 오름차순일 경우 cursor값이 크거나, 같되 idAfter가 커야 함
             return qFeed.likeCount.gt(cursorLikeCount)
                 .or(qFeed.likeCount.eq(cursorLikeCount)
-                    .and(afterCondition(condition.idAfter(), condition.sortDirection())));
+                    .and(qFeed.id.gt(condition.idAfter())));
           }
       }
     }
 
-    return afterCondition(condition.idAfter(), condition.sortDirection());
-  }
-
-  // 보조 커서(idAfter) 세팅
-  private BooleanExpression afterCondition(UUID idAfter, String sortDirection) {
-
-    if (idAfter == null) {
-      return null;
-    }
-
-    boolean isDesc = "DESCENDING".equalsIgnoreCase(sortDirection);
-
-    if (isDesc) {
-      return qFeed.id.lt(idAfter);
-    }
-
-    return qFeed.id.gt(idAfter);
+    return null;
   }
 
   /**

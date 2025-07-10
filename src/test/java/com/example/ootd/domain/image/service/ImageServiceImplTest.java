@@ -6,12 +6,12 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.example.ootd.TestEntityFactory;
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.image.repository.ImageRepository;
 import com.example.ootd.domain.image.service.impl.ImageServiceImpl;
 import com.example.ootd.exception.image.ImageNotFoundException;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,12 +33,8 @@ public class ImageServiceImplTest {
   @InjectMocks
   private ImageServiceImpl imageService;
 
-  // 테스트용 uuid
-  private final UUID imageId = UUID.randomUUID();
-
   // 테스트용 Image 객체
-  private final Image testImage = new Image("https://test-bucket.s3.region.amazonaws.com/test.jpg",
-      "test.jpg");
+  private final Image testImage = TestEntityFactory.createImage("1");
 
   @Nested
   @DisplayName("upload() - 사진 업로드")
@@ -83,14 +79,14 @@ public class ImageServiceImplTest {
     void readSuccess() {
 
       // given
-      given(imageRepository.findById(imageId)).willReturn(Optional.of(testImage));
+      given(imageRepository.findById(testImage.getId())).willReturn(Optional.of(testImage));
 
       // when
-      String url = imageService.read(imageId);
+      String url = imageService.read(testImage.getId());
 
       // then
       assertThat(url).isEqualTo(testImage.getUrl());
-      verify(imageRepository).findById(imageId);
+      verify(imageRepository).findById(testImage.getId());
     }
 
     @Test
@@ -98,13 +94,13 @@ public class ImageServiceImplTest {
     void readImageNotFound() {
 
       // given
-      given(imageRepository.findById(imageId)).willReturn(Optional.empty());
+      given(imageRepository.findById(testImage.getId())).willReturn(Optional.empty());
 
       // when & then
-      assertThatThrownBy(() -> imageService.read(imageId))
+      assertThatThrownBy(() -> imageService.read(testImage.getId()))
           .isInstanceOf(ImageNotFoundException.class)
           .hasMessageContaining("이미지를 찾을 수 없습니다.");
-      verify(imageRepository).findById(imageId);
+      verify(imageRepository).findById(testImage.getId());
     }
   }
 
@@ -117,13 +113,13 @@ public class ImageServiceImplTest {
     void deleteSuccess() {
 
       // given
-      given(imageRepository.findById(imageId)).willReturn(Optional.of(testImage));
+      given(imageRepository.findById(testImage.getId())).willReturn(Optional.of(testImage));
 
       // when
-      imageService.delete(imageId);
+      imageService.delete(testImage.getId());
 
       // then
-      verify(imageRepository).findById(imageId);
+      verify(imageRepository).findById(testImage.getId());
       verify(s3Service).delete(testImage.getFileName());
       verify(imageRepository).delete(testImage);
     }
@@ -133,13 +129,13 @@ public class ImageServiceImplTest {
     void deleteImageNotFound() {
 
       // given
-      given(imageRepository.findById(imageId)).willReturn(Optional.empty());
+      given(imageRepository.findById(testImage.getId())).willReturn(Optional.empty());
 
       // when & then
-      assertThatThrownBy(() -> imageService.delete(imageId))
+      assertThatThrownBy(() -> imageService.delete(testImage.getId()))
           .isInstanceOf(ImageNotFoundException.class)
           .hasMessageContaining("이미지를 찾을 수 없습니다.");
-      verify(imageRepository).findById(imageId);
+      verify(imageRepository).findById(testImage.getId());
     }
   }
 }

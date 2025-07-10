@@ -9,7 +9,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -89,33 +88,17 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
             // 내림차순일 경우 cursor값이 작거나, 같되 idAfter가 작아야 함
             return qAttribute.createdAt.lt(cursorCreatedAt)
                 .or(qAttribute.createdAt.eq(cursorCreatedAt)
-                    .and(afterCondition(condition.idAfter(), condition.sortDirection())));
+                    .and(qAttribute.id.lt(condition.idAfter())));
           } else {
             // 오름차순일 경우 cursor값이 크거나, 같되 idAfter가 커야 함
             return qAttribute.createdAt.gt(cursorCreatedAt)
                 .or(qAttribute.createdAt.eq(cursorCreatedAt)
-                    .and(afterCondition(condition.idAfter(), condition.sortDirection())));
+                    .and(qAttribute.id.gt(condition.idAfter())));
           }
       }
     }
 
-    return afterCondition(condition.idAfter(), condition.sortDirection());
-  }
-
-  // 보조 커서(idAfter) 세팅
-  private BooleanExpression afterCondition(UUID idAfter, String sortDirection) {
-
-    if (idAfter == null) {
-      return null;
-    }
-
-    boolean isDesc = "DESCENDING".equalsIgnoreCase(sortDirection);
-
-    if (isDesc) {
-      return qAttribute.id.lt(idAfter);
-    }
-
-    return qAttribute.id.gt(idAfter);
+    return null;
   }
 
   /**

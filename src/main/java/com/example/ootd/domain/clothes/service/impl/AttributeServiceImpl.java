@@ -8,6 +8,9 @@ import com.example.ootd.domain.clothes.entity.Attribute;
 import com.example.ootd.domain.clothes.mapper.AttributeMapper;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
 import com.example.ootd.domain.clothes.service.AttributeService;
+import com.example.ootd.domain.notification.dto.NotificationEvent;
+import com.example.ootd.domain.notification.enums.NotificationLevel;
+import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
 import com.example.ootd.dto.PageResponse;
 import com.example.ootd.exception.clothes.AttributeNotFoundException;
 import java.util.HashSet;
@@ -26,6 +29,7 @@ public class AttributeServiceImpl implements AttributeService {
 
   private final AttributeRepository attributeRepository;
   private final AttributeMapper attributeMapper;
+  private final NotificationPublisherInterface notificationPublisher;
 
   @Override
   public ClothesAttributeDefDto create(ClothesAttributeDefCreateRequest request) {
@@ -38,6 +42,12 @@ public class AttributeServiceImpl implements AttributeService {
         .build();
 
     attributeRepository.save(attribute);
+
+    // 모든 사용자에게 알림
+    notificationPublisher.publishToAll(
+        new NotificationEvent("새로운 의상 속성이 등록되었어요.", "내 의상에 [" + attribute.getName() + "] 속성을 추가해보세요.",
+            NotificationLevel.INFO)
+    );
 
     ClothesAttributeDefDto clothesAttributeDefDto = attributeMapper.toDto(attribute);
 
@@ -57,6 +67,12 @@ public class AttributeServiceImpl implements AttributeService {
 
     updateName(attribute, request.name());
     updateDetails(attribute, request.selectableValues());
+
+    // 모든 사용자에게 알림
+    notificationPublisher.publishToAll(
+        new NotificationEvent("의상 속성이 변경되었어요.", "[" + attribute.getName() + "] 속성을 확인해보세요.",
+            NotificationLevel.INFO)
+    );
 
     ClothesAttributeDefDto clothesAttributeDefDto = attributeMapper.toDto(attribute);
 

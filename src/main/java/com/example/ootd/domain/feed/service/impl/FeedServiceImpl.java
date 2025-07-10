@@ -21,6 +21,7 @@ import com.example.ootd.domain.feed.repository.FeedRepository;
 import com.example.ootd.domain.feed.service.FeedService;
 import com.example.ootd.domain.follow.repository.FollowRepository;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
+import com.example.ootd.domain.notification.dto.NotificationRequest;
 import com.example.ootd.domain.notification.enums.NotificationLevel;
 import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
 import com.example.ootd.domain.user.User;
@@ -91,7 +92,7 @@ public class FeedServiceImpl implements FeedService {
     // 팔로워에게 알림 발송
     List<UUID> followerIds = followRepository.findFollowersByFolloweeId(request.authorId());
     notificationPublisher.publishToMany(
-        new NotificationEvent("새 피드 알림", author.getName() + "님이 새 피드를 등록했습니다.",
+        new NotificationEvent(author.getName() + "님이 새 피드를 등록했어요", feed.getContent(),
             NotificationLevel.INFO),
         followerIds
     );
@@ -182,6 +183,16 @@ public class FeedServiceImpl implements FeedService {
 
     feed.increaseLikeCount(); // TODO: 동시성 문제 해결
 
+    // 피드 작성자에게 알림
+    notificationPublisher.publish(
+        NotificationRequest.builder()
+            .receiverId(feed.getUser().getId())
+            .title(user.getName() + "님이 내 피드를 좋아합니다.")
+            .content(feed.getContent())
+            .level(NotificationLevel.INFO)
+            .build()
+    );
+
     FeedDto feedDto = feedMapper.toDto(feed, true);
 
     log.info("피드 좋아요 완료: {}", feedDto);
@@ -221,6 +232,16 @@ public class FeedServiceImpl implements FeedService {
 
     feedCommentRepository.save(comment);
     feed.increaseCommentCount();  // TODO: 동시성 문제 해결
+
+    // 피드 작성자에게 알림
+    notificationPublisher.publish(
+        NotificationRequest.builder()
+            .receiverId(feed.getUser().getId())
+            .title(user.getName() + "님이 댓글을 달았어요.")
+            .content(comment.getContent())
+            .level(NotificationLevel.INFO)
+            .build()
+    );
 
     CommentDto commentDto = commentMapper.toDto(comment);
 

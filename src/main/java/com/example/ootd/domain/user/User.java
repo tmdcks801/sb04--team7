@@ -147,20 +147,23 @@ public class User {
     this.tempPasswordExpiration = LocalDateTime.now().plusMinutes(10);
     this.password = tempPassword;
   }
-  
+
   public void updateRole(UserRole role){
     this.role = role;
   }
 
   public void updateProfile(ProfileUpdateRequest request, Image image){
-    this.image = image;
-    this.name = request.name();
-    this.gender = request.gender();
-    this.birthDate = request.birthDate();
-    this.location = request.location();
-    this.temperatureSensitivity = request.temperatureSensitivity();
+    this.image = image == null ? this.image : image;
+    this.name = request.name() == null ? this.name : request.name();
+    this.gender = request.gender() == null ? this.gender : request.gender();
+    this.birthDate = request.birthDate() == null ? this.birthDate : request.birthDate();
+    this.location = request.location() == null ? this.location : request.location();
+    this.temperatureSensitivity = request.temperatureSensitivity() == 0 ? this.temperatureSensitivity : request.temperatureSensitivity();
   }
 
+  public void updateLocation(Location location){
+    this.location = location;
+  }
   public void updatePassword(String password){
     this.password = password;
     this.isTempPassword = false;
@@ -185,4 +188,5 @@ public class User {
     this.temperatureSensitivity = 3;
 
   }
+
 }

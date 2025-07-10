@@ -35,7 +35,7 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
         )
         .orderBy(
             qClothes.createdAt.desc(),  // 최신순으로 정렬
-            qClothes.id.asc()
+            qClothes.id.desc()  // id 내림차순
         )
         .limit(condition.limit() + 1)
         .fetch();
@@ -64,7 +64,7 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
   private BooleanExpression getWhere(ClothesType typeEqual, UUID ownerId) {
 
     if (typeEqual == null) {
-      return null;
+      return qClothes.user.id.eq(ownerId);
     }
 
     return qClothes.type.eq(typeEqual)
@@ -77,23 +77,14 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
   // 커서(cursor) 세팅
   private BooleanExpression cursorCondition(String cursor, UUID idAfter) {
 
-    if (!StringUtils.hasText(cursor)) {
-      return afterCondition(idAfter);
+    if (!StringUtils.hasText(cursor) || idAfter == null) {
+      return null;
     }
 
     LocalDateTime cursorCreatedAt = LocalDateTime.parse(cursor);
 
     return qClothes.createdAt.lt(cursorCreatedAt)
         .or(qClothes.createdAt.eq(cursorCreatedAt)
-            .and(afterCondition(idAfter)));
-  }
-
-  // 보조 커서(idAfter) 세팅
-  private BooleanExpression afterCondition(UUID idAfter) {
-    if (idAfter == null) {
-      return null;
-    }
-
-    return qClothes.id.gt(idAfter);
+            .and(qClothes.id.lt(idAfter)));
   }
 }

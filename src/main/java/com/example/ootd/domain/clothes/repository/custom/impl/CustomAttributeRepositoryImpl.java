@@ -9,7 +9,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -31,10 +30,7 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
             getWhere(condition.keywordLike()),
             cursorCondition(condition)
         )
-        .orderBy(
-            getOrderBy(condition.sortBy(), condition.sortDirection()),
-            qAttribute.id.asc()
-        )
+        .orderBy(getOrderBy(condition.sortBy(), condition.sortDirection()))
         .limit(condition.limit() + 1)
         .fetch();
   }
@@ -89,55 +85,45 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
         case "createdAt": // 생성일
           LocalDateTime cursorCreatedAt = LocalDateTime.parse(condition.cursor());
           if (isDesc) {
-            // 내림차순일 경우 cursor값이 작거나, 같되 idAfter가 커야 함
+            // 내림차순일 경우 cursor값이 작거나, 같되 idAfter가 작아야 함
             return qAttribute.createdAt.lt(cursorCreatedAt)
                 .or(qAttribute.createdAt.eq(cursorCreatedAt)
-                    .and(afterCondition(condition.idAfter())));
+                    .and(qAttribute.id.lt(condition.idAfter())));
           } else {
             // 오름차순일 경우 cursor값이 크거나, 같되 idAfter가 커야 함
             return qAttribute.createdAt.gt(cursorCreatedAt)
                 .or(qAttribute.createdAt.eq(cursorCreatedAt)
-                    .and(afterCondition(condition.idAfter())));
+                    .and(qAttribute.id.gt(condition.idAfter())));
           }
       }
     }
 
-    return afterCondition(condition.idAfter());
-  }
-
-  // 보조 커서(idAfter) 세팅
-  private BooleanExpression afterCondition(UUID idAfter) {
-
-    if (idAfter == null) {
-      return null;
-    }
-
-    return qAttribute.id.gt(idAfter);
+    return null;
   }
 
   /**
    * orderBy절
    */
   // 속성명 or 생성일
-  private OrderSpecifier<?> getOrderBy(String sortBy, String sortDirection) {
+  private OrderSpecifier<?>[] getOrderBy(String sortBy, String sortDirection) {
 
     boolean isDesc = "DESCENDING".equalsIgnoreCase(sortDirection);
 
     switch (sortBy) {
       case "name":  // 속성명
         if (isDesc) {
-          return qAttribute.name.desc();
+          return new OrderSpecifier<?>[]{qAttribute.name.desc()};
         } else {
-          return qAttribute.name.asc();
+          return new OrderSpecifier<?>[]{qAttribute.name.asc()};
         }
       case "createdAt":  // 생성일
         if (isDesc) {
-          return qAttribute.createdAt.desc();
+          return new OrderSpecifier<?>[]{qAttribute.createdAt.desc(), qAttribute.id.desc()};
         } else {
-          return qAttribute.createdAt.asc();
+          return new OrderSpecifier<?>[]{qAttribute.createdAt.asc(), qAttribute.id.asc()};
         }
       default:
-        return qAttribute.name.asc(); // 기본 정렬: 속성명 오름차순
+        return new OrderSpecifier<?>[]{qAttribute.name.asc()}; // 기본 정렬: 속성명 오름차순
     }
   }
 }

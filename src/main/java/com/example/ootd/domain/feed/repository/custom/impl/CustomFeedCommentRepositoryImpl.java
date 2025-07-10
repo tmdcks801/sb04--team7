@@ -7,7 +7,6 @@ import com.example.ootd.domain.feed.repository.custom.CustomFeedCommentRepositor
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -41,18 +40,9 @@ public class CustomFeedCommentRepositoryImpl implements CustomFeedCommentReposit
     if (condition.cursor() != null) {
       return qFeedComment.createdAt.gt(condition.cursor())
           .or(qFeedComment.createdAt.eq(condition.cursor())
-              .and(afterCondition(condition.idAfter())));
+              .and(qFeedComment.id.gt(condition.idAfter())));
     }
 
-    return afterCondition(condition.idAfter());
-  }
-
-  private BooleanExpression afterCondition(UUID idAfter) {
-
-    if (idAfter == null) {
-      return null;
-    }
-
-    return qFeedComment.id.gt(idAfter);
+    return null;
   }
 }

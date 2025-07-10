@@ -52,13 +52,15 @@ public class AttributeRepositoryTest {
       Attribute attribute = Attribute.builder().name("테스트" + i)
           .details(new ArrayList<>(Arrays.asList(String.valueOf(i), "test" + i))).build();
       list.add(attribute);
+      attributeRepository.save(attribute);
     }
     for (int i = 0; i < 5; i++) {
       Attribute attribute = Attribute.builder().name("테스트" + i + i)
           .details(new ArrayList<>(Arrays.asList(String.valueOf(i), "test" + i + i))).build();
       list.add(attribute);
+      attributeRepository.save(attribute);
     }
-    attributeRepository.saveAll(list);
+//    attributeRepository.saveAll(list);
   }
 
   @Nested
@@ -110,16 +112,20 @@ public class AttributeRepositoryTest {
       // given
       ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder().limit(5)
           .sortBy("createdAt").sortDirection("ASCENDING").build();
-      list.sort(Comparator.comparing(Attribute::getCreatedAt) // list 생성일 오름차순 정렬
-          .thenComparing(Attribute::getId));   // 생성일 같을 경우 id 오름차순 정렬
+      list.sort(
+          Comparator.comparing(Attribute::getCreatedAt) // list 생성일 오름차순 정렬
+              .thenComparing(a -> a.getId().toString()) // 생성일 같을 경우 id 오름차순 정렬
+      );
 
       // when
       List<Attribute> result = attributeRepository.findByCondition(condition);
 
       // then
       assertThat(result).hasSize(condition.limit() + 1);
-      assertThat(result.get(condition.limit() - 1).getName()).isEqualTo(
-          list.get(condition.limit() - 1).getName());
+      assertThat(result.get(0).getName()).isEqualTo(
+          list.get(0).getName());
+      assertThat(result.get(3).getName()).isEqualTo(
+          list.get(3).getName());
     }
 
     @Test
@@ -129,16 +135,20 @@ public class AttributeRepositoryTest {
       // given
       ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder().limit(5)
           .sortBy("createdAt").sortDirection("DESCENDING").build();
-      list.sort(Comparator.comparing(Attribute::getCreatedAt).reversed()  // list 생성일 내림차순 정렬
-          .thenComparing(Attribute::getId));  // 생성일 같을 경우 id 오름차순 정렬
+      list.sort(
+          Comparator.comparing(Attribute::getCreatedAt, Comparator.reverseOrder())  // list 생성일 내림차 정렬
+              .thenComparing(a -> a.getId().toString(), Comparator.reverseOrder())  // 생성일 같을 경우 id 내림차순 정렬
+      );
 
       // when
       List<Attribute> result = attributeRepository.findByCondition(condition);
 
       // then
       assertThat(result).hasSize(condition.limit() + 1);
-      assertThat(result.get(condition.limit() - 1).getName()).isEqualTo(
-          list.get(condition.limit() - 1).getName());
+      assertThat(result.get(0).getName()).isEqualTo(
+          list.get(0).getName());
+      assertThat(result.get(3).getName()).isEqualTo(
+          list.get(3).getName());
     }
   }
 }

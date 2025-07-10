@@ -35,7 +35,7 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
         )
         .orderBy(
             qClothes.createdAt.desc(),  // 최신순으로 정렬
-            qClothes.id.asc()
+            qClothes.id.desc()  // id 내림차순
         )
         .limit(condition.limit() + 1)
         .fetch();
@@ -94,6 +94,6 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
       return null;
     }
 
-    return qClothes.id.gt(idAfter);
+    return qClothes.id.lt(idAfter);
   }
 }

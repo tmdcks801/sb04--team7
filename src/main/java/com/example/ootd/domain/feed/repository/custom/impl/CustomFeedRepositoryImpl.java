@@ -39,8 +39,7 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
             cursorCondition(condition)
         )
         .orderBy(
-            getOrderBy(condition.sortBy(), condition.sortDirection()),
-            qFeed.id.asc()
+            getOrderBy(condition.sortBy(), condition.sortDirection())
         )
         .limit(condition.limit() + 1)
         .fetch();
@@ -103,37 +102,43 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
             // 내림차순일 경우 cursor값이 작거나, 같되 idAfter가 커야 함
             return qFeed.createdAt.lt(cursorCreatedAt)
                 .or(qFeed.createdAt.eq(cursorCreatedAt)
-                    .and(afterCondition(condition.idAfter())));
+                    .and(afterCondition(condition.idAfter(), condition.sortDirection())));
           } else {
             // 오름차순일 경우 cursor값이 크거나, 같되 idAfter가 커야 함
             return qFeed.createdAt.gt(cursorCreatedAt)
                 .or(qFeed.createdAt.eq(cursorCreatedAt)
-                    .and(afterCondition(condition.idAfter())));
+                    .and(afterCondition(condition.idAfter(), condition.sortDirection())));
           }
         case "likeCount":
           long cursorLikeCount = Long.parseLong(condition.cursor());
           if (isDesc) {
-            // 내림차순일 경우 cursor값이 작거나, 같되 idAfter가 커야 함
+            // 내림차순일 경우 cursor값이 작거나, 같되 idAfter가 작아야 함
             return qFeed.likeCount.lt(cursorLikeCount)
                 .or(qFeed.likeCount.eq(cursorLikeCount)
-                    .and(afterCondition(condition.idAfter())));
+                    .and(afterCondition(condition.idAfter(), condition.sortDirection())));
           } else {
             // 오름차순일 경우 cursor값이 크거나, 같되 idAfter가 커야 함
             return qFeed.likeCount.gt(cursorLikeCount)
                 .or(qFeed.likeCount.eq(cursorLikeCount)
-                    .and(afterCondition(condition.idAfter())));
+                    .and(afterCondition(condition.idAfter(), condition.sortDirection())));
           }
       }
     }
 
-    return afterCondition(condition.idAfter());
+    return afterCondition(condition.idAfter(), condition.sortDirection());
   }
 
   // 보조 커서(idAfter) 세팅
-  private BooleanExpression afterCondition(UUID idAfter) {
+  private BooleanExpression afterCondition(UUID idAfter, String sortDirection) {
 
     if (idAfter == null) {
       return null;
+    }
+
+    boolean isDesc = "DESCENDING".equalsIgnoreCase(sortDirection);
+
+    if (isDesc) {
+      return qFeed.id.lt(idAfter);
     }
 
     return qFeed.id.gt(idAfter);
@@ -143,25 +148,25 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
    * orderBy절
    */
   // 생성일 or 좋아요 수
-  private OrderSpecifier<?> getOrderBy(String sortBy, String sortDirection) {
+  private OrderSpecifier<?>[] getOrderBy(String sortBy, String sortDirection) {
 
     boolean isDesc = "DESCENDING".equalsIgnoreCase(sortDirection);
 
     switch (sortBy) {
       case "createdAt":  // 생성일
         if (isDesc) {
-          return qFeed.createdAt.desc();
+          return new OrderSpecifier<?>[]{qFeed.createdAt.desc(), qFeed.id.desc()};
         } else {
-          return qFeed.createdAt.asc();
+          return new OrderSpecifier<?>[]{qFeed.createdAt.asc(), qFeed.id.asc()};
         }
       case "likeCount":
         if (isDesc) {
-          return qFeed.likeCount.desc();
+          return new OrderSpecifier<?>[]{qFeed.likeCount.desc(), qFeed.id.desc()};
         } else {
-          return qFeed.likeCount.asc();
+          return new OrderSpecifier<?>[]{qFeed.likeCount.asc(), qFeed.id.asc()};
         }
       default:
-        return qFeed.createdAt.desc(); // 기본 정렬: 최신순
+        return new OrderSpecifier<?>[]{qFeed.createdAt.desc(), qFeed.id.desc()};  // 기본 정렬 최신순
     }
   }
 }

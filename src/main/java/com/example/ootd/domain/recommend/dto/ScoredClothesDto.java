@@ -10,6 +10,7 @@ import lombok.Builder;
 @Builder
 public record ScoredClothesDto(
     UUID id,
+    UUID ownerId,
     String name,
     ClothesType type,
     String imageUrl,

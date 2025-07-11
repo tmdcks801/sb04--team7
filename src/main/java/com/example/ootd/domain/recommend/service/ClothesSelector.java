@@ -111,6 +111,7 @@ public class ClothesSelector {
 
     return ClothesDto.builder()
         .id(clothes.id())
+        .ownerId(clothes.ownerId())
         .name(clothes.name())
         .type(clothes.type())
         .imageUrl(clothes.imageUrl())

@@ -17,6 +17,7 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
   @Query(value = """
         SELECT 
             c.id, 
+            c.user_id,
             c.name, 
             c.type, 
             i.url as image_url,

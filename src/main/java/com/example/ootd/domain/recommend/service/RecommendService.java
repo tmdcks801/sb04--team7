@@ -1,4 +1,4 @@
-package com.example.ootd.domain.clothes.service;
+package com.example.ootd.domain.recommend.service;
 
 import com.example.ootd.domain.clothes.dto.data.RecommendationDto;
 import java.util.UUID;

@@ -13,7 +13,7 @@ import com.example.ootd.domain.clothes.mapper.ClothesMapper;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
 import com.example.ootd.domain.clothes.repository.ClothesRepository;
 import com.example.ootd.domain.clothes.service.ClothesService;
-import com.example.ootd.domain.clothes.service.RecommendService;
+import com.example.ootd.domain.recommend.service.RecommendService;
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.image.service.ImageService;
 import com.example.ootd.domain.user.User;

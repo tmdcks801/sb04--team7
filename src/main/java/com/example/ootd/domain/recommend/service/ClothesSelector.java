@@ -2,7 +2,7 @@ package com.example.ootd.domain.recommend.service;
 
 import com.example.ootd.domain.clothes.dto.data.ClothesAttributeWithDefDto;
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
-import com.example.ootd.domain.clothes.dto.data.ScoredClothesDto;
+import com.example.ootd.domain.recommend.dto.ScoredClothesDto;
 import com.example.ootd.domain.clothes.entity.ClothesType;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
 import java.util.ArrayList;

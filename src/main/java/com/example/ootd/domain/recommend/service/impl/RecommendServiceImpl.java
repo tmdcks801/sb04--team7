@@ -1,8 +1,8 @@
 package com.example.ootd.domain.recommend.service.impl;
 
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
-import com.example.ootd.domain.clothes.dto.data.RecommendationDto;
-import com.example.ootd.domain.clothes.dto.data.ScoredClothesDto;
+import com.example.ootd.domain.recommend.dto.RecommendationDto;
+import com.example.ootd.domain.recommend.dto.ScoredClothesDto;
 import com.example.ootd.domain.clothes.entity.ClothesType;
 import com.example.ootd.domain.recommend.service.ClothesCalculator;
 import com.example.ootd.domain.recommend.service.ClothesSelector;

@@ -1,6 +1,6 @@
 package com.example.ootd.domain.recommend.service;
 
-import com.example.ootd.domain.clothes.dto.data.ScoredClothesDto;
+import com.example.ootd.domain.recommend.dto.ScoredClothesDto;
 import org.springframework.stereotype.Component;
 
 @Component

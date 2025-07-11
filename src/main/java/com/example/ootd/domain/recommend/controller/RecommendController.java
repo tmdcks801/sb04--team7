@@ -1,6 +1,6 @@
 package com.example.ootd.domain.recommend.controller;
 
-import com.example.ootd.domain.clothes.dto.data.RecommendationDto;
+import com.example.ootd.domain.recommend.dto.RecommendationDto;
 import com.example.ootd.domain.recommend.service.RecommendService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

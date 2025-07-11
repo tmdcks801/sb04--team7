@@ -61,7 +61,7 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
       return null;
     }
 
-    return qAttribute.name.contains(keywordLike)
+    return (qAttribute.name.contains(keywordLike))
         .or(qAttribute.detailsRaw.contains(keywordLike));
   }
 
@@ -86,14 +86,14 @@ public class CustomAttributeRepositoryImpl implements CustomAttributeRepository 
           LocalDateTime cursorCreatedAt = LocalDateTime.parse(condition.cursor());
           if (isDesc) {
             // 내림차순일 경우 cursor값이 작거나, 같되 idAfter가 작아야 함
-            return qAttribute.createdAt.lt(cursorCreatedAt)
-                .or(qAttribute.createdAt.eq(cursorCreatedAt)
-                    .and(qAttribute.id.lt(condition.idAfter())));
+            return (qAttribute.createdAt.eq(cursorCreatedAt)
+                .and(qAttribute.id.lt(condition.idAfter())))
+                .or(qAttribute.createdAt.lt(cursorCreatedAt));
           } else {
             // 오름차순일 경우 cursor값이 크거나, 같되 idAfter가 커야 함
-            return qAttribute.createdAt.gt(cursorCreatedAt)
-                .or(qAttribute.createdAt.eq(cursorCreatedAt)
-                    .and(qAttribute.id.gt(condition.idAfter())));
+            return (qAttribute.createdAt.eq(cursorCreatedAt)
+                .and(qAttribute.id.gt(condition.idAfter())))
+                .or(qAttribute.createdAt.gt(cursorCreatedAt));
           }
       }
     }

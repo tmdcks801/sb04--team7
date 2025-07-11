@@ -32,6 +32,27 @@ public class TestEntityFactory {
     return user;
   }
 
+  public static User createUser(String email, String name){
+    User user = new User(
+        name,
+        email,
+        "test-password",
+        UserRole.ROLE_USER,
+        false,
+        null,
+        null,
+        Gender.MALE,
+        LocalDate.of(1999,4,13),
+        3,
+        false,
+        null
+    );
+
+    ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
+    ReflectionTestUtils.setField(user, "createdAt", LocalDateTime.now());
+
+    return user;
+  }
 
   // 테스트용 유저 객체 반환
   public static User createUserNoId(String uniqueSuffix) {

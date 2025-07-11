@@ -127,6 +127,8 @@ public class ClothesSelector {
           .ifPresent(attr -> attributes.add(ClothesAttributeWithDefDto.builder()
               .definitionId(attr.getId())
               .value(thickness)
+              .definitionName(attr.getName())
+              .selectableValues(attr.getDetails())
               .build()));
     }
 
@@ -136,6 +138,8 @@ public class ClothesSelector {
           .ifPresent(attr -> attributes.add(ClothesAttributeWithDefDto.builder()
               .definitionId(attr.getId())
               .value(color)
+              .definitionName(attr.getName())
+              .selectableValues(attr.getDetails())
               .build()));
     }
 

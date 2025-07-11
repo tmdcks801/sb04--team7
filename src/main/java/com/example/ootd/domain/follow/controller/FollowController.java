@@ -45,7 +45,7 @@ public class FollowController {
 
   @GetMapping("/followings")
   public ResponseEntity<FollowListResponse> getFollowings(
-    @RequestParam(name = "followingId") UUID userId,
+    @RequestParam(name = "followerId") UUID userId,
     @ModelAttribute @Valid FollowListCondition conditions
   ){
     FollowListResponse response = followService.getFollowingList(conditions, userId);

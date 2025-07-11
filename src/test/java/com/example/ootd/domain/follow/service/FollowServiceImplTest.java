@@ -3,6 +3,7 @@ package com.example.ootd.domain.follow.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -31,6 +32,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collections;
+import com.example.ootd.domain.follow.dto.FollowListCondition;
 
 import java.util.UUID;
 
@@ -162,5 +166,77 @@ public class FollowServiceImplTest {
 
         // then
         assertThrows(OotdException.class, () -> followService.deleteFollow(followId));
+    }
+
+    @Test
+    @DisplayName("팔로워 목록 조회 성공")
+    void getFollowerListSuccess() {
+        // given
+        FollowListCondition condition = new FollowListCondition(null, null, 10, null, "id", null);
+        given(followRepository.countByFolloweeId(any(UUID.class))).willReturn(0L);
+        given(followRepository.findFollowersWithCursor(any(UUID.class), any(), any(), anyInt(), any(), any(), any()))
+            .willReturn(Collections.emptyList());
+
+        // when
+        var result = followService.getFollowerList(condition, followeeId);
+
+        // then
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    @DisplayName("팔로워 목록 조회 성공 - 다음 페이지 존재")
+    void getFollowerListSuccessHasNext() {
+        // given
+        FollowListCondition condition = new FollowListCondition(null, null, 10, null, "id", null);
+        Follow mockFollow = Follow.builder().id(UUID.randomUUID()).follower(follower).followee(followee).build();
+        List<Follow> follows = Collections.nCopies(11, mockFollow);
+        given(followRepository.countByFolloweeId(any(UUID.class))).willReturn(11L);
+        given(followRepository.findFollowersWithCursor(any(UUID.class), any(), any(), anyInt(), any(), any(), any()))
+            .willReturn(follows);
+        given(followMapper.toDto(any(Follow.class))).willReturn(followDto);
+
+        // when
+        var result = followService.getFollowerList(condition, followeeId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.hasNext()).isTrue();
+    }
+
+    @Test
+    @DisplayName("팔로잉 목록 조회 성공")
+    void getFollowingListSuccess() {
+        // given
+        FollowListCondition condition = new FollowListCondition(null, null, 10, null, "id", null);
+        given(followRepository.countByFollowerId(any(UUID.class))).willReturn(0L);
+        given(followRepository.findFollowingsWithCursor(any(UUID.class), any(), any(), anyInt(), any(), any(), any()))
+            .willReturn(Collections.emptyList());
+
+        // when
+        var result = followService.getFollowingList(condition, followerId);
+
+        // then
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    @DisplayName("팔로잉 목록 조회 성공 - 다음 페이지 존재")
+    void getFollowingListSuccessHasNext() {
+        // given
+        FollowListCondition condition = new FollowListCondition(null, null, 10, null, "id", null);
+        Follow mockFollow = Follow.builder().id(UUID.randomUUID()).follower(follower).followee(followee).build();
+        List<Follow> follows = Collections.nCopies(11, mockFollow);
+        given(followRepository.countByFollowerId(any(UUID.class))).willReturn(11L);
+        given(followRepository.findFollowingsWithCursor(any(UUID.class), any(), any(), anyInt(), any(), any(), any()))
+            .willReturn(follows);
+        given(followMapper.toDto(any(Follow.class))).willReturn(followDto);
+
+        // when
+        var result = followService.getFollowingList(condition, followerId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.hasNext()).isTrue();
     }
 }

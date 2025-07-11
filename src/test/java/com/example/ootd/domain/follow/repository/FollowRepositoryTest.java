@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.example.ootd.domain.follow.dto.Direction;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -140,5 +142,35 @@ class FollowRepositoryTest {
 
         // then
         assertThat(count).isEqualTo(10L);
+    }
+
+    @Test
+    @DisplayName("팔로워 커서 기반 페이지네이션 조회 테스트")
+    void findFollowersWithCursor() {
+        // given
+        UUID followeeId = UUID.randomUUID();
+        given(followRepository.findFollowersWithCursor(followeeId, null, null, 10, null, "id", Direction.ASCENDING))
+            .willReturn(List.of());
+
+        // when
+        List<Follow> result = followRepository.findFollowersWithCursor(followeeId, null, null, 10, null, "id", Direction.ASCENDING);
+
+        // then
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    @DisplayName("팔로잉 커서 기반 페이지네이션 조회 테스트")
+    void findFollowingsWithCursor() {
+        // given
+        UUID followerId = UUID.randomUUID();
+        given(followRepository.findFollowingsWithCursor(followerId, null, null, 10, null, "id", Direction.ASCENDING))
+            .willReturn(List.of());
+
+        // when
+        List<Follow> result = followRepository.findFollowingsWithCursor(followerId, null, null, 10, null, "id", Direction.ASCENDING);
+
+        // then
+        assertThat(result).isNotNull();
     }
 }

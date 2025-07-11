@@ -9,12 +9,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+
 import com.example.ootd.domain.follow.dto.FollowCreateRequest;
 import com.example.ootd.domain.follow.dto.FollowDto;
+import com.example.ootd.domain.follow.dto.FollowListCondition;
+import com.example.ootd.domain.follow.dto.FollowListResponse;
 import com.example.ootd.domain.follow.dto.FollowSummaryDto;
 import com.example.ootd.domain.follow.service.FollowService;
 import com.example.ootd.domain.user.dto.UserSummary;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith(MockitoExtension.class)
@@ -126,6 +132,50 @@ class FollowControllerTest {
         // when & then
         mockMvc.perform(get("/api/follows/summary")
                 .param("userId", followerId.toString()))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("팔로워 목록 조회 성공")
+    void getFollowerListSuccess() throws Exception {
+        // given
+        FollowListResponse response = FollowListResponse.builder()
+            .data(List.of(followDto))
+            .nextCursor(null)
+            .nextIdAfter(null)
+            .hasNext(false)
+            .totalCount(1)
+            .sortBy("id")
+            .sortDirection(null)
+            .build();
+        given(followService.getFollowerList(any(FollowListCondition.class), any(UUID.class))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/follows/followers")
+                .param("followeeId", followeeId.toString())
+                .param("limit", "10"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("팔로잉 목록 조회 성공")
+    void getFollowingListSuccess() throws Exception {
+        // given
+        FollowListResponse response = FollowListResponse.builder()
+            .data(List.of(followDto))
+            .nextCursor(null)
+            .nextIdAfter(null)
+            .hasNext(false)
+            .totalCount(1)
+            .sortBy("id")
+            .sortDirection(null)
+            .build();
+        given(followService.getFollowingList(any(FollowListCondition.class), any(UUID.class))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/follows/followings")
+                .param("followerId", followerId.toString())
+                .param("limit", "10"))
             .andExpect(status().isOk());
     }
 }

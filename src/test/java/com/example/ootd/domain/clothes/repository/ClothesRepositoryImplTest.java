@@ -56,12 +56,12 @@ public class ClothesRepositoryImplTest {
   void setUp() {
 
     list.clear();
-    user1 = userRepository.save(TestEntityFactory.createUserNoId("1"));
-    User user2 = userRepository.save(TestEntityFactory.createUserNoId("2"));
+    user1 = userRepository.save(TestEntityFactory.createUserWithoutId("1"));
+    User user2 = userRepository.save(TestEntityFactory.createUserWithoutId("2"));
 
     // 테스트용 데이터 저장
     for (int i = 0; i < 6; i++) {
-      Image image = imageRepository.save(TestEntityFactory.createImage(String.valueOf(i)));
+      Image image = imageRepository.save(TestEntityFactory.createImageWithoutId(String.valueOf(i)));
       Clothes clothes = Clothes.builder().user(user1).image(image)
           .name("test" + i).type(ClothesType.values()[i]).build();
       list.add(clothes);

@@ -1,11 +1,13 @@
 package com.example.ootd;
 
+import com.example.ootd.domain.clothes.entity.Attribute;
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.user.Gender;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.UserRole;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -32,7 +34,7 @@ public class TestEntityFactory {
     return user;
   }
 
-  public static User createUser(String email, String name){
+  public static User createUser(String email, String name) {
     User user = new User(
         name,
         email,
@@ -42,7 +44,7 @@ public class TestEntityFactory {
         null,
         null,
         Gender.MALE,
-        LocalDate.of(1999,4,13),
+        LocalDate.of(1999, 4, 13),
         3,
         false,
         null
@@ -55,7 +57,7 @@ public class TestEntityFactory {
   }
 
   // 테스트용 유저 객체 반환
-  public static User createUserNoId(String uniqueSuffix) {
+  public static User createUserWithoutId(String uniqueSuffix) {
 
     return new User(
         "test-name-no-id" + uniqueSuffix,
@@ -72,13 +74,34 @@ public class TestEntityFactory {
         false,
         null
     );
-
   }
 
   // 테스트용 이미지 객체 반환
-  public static Image createImage(String uniqueSuffix) {
+  public static Image createImageWithoutId(String uniqueSuffix) {
 
     return new Image("https://test-bucket.s3.region.amazonaws.com/test" + uniqueSuffix + ".jpg",
         "test" + uniqueSuffix + ".jpg");
+  }
+
+  public static Image createImage() {
+
+    Image image = new Image("https://test-bucket.s3.region.amazonaws.com/test.jpg",
+        "test.jpg");
+
+    ReflectionTestUtils.setField(image, "id", UUID.randomUUID());
+
+    return image;
+  }
+
+  // 테스트용 의상 속성 정의 객체 반환
+  public static Attribute createAttribute() {
+
+    Attribute attribute = new Attribute(
+        "test", List.of("test1", "test2", "test3")
+    );
+
+    ReflectionTestUtils.setField(attribute, "id", UUID.randomUUID());
+
+    return attribute;
   }
 }

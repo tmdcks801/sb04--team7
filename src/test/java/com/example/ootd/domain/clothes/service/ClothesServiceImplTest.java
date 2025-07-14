@@ -21,6 +21,7 @@ import com.example.ootd.domain.clothes.repository.ClothesRepository;
 import com.example.ootd.domain.clothes.service.impl.ClothesServiceImpl;
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.image.service.ImageService;
+import com.example.ootd.domain.recommend.service.RecommendService;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.exception.user.UserIdNotFoundException;

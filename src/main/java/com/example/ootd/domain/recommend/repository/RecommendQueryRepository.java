@@ -27,7 +27,8 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
             w.wind_speed,
             u.temperature_sensitivity,
             thickness_ca.value as thickness,
-            color_ca.value as color
+            color_ca.value as color,
+            season_ca.value as season
             
         FROM clothes c
         LEFT JOIN images i ON c.image_id = i.id
@@ -37,6 +38,7 @@ public interface RecommendQueryRepository extends JpaRepository<Clothes, UUID> {
         LEFT JOIN attributes thickness_a ON thickness_ca.attribute_id = thickness_a.id AND thickness_a.name = '두께감'
         LEFT JOIN clothes_attributes color_ca ON c.id = color_ca.clothes_id
         LEFT JOIN attributes color_a ON color_ca.attribute_id = color_a.id AND color_a.name = '색상'
+        LEFT JOIN attritubes season_a ON season_ca.attribute_id = season_a.id AND season_a.name = '계절'
         WHERE c.user_id = :userId
         ORDER BY c.type, c.name
         """, nativeQuery = true)

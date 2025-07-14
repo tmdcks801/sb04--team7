@@ -52,6 +52,7 @@ public class AttributeRepositoryTest {
       Attribute attribute = Attribute.builder().name("테스트" + i)
           .details(new ArrayList<>(Arrays.asList(String.valueOf(i), "test" + i))).build();
       list.add(attribute);
+
     }
     for (int i = 0; i < 5; i++) {
       Attribute attribute = Attribute.builder().name("테스트" + i + i)
@@ -120,10 +121,9 @@ public class AttributeRepositoryTest {
 
       // then
       assertThat(result).hasSize(condition.limit() + 1);
-      assertThat(result.get(0).getName()).isEqualTo(
-          list.get(0).getName());
-      assertThat(result.get(3).getName()).isEqualTo(
-          list.get(3).getName());
+      assertThat(result.get(0).getName()).isEqualTo(list.get(0).getName());
+      assertThat(result.get(3).getName()).isEqualTo(list.get(3).getName());
+      assertThat(result).containsExactlyElementsOf(list.subList(0, condition.limit() + 1));
     }
 
     @Test
@@ -142,10 +142,9 @@ public class AttributeRepositoryTest {
 
       // then
       assertThat(result).hasSize(condition.limit() + 1);
-      assertThat(result.get(0).getName()).isEqualTo(
-          list.get(0).getName());
-      assertThat(result.get(3).getName()).isEqualTo(
-          list.get(3).getName());
+      assertThat(result.get(0).getName()).isEqualTo(list.get(0).getName());
+      assertThat(result.get(3).getName()).isEqualTo(list.get(3).getName());
+      assertThat(result).containsExactlyElementsOf(list.subList(0, condition.limit() + 1));
     }
 
     @Test
@@ -192,18 +191,19 @@ public class AttributeRepositoryTest {
       );
     }
 
+    // ----------------------
     // 생성일 정렬은 잘 되는데, 커서 페이지네이션 불안정. 테스트를 통과 했다 안했다 그럼.. 이유를 모르겠음
     // 포스트맨에서 테스트 시 커서 페이지네이션은 됨
+    //
 //    @Test
 //    @DisplayName("성공 - 커서 페이지네이션, 생성일 오름차순")
 //    void findByConditionSuccessCreatedAtAscCursor() {
 //
 //      // given
 //      int limit = 5;
-//      list.sort(
-//          Comparator.comparing(Attribute::getCreatedAt) // list 생성일 오름차순 정렬
-//              .thenComparing(a -> a.getId().toString()) // 생성일 같을 경우 id 오름차순 정렬
-//      );
+//      // list 생성일 오름차순 정렬, id 오름차순
+//      list.sort(Comparator.comparing(Attribute::getCreatedAt)
+//          .thenComparing(a -> a.getId().toString()));
 //      ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder()
 //          .limit(limit).cursor(list.get(limit - 1).getCreatedAt().toString())
 //          .idAfter(list.get(limit - 1).getId())
@@ -223,12 +223,9 @@ public class AttributeRepositoryTest {
 //
 //      // given
 //      int limit = 5;
-//      list.sort(
-//          Comparator.comparing(Attribute::getCreatedAt,
-//                  Comparator.reverseOrder())  // list 생성일 내림차 정렬
-//              .thenComparing(a -> a.getId().toString(), Comparator.reverseOrder())
-//          // 생성일 같을 경우 id 내림차순 정렬
-//      );
+//      // list 생성일 내림차순, id 내림차순
+//      list.sort(Comparator.comparing(Attribute::getCreatedAt, Comparator.reverseOrder())
+//          .thenComparing(a -> a.getId().toString(), Comparator.reverseOrder()));
 //      ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder()
 //          .limit(limit).cursor(list.get(limit - 1).getCreatedAt().toString())
 //          .idAfter(list.get(limit - 1).getId())
@@ -241,6 +238,7 @@ public class AttributeRepositoryTest {
 //      assertThat(result).hasSize(limit + 1);
 //      assertThat(result.get(0)).isEqualTo(list.get(limit));
 //    }
+    // ----------------------
 
     @Test
     @DisplayName("성공 - 키워드 검색, 속성명")

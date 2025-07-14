@@ -10,4 +10,7 @@ public interface AttributeRepository extends JpaRepository<Attribute, UUID>,
     CustomAttributeRepository {
     
     Optional<Attribute> findByName(String name);
+
+  boolean existsByName(String name);
+
 }

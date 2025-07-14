@@ -22,6 +22,7 @@ import com.example.ootd.dto.PageResponse;
 import com.example.ootd.exception.clothes.AttributeDetailNotFoundException;
 import com.example.ootd.exception.clothes.AttributeNotFoundException;
 import com.example.ootd.exception.clothes.ClothesNotFountException;
+import com.example.ootd.exception.user.UserIdNotFoundException;
 import com.querydsl.core.util.StringUtils;
 import java.util.HashSet;
 import java.util.List;
@@ -56,7 +57,7 @@ public class ClothesServiceImpl implements ClothesService {
 
     Image clothesImage = imageService.upload(image);
     User user = userRepository.findById(userId)
-        .orElseThrow(); // TODO: null 처리
+        .orElseThrow(() -> UserIdNotFoundException.withId(userId));
 
     // Clothes 등록
     Clothes clothes = Clothes.builder()

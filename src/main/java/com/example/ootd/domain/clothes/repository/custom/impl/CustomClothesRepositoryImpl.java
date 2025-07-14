@@ -67,7 +67,7 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
       return qClothes.user.id.eq(ownerId);
     }
 
-    return qClothes.type.eq(typeEqual)
+    return (qClothes.type.eq(typeEqual))
         .and(qClothes.user.id.eq(ownerId));
   }
 
@@ -83,8 +83,7 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
 
     LocalDateTime cursorCreatedAt = LocalDateTime.parse(cursor);
 
-    return qClothes.createdAt.lt(cursorCreatedAt)
-        .or(qClothes.createdAt.eq(cursorCreatedAt)
-            .and(qClothes.id.lt(idAfter)));
+    return (qClothes.createdAt.eq(cursorCreatedAt).and(qClothes.id.lt(idAfter)))
+        .or(qClothes.createdAt.lt(cursorCreatedAt));
   }
 }

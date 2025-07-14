@@ -12,6 +12,7 @@ import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.enums.NotificationLevel;
 import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
 import com.example.ootd.dto.PageResponse;
+import com.example.ootd.exception.clothes.AttributeNameAlreadyExistsException;
 import com.example.ootd.exception.clothes.AttributeNotFoundException;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,10 @@ public class AttributeServiceImpl implements AttributeService {
 
     log.debug("의상 속성 정의 등록 시작: {}", request);
 
+    if (attributeRepository.existsByName(request.name())) {
+      throw AttributeNameAlreadyExistsException.withName(request.name());
+    }
+
     Attribute attribute = Attribute.builder()
         .name(request.name())
         .details(request.selectableValues())
@@ -45,7 +50,8 @@ public class AttributeServiceImpl implements AttributeService {
 
     // 모든 사용자에게 알림
     notificationPublisher.publishToAll(
-        new NotificationEvent("새로운 의상 속성이 등록되었어요.", "내 의상에 [" + attribute.getName() + "] 속성을 추가해보세요.",
+        new NotificationEvent("새로운 의상 속성이 등록되었어요.",
+            "내 의상에 [" + attribute.getName() + "] 속성을 추가해보세요.",
             NotificationLevel.INFO)
     );
 

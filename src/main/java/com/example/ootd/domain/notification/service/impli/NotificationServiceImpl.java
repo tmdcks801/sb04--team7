@@ -24,6 +24,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.BulkOperationException;
@@ -36,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "notification")
 public class NotificationServiceImpl implements NotificationServiceInterface {
 
   private final NotificationRepository repository;
@@ -44,6 +48,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
 
   @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @CachePut(key = "#result.id")
   public NotificationDto createNotification(NotificationDto dto) {
 
     try {
@@ -59,6 +64,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
 
   @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @CachePut(key = "#result.id")
   public NotificationDto createNotification(NotificationRequest req) {
     try {
       Notification notification = Notification.createNotification(req);
@@ -139,6 +145,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
 
   @Override
   @Transactional
+  @CacheEvict(key = "#notificationId")
   public void readNotification(UUID notificationId) {
     try {
       Notification notification = repository.findById(notificationId).orElseThrow(() ->
@@ -179,7 +186,7 @@ public class NotificationServiceImpl implements NotificationServiceInterface {
         Set<Integer> failedIdx = new HashSet<>();
 
         for (BulkWriteError error : ex.getErrors()) {   // BulkWriteError 목록 순회
-          failedIdx.add(error.getIndex());        // 실패한 문서의 index 추출
+          failedIdx.add(error.getIndex());        // 실패한거 index 추출
         }
 
         List<NotificationRequest> nextRound = new ArrayList<>();//실패란거 처리

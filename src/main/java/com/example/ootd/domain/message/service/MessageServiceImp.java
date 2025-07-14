@@ -20,6 +20,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -37,6 +40,7 @@ public class MessageServiceImp implements MessageServiceInterface {
   private final MessageMapper messageMapper;
   private final UserRepository userRepository;
   private final NotificationPublisherInterface notificationPublisherInterface;
+
 
   @Override
   @Transactional

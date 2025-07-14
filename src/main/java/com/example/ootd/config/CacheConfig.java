@@ -1,6 +1,7 @@
 package com.example.ootd.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -20,6 +21,11 @@ public class CacheConfig {
         .expireAfterWrite(24, TimeUnit.HOURS) // 하루 캐시
         .recordStats()
     );
+    cacheManager.registerCustomCache("notification",
+        Caffeine.newBuilder()
+            .maximumSize(1_000)
+            .expireAfterWrite(Duration.ofMinutes(100))
+            .build());
     return cacheManager;
   }
 }

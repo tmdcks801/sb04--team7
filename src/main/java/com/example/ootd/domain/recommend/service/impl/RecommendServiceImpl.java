@@ -74,7 +74,7 @@ public class RecommendServiceImpl implements RecommendService {
 
     return ScoredClothesDto.builder()
         .id(clothes.id())
-        .ownerId(clothes.ownerId())  // 이걸 빼먹었네요!
+        .ownerId(clothes.ownerId())
         .name(clothes.name())
         .type(clothes.type())
         .imageUrl(clothes.imageUrl())
@@ -85,7 +85,7 @@ public class RecommendServiceImpl implements RecommendService {
         .temperatureSensitivity(clothes.temperatureSensitivity())
         .thickness(clothes.thickness())
         .color(clothes.color())
-        .score(calculateScore) // 새로 계산된 점수
+        .score(calculateScore)
         .build();
   }
 

@@ -118,14 +118,11 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
         .limit(limit)
         .fetch();
 
-    log.info("팔로워 목록 조회: 팔로우하는 사람 ID: {}, 커서: {}, 이후 ID: {}, 조회 개수: {}, 이름 검색 조건: {}",
-        followerId, cursor, idAfter, limit, nameLike);
-
     if (followers.isEmpty()) {
-      log.info("팔로워 목록이 비어 있습니다. 팔로우하는 사람 ID: {}, 커서: {}, 이후 ID: {}, 조회 개수: {}, 이름 검색 조건: {}",
+      log.warn("팔로워 목록이 비어 있습니다. 팔로우하는 사람 ID: {}, 커서: {}, 이후 ID: {}, 조회 개수: {}, 이름 검색 조건: {}",
           followerId, cursor, idAfter, limit, nameLike);
     } else {
-      log.info("팔로워 목록 조회 성공: {}개의 팔로우를 찾았습니다.", followers.size());
+      log.debug("팔로워 목록 조회 성공: {}개의 팔로우를 찾았습니다.", followers.size());
     }
 
     return followers;

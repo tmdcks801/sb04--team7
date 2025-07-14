@@ -31,6 +31,8 @@ import com.example.ootd.domain.weather.repository.WeatherRepository;
 import com.example.ootd.dto.PageResponse;
 import com.example.ootd.exception.feed.FeedLikeNotFoundException;
 import com.example.ootd.exception.feed.FeedNotFoundException;
+import com.example.ootd.exception.user.UserIdNotFoundException;
+import com.example.ootd.exception.weather.WeatherNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,10 +68,10 @@ public class FeedServiceImpl implements FeedService {
     log.debug("피드 등록 시작: {}", request);
 
     User author = userRepository.findById(request.authorId())
-        .orElseThrow(); // TODO: null 예외처리
+        .orElseThrow(() -> UserIdNotFoundException.withId(request.authorId()));
 
     Weather weather = weatherRepository.findById(request.weatherId())
-        .orElseThrow(); // TODO: null 예외처리
+        .orElseThrow(() -> WeatherNotFoundException.withId(request.weatherId()));
 
     List<Clothes> clothesList = clothesRepository.findAllById(request.clothesIds());
 
@@ -176,7 +178,7 @@ public class FeedServiceImpl implements FeedService {
 
     Feed feed = getFeedById(feedId);
     User user = userRepository.findById(userId)
-        .orElseThrow(); // TODO: null 예외처리
+        .orElseThrow(() -> UserIdNotFoundException.withId(userId));
 
     FeedLike feedLike = new FeedLike(feed, user);
     feedLikeRepository.save(feedLike);
@@ -222,7 +224,7 @@ public class FeedServiceImpl implements FeedService {
 
     Feed feed = getFeedById(request.feedId());
     User user = userRepository.findById(userId)
-        .orElseThrow(); // TODO: null 예외처리
+        .orElseThrow(() -> UserIdNotFoundException.withId(userId));
 
     FeedComment comment = FeedComment.builder()
         .feed(feed)

@@ -9,7 +9,7 @@ import lombok.Builder;
 public record RecommendationDto(
     UUID weatherId,
     UUID userId,
-    List<ClothesDto> clothes
+    List<RecommendClothesDto> clothes
 ) {
 
 }

@@ -1,7 +1,7 @@
 package com.example.ootd.domain.recommend.service;
 
 import com.example.ootd.domain.clothes.dto.data.ClothesAttributeWithDefDto;
-import com.example.ootd.domain.clothes.dto.data.ClothesDto;
+import com.example.ootd.domain.recommend.dto.RecommendClothesDto;
 import com.example.ootd.domain.recommend.dto.ScoredClothesDto;
 import com.example.ootd.domain.clothes.entity.ClothesType;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
@@ -21,7 +21,7 @@ public class ClothesSelector {
   private final AttributeRepository attributeRepository;
 
 
-  public List<ClothesDto> selectRecommendedClothes(List<ScoredClothesDto> scoredClothes) {
+  public List<RecommendClothesDto> selectRecommendedClothes(List<ScoredClothesDto> scoredClothes) {
     if (scoredClothes == null || scoredClothes.isEmpty()) {
       log.warn("scoredClothes가 비어있습니다.");
       return List.of();
@@ -31,7 +31,7 @@ public class ClothesSelector {
     Map<ClothesType, List<ScoredClothesDto>> clothesByType = scoredClothes.stream()
         .collect(Collectors.groupingBy(ScoredClothesDto::type));
 
-    List<ClothesDto> selectedClothes = new ArrayList<>();
+    List<RecommendClothesDto> selectedClothes = new ArrayList<>();
 
     // 필수 아이템들
     addBestClothes(selectedClothes, clothesByType, ClothesType.TOP);
@@ -57,7 +57,7 @@ public class ClothesSelector {
     return selectedClothes;
   }
 
-  private void addBestClothes(List<ClothesDto> selectedClothes,
+  private void addBestClothes(List<RecommendClothesDto> selectedClothes,
       Map<ClothesType, List<ScoredClothesDto>> clothesByType, ClothesType clothesType) {
 
     clothesByType.getOrDefault(clothesType, List.of())
@@ -66,7 +66,7 @@ public class ClothesSelector {
         .ifPresent(clothes -> selectedClothes.add(convertToClothesDto(clothes)));
   }
 
-  private void addOptionalClothes(List<ClothesDto> selectedClothes,
+  private void addOptionalClothes(List<RecommendClothesDto> selectedClothes,
       Map<ClothesType, List<ScoredClothesDto>> clothesByType) {
 
     List<ClothesType> optionalTypes = List.of(
@@ -107,19 +107,18 @@ public class ClothesSelector {
     }
   }
 
-  private ClothesDto convertToClothesDto(ScoredClothesDto clothes) {
+  private RecommendClothesDto convertToClothesDto(ScoredClothesDto clothes) {
 
-    return ClothesDto.builder()
-        .id(clothes.id())
-        .ownerId(clothes.ownerId())
+    return RecommendClothesDto.builder()
+        .clothesId(clothes.id())
         .name(clothes.name())
         .type(clothes.type())
         .imageUrl(clothes.imageUrl())
-        .attributes(createThicknessAttribute(clothes.thickness(), clothes.color()))
+        .attributes(createThicknessAttribute(clothes.thickness(), clothes.color(), clothes.season()))
         .build();
   }
 
-  private List<ClothesAttributeWithDefDto> createThicknessAttribute(String thickness, String color) {
+  private List<ClothesAttributeWithDefDto> createThicknessAttribute(String thickness, String color, String season) {
     List<ClothesAttributeWithDefDto> attributes = new ArrayList<>();
 
     // 두께감 속성 추가
@@ -139,6 +138,17 @@ public class ClothesSelector {
           .ifPresent(attr -> attributes.add(ClothesAttributeWithDefDto.builder()
               .definitionId(attr.getId())
               .value(color)
+              .definitionName(attr.getName())
+              .selectableValues(attr.getDetails())
+              .build()));
+    }
+
+    // 계절 속성 추가
+    if (season != null && !season.trim().isEmpty()) {
+      attributeRepository.findByName("계절")
+          .ifPresent(attr -> attributes.add(ClothesAttributeWithDefDto.builder()
+              .definitionId(attr.getId())
+              .value(season)
               .definitionName(attr.getName())
               .selectableValues(attr.getDetails())
               .build()));

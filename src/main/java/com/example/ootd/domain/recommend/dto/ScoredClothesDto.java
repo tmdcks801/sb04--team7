@@ -21,6 +21,7 @@ public record ScoredClothesDto(
     Integer temperatureSensitivity,
     String thickness,
     String color,
+    String season,
     Double score
 ) {
 }

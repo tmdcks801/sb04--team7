@@ -1,5 +1,6 @@
 package com.example.ootd.domain.recommend.controller;
 
+import com.example.ootd.domain.recommend.dto.RecommendClothesDto;
 import com.example.ootd.domain.recommend.dto.RecommendationDto;
 import com.example.ootd.domain.recommend.service.RecommendService;
 import java.util.UUID;
@@ -20,8 +21,8 @@ public class RecommendController {
   private final RecommendService recommendService;
 
   @GetMapping
-  public ResponseEntity<RecommendationDto> recommend(@RequestParam("weatherId") UUID weatherId) {
-    RecommendationDto recommendation = recommendService.recommend(weatherId);
+  public ResponseEntity<RecommendClothesDto> recommend(@RequestParam("weatherId") UUID weatherId) {
+    RecommendClothesDto recommendation = recommendService.recommend(weatherId);
     log.debug("옷 추천 완료: {}", recommendation);
     return ResponseEntity.ok(recommendation);
   }

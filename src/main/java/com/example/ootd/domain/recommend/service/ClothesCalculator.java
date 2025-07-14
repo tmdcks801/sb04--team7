@@ -1,12 +1,13 @@
 package com.example.ootd.domain.recommend.service;
 
 import com.example.ootd.domain.recommend.dto.ScoredClothesDto;
+import java.time.LocalDate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ClothesCalculator {
 
-  private static final double BASE_SCORE = 60.0;
+  private static final double BASE_SCORE = 40.0;
 
   public double calculateScore(ScoredClothesDto clothes) {
     double feltTemperature = calculateFeltTemperature(clothes);
@@ -14,8 +15,28 @@ public class ClothesCalculator {
     double baseScore = BASE_SCORE;
     double temperatureScore = calculateTemperatureScore(clothes, feltTemperature);
     double rainAdjustment = calculateRainAdjustment(clothes);
+    double seasonScore = calculateSeasonScore(clothes);
 
-    return baseScore + temperatureScore  + rainAdjustment;
+    return baseScore + temperatureScore  + rainAdjustment + seasonScore;
+  }
+
+  private double calculateSeasonScore(ScoredClothesDto clothes) {
+    String currentSeason = getCurrentSeason();
+    if(clothes.season() != null && clothes.season().contains(currentSeason)) {
+      return 15.0;
+    }
+    return 0.0;
+  }
+
+  private String getCurrentSeason() {
+    int month = LocalDate.now().getMonthValue();
+    return switch (month) {
+      case 3, 4, 5 -> "봄";
+      case 6, 7, 8, 9 -> "여름";
+      case 10, 11 -> "가일";
+      case 12, 1, 2 -> "겨울";
+      default -> "봄";
+    };
   }
 
   private double calculateFeltTemperature(ScoredClothesDto clothes) {

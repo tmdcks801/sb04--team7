@@ -1,6 +1,7 @@
 package com.example.ootd.domain.recommend.service.impl;
 
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
+import com.example.ootd.domain.recommend.dto.RecommendClothesDto;
 import com.example.ootd.domain.recommend.dto.RecommendationDto;
 import com.example.ootd.domain.recommend.dto.ScoredClothesDto;
 import com.example.ootd.domain.clothes.entity.ClothesType;
@@ -60,7 +61,7 @@ public class RecommendServiceImpl implements RecommendService {
         .sorted((a, b) -> Double.compare(b.score(), a.score()))
         .toList();
 
-    List<ClothesDto> recommendedClothes = clothesSelector.selectRecommendedClothes(scoredClothes);
+    List<RecommendClothesDto> recommendedClothes = clothesSelector.selectRecommendedClothes(scoredClothes);
 
     return RecommendationDto.builder()
         .weatherId(weatherId)
@@ -74,7 +75,6 @@ public class RecommendServiceImpl implements RecommendService {
 
     return ScoredClothesDto.builder()
         .id(clothes.id())
-        .ownerId(clothes.ownerId())  // 이걸 빼먹었네요!
         .name(clothes.name())
         .type(clothes.type())
         .imageUrl(clothes.imageUrl())
@@ -85,7 +85,8 @@ public class RecommendServiceImpl implements RecommendService {
         .temperatureSensitivity(clothes.temperatureSensitivity())
         .thickness(clothes.thickness())
         .color(clothes.color())
-        .score(calculateScore) // 새로 계산된 점수
+        .season(clothes.season())
+        .score(calculateScore)
         .build();
   }
 
@@ -124,17 +125,17 @@ public class RecommendServiceImpl implements RecommendService {
   private ScoredClothesDto convertToScoredClothes(Object[] row) {
     return ScoredClothesDto.builder()
         .id(UUID.fromString(row[0].toString()))
-        .ownerId(UUID.fromString((row[1].toString())))
-        .name(row[2].toString())
-        .type(ClothesType.valueOf(row[3].toString()))
-        .imageUrl(row[4] != null ? row[4].toString() : null)
-        .temperatureCurrent(((Number) row[5]).doubleValue())
-        .precipitationAmount(((Number) row[6]).doubleValue())
-        .humidityCurrent(((Number) row[7]).doubleValue())
-        .windSpeed(((Number) row[8]).doubleValue())
-        .temperatureSensitivity(((Number) row[9]).intValue())
-        .thickness(row[10] != null ? row[10].toString() : null)
-        .color(row[11] != null ? row[11].toString() : null)
+        .name(row[1].toString())
+        .type(ClothesType.valueOf(row[2].toString()))
+        .imageUrl(row[3] != null ? row[3].toString() : null)
+        .temperatureCurrent(((Number) row[4]).doubleValue())
+        .precipitationAmount(((Number) row[5]).doubleValue())
+        .humidityCurrent(((Number) row[6]).doubleValue())
+        .windSpeed(((Number) row[7]).doubleValue())
+        .temperatureSensitivity(((Number) row[8]).intValue())
+        .thickness(row[9] != null ? row[9].toString() : null)
+        .color(row[10] != null ? row[10].toString() : null)
+        .season(row[11] != null ? row[11].toString() : null)
         .score(0.0) // 임시 점수 -> 어차피 변경됨
         .build();
   }

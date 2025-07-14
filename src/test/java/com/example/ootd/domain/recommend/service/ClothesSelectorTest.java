@@ -17,6 +17,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("옷 추천 서비스 테스트")
 class ClothesSelectorTest {
 
     @InjectMocks
@@ -85,6 +86,18 @@ class ClothesSelectorTest {
     }
 
     @Test
+    @DisplayName("scoredClothes가 Null일 경우")
+    void selectRecommendedClothes_Return_Null() {
+        List<ScoredClothesDto> scoredClothes = List.of();
+
+        // when
+        List<RecommendClothesDto> result = clothesSelector.selectRecommendedClothes(scoredClothes);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
     @DisplayName("추운 날씨에 아우터를 추천하는지 테스트")
     void selectRecommendedClothes_shouldWearOuter() {
         // given
@@ -117,4 +130,6 @@ class ClothesSelectorTest {
         // then
         assertThat(result.stream().map(RecommendClothesDto::type)).contains(ClothesType.DRESS);
     }
+
+
 }

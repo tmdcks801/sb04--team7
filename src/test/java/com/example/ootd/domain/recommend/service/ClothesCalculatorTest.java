@@ -14,6 +14,7 @@ import java.util.Collections;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("옷 점수 계산 테스트")
 class ClothesCalculatorTest {
 
     @InjectMocks
@@ -72,6 +73,60 @@ class ClothesCalculatorTest {
         // then
         assertThat(score).isGreaterThan(50.0); // 점수가 높을 것으로 예상
     }
+
+  @Test
+  @DisplayName("따뜻한 날씨 점수 계산 테스트")
+  void calculateScore_WarmWeather() {
+    // given
+    ScoredClothesDto clothes = ScoredClothesDto.builder()
+        .id(UUID.randomUUID())
+        .ownerId(UUID.randomUUID())
+        .name("Warm Weather Clothes")
+        .type(ClothesType.TOP)
+        .imageUrl("imageUrl")
+        .thickness("약간 얇음")
+        .color("화이트")
+        .season("봄")
+        .temperatureCurrent(20.0)
+        .windSpeed(1.0)
+        .humidityCurrent(40.0)
+        .precipitationAmount(0.0)
+        .temperatureSensitivity(0)
+        .build();
+
+    // when
+    double score = clothesCalculator.calculateScore(clothes);
+
+    // then
+    assertThat(score).isGreaterThan(50.0); // 점수가 높을 것으로 예상
+  }
+
+  @Test
+  @DisplayName("시원한 날씨 점수 계산 테스트")
+  void calculateScore_CoolWeather() {
+    // given
+    ScoredClothesDto clothes = ScoredClothesDto.builder()
+        .id(UUID.randomUUID())
+        .ownerId(UUID.randomUUID())
+        .name("Cool Weather Clothes")
+        .type(ClothesType.TOP)
+        .imageUrl("imageUrl")
+        .thickness("약간 두꺼움")
+        .color("블랙")
+        .season("가을")
+        .temperatureCurrent(10.0)
+        .windSpeed(1.0)
+        .humidityCurrent(40.0)
+        .precipitationAmount(0.0)
+        .temperatureSensitivity(0)
+        .build();
+
+    // when
+    double score = clothesCalculator.calculateScore(clothes);
+
+    // then
+    assertThat(score).isGreaterThan(50.0); // 점수가 높을 것으로 예상
+  }
 
     @Test
     @DisplayName("추운 날씨 점수 계산 테스트")

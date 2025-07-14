@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("옷 추천 쿼리 테스트")
 public class RecommendQueryRepositoryTest {
 
   @Mock

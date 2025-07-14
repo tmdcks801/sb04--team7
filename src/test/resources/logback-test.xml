@@ -1,0 +1,17 @@
+<!-- src/test/resources/logback-test.xml -->
+<configuration>
+  <!-- 콘솔 출력만 -->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} : %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- 패키지별 로그 레벨 조정(선택) -->
+  <logger name="org.springframework" level="INFO"/>
+  <logger name="org.hibernate"      level="WARN"/>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+  </root>
+</configuration>

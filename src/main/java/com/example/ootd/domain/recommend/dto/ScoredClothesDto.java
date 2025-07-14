@@ -1,4 +1,4 @@
-package com.example.ootd.domain.clothes.dto.data;
+package com.example.ootd.domain.recommend.dto;
 
 import com.example.ootd.domain.clothes.entity.ClothesType;
 import java.util.UUID;
@@ -10,6 +10,7 @@ import lombok.Builder;
 @Builder
 public record ScoredClothesDto(
     UUID id,
+    UUID ownerId,
     String name,
     ClothesType type,
     String imageUrl,

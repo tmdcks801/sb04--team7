@@ -6,6 +6,7 @@ import static com.example.ootd.exception.ErrorCode.FOLLOWEE_NOT_FOUND;
 import static com.example.ootd.exception.ErrorCode.FOLLOWER_NOT_FOUND;
 import static com.example.ootd.exception.ErrorCode.FOLLOW_NOT_FOUND;
 import static com.example.ootd.exception.ErrorCode.FOLLOW_USER_NOT_FOUND;
+import static com.example.ootd.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.example.ootd.domain.follow.dto.Direction;
 import com.example.ootd.domain.follow.dto.FollowCreateRequest;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,13 +101,21 @@ public class FollowServiceImpl implements FollowService {
 
     // 팔로우 관계 요약 생성
     // MapStruct로 변경하려 했으나 DB 조회가 필요하여 직접 생성
+    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    if (principal.equals("anonymousUser")) {
+      throw new OotdException(USER_NOT_FOUND);
+    }
+
+    User follower = (User) principal;
+    User followee = userRepository.findById(userId)
+        .orElseThrow(() -> new OotdException(FOLLOW_USER_NOT_FOUND));
+
     FollowSummaryDto summary = FollowSummaryDto.builder()
-        .followeeId(user.getId())
-        .followerCount(followRepository.countByFolloweeId(user.getId()))
-        .followingCount(followRepository.countByFollowerId(user.getId()))
-        .followingByMe(followRepository.existsByFollowerIdAndFolloweeId(user.getId(), userId))
-        .followedByMeId(userId)
-        .followedByMe(followRepository.existsByFollowerIdAndFolloweeId(userId, user.getId()))
+        .followeeId(followee.getId())
+        .followerCount(followRepository.countByFolloweeId(followee.getId()))
+        .followingCount(followRepository.countByFollowerId(followee.getId()))
+        .followingByMe(followRepository.existsByFollowerIdAndFolloweeId(follower.getId(), followee.getId()))
         .build();
 
 

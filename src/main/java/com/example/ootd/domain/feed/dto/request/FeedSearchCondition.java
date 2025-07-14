@@ -5,7 +5,9 @@ import com.example.ootd.domain.weather.entity.SkyStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
+import lombok.Builder;
 
+@Builder
 public record FeedSearchCondition(
     String cursor,
     UUID idAfter,

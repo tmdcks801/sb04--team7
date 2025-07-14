@@ -1,6 +1,7 @@
 package com.example.ootd.batch.listener;
 
 import com.example.ootd.batch.dto.WeatherBatchData;
+import com.example.ootd.batch.service.WeatherAlertService;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.enums.NotificationLevel;
 import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
@@ -13,13 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.listener.StepListenerSupport;
 import org.springframework.batch.item.Chunk;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -29,14 +28,14 @@ public class WeatherAlertListener extends StepListenerSupport<WeatherBatchData, 
   @Getter
   private final ConcurrentHashMap<String, List<String>> failedRegions = new ConcurrentHashMap<>();
 
-  // 중복 알림 방지를 위한 캐시 (지역_알림타입_날짜 -> 마지막 발송 시간)
-  private final ConcurrentHashMap<String, Long> lastAlertTime = new ConcurrentHashMap<>();
-
   @Autowired
   private NotificationPublisherInterface notificationPublisher;
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private WeatherAlertService weatherAlertService;
 
   @Override
   public void afterRead(WeatherBatchData item) {
@@ -54,16 +53,6 @@ public class WeatherAlertListener extends StepListenerSupport<WeatherBatchData, 
       log.warn("Processing returned null for region: {}", item.getRegionName());
       return;
     }
-
-//    안좋은 날씨인지 확인하기
-//    log.debug(
-//        " WeatherAlertListener DEBUG \nRegion: {}\nForecast Date: {}\nMax Temp: {}°C\nPrecipitation: {} ({}%)\nWind: {}",
-//        result.getRegionName(),
-//        result.getForecastAt().toLocalDate(),
-//        result.getTemperature().getTemperatureMax(),
-//        result.getPrecipitation().getPrecipitationType(),
-//        result.getPrecipitation().getPrecipitationProbability(),
-//        result.getWindSpeed().getWindAsWord());
 
     // 날씨 악화 감지 및 알림 발송
     try {
@@ -126,7 +115,7 @@ public class WeatherAlertListener extends StepListenerSupport<WeatherBatchData, 
   private List<WeatherAlertType> detectWeatherAlerts(Weather weather) {
     List<WeatherAlertType> alerts = new ArrayList<>();
 
-    // 폭염 감지 (최고기온 35도 이상, 낮 시간대)
+    // 폭염 감지 (최고기온 35도 이상)
     if (isHeatWave(weather)) {
       alerts.add(WeatherAlertType.HEAT_WAVE);
     }
@@ -152,8 +141,6 @@ public class WeatherAlertListener extends StepListenerSupport<WeatherBatchData, 
   // 폭염 조건 검사
   private boolean isHeatWave(Weather weather) {
     Double maxTemp = weather.getTemperature().getTemperatureMax();
-
-    // 최고기온 35도 이상이면 시간 상관없이 폭염 위험
     return maxTemp != null && maxTemp >= 35.0;
   }
 
@@ -182,19 +169,15 @@ public class WeatherAlertListener extends StepListenerSupport<WeatherBatchData, 
     return weather.getWindSpeed().getWindAsWord() == WindStrength.STRONG;
   }
 
-  // 날씨 알림 발송
+  // 날씨 알림 발송 (Spring Cache + WeatherAlertService 활용)
   private void sendWeatherAlerts(String regionName, List<WeatherAlertType> alerts,
       LocalDate forecastDate) {
     try {
-      // 중복 알림 방지 체크 (같은 날짜에 같은 경보는 한 번만)
-      if (!shouldSendAnyAlert(regionName, alerts, forecastDate)) {
-        log.debug("Skipping duplicate alerts for region: {} on date: {}", regionName, forecastDate);
+      // 중복 알림 방지 체크
+      if (!weatherAlertService.hasUnsentAlerts(regionName, alerts, forecastDate)) {
+        log.debug("All alerts already sent for region: {} on date: {}", regionName, forecastDate);
         return;
       }
-
-      // 알림 조건을 만족하는 경우에만 사용자 조회
-      log.debug("Weather alert conditions met for {}: {}", regionName, alerts.stream()
-          .map(WeatherAlertType::getMessage).toList());
 
       // 해당 지역 사용자들 조회
       List<UUID> regionUsers = findUsersByRegion(regionName);
@@ -215,9 +198,6 @@ public class WeatherAlertListener extends StepListenerSupport<WeatherBatchData, 
 
       notificationPublisher.publishToMany(event, regionUsers);
 
-      // 발송 시간 기록
-      updateLastAlertTime(regionName, alerts, forecastDate);
-
       log.info("Weather alert sent to {} users in {} for {}: {}",
           regionUsers.size(), regionName, forecastDate, alerts.stream()
               .map(WeatherAlertType::getMessage).toList());
@@ -226,29 +206,6 @@ public class WeatherAlertListener extends StepListenerSupport<WeatherBatchData, 
       log.error("Failed to send weather alert for region: {} on date: {}", regionName, forecastDate,
           e);
     }
-  }
-
-  // 중복 알림 방지 체크 (같은 날짜에 같은 경보는 한 번만)
-  private boolean shouldSendAnyAlert(String regionName, List<WeatherAlertType> alerts,
-      LocalDate forecastDate) {
-    long now = System.currentTimeMillis();
-    long oneDayAgo = now - TimeUnit.DAYS.toMillis(1);
-
-    return alerts.stream().anyMatch(alert -> {
-      String key = regionName + "_" + alert.name() + "_" + forecastDate;
-      long lastTime = lastAlertTime.getOrDefault(key, 0L);
-      return lastTime <= oneDayAgo;
-    });
-  }
-
-  // 알림 발송 시간 기록 (날짜별로 기록)
-  private void updateLastAlertTime(String regionName, List<WeatherAlertType> alerts,
-      LocalDate forecastDate) {
-    long now = System.currentTimeMillis();
-    alerts.forEach(alert -> {
-      String key = regionName + "_" + alert.name() + "_" + forecastDate;
-      lastAlertTime.put(key, now);
-    });
   }
 
   // 알림 메시지 생성
@@ -298,20 +255,8 @@ public class WeatherAlertListener extends StepListenerSupport<WeatherBatchData, 
     failedRegions.clear();
   }
 
-  // 정기적 캐시 정리 (매일 새벽 2시)
-  @Scheduled(cron = "0 0 2 * * *")
-  public void cleanupExpiredAlerts() {
-    long now = System.currentTimeMillis();
-    long threeDaysAgo = now - TimeUnit.DAYS.toMillis(3);
-
-    int beforeSize = lastAlertTime.size();
-
-    lastAlertTime.entrySet().removeIf(entry ->
-        entry.getValue() < threeDaysAgo
-    );
-
-    int afterSize = lastAlertTime.size();
-    log.info("Alert cache cleanup: {} -> {} entries (removed {} old entries)",
-        beforeSize, afterSize, beforeSize - afterSize);
+  // 캐시 통계 조회 (WeatherAlertService 위임)
+  public void logCacheStats() {
+    weatherAlertService.logCacheStatistics();
   }
 }

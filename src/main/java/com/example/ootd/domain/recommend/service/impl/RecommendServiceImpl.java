@@ -85,6 +85,7 @@ public class RecommendServiceImpl implements RecommendService {
         .temperatureSensitivity(clothes.temperatureSensitivity())
         .thickness(clothes.thickness())
         .color(clothes.color())
+        .season(clothes.season())
         .score(calculateScore)
         .build();
   }

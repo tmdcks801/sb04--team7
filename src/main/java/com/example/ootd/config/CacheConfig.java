@@ -35,6 +35,11 @@ public class CacheConfig {
         .expireAfterWrite(24, TimeUnit.HOURS) // 하루 캐시
         .recordStats()
     );
+    cacheManager.registerCustomCache("notification",
+        Caffeine.newBuilder()
+            .maximumSize(1_000)
+            .expireAfterWrite(Duration.ofMinutes(100))
+            .build());
 
     return cacheManager;
   }

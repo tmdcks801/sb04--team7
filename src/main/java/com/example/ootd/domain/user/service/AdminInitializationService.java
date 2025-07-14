@@ -8,11 +8,13 @@ import java.time.LocalDate;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Profile("!test") // 테스트 프로파일에서는 실행되지 않음
 public class AdminInitializationService implements CommandLineRunner {
 
   private final UserRepository userRepository;
@@ -26,7 +28,8 @@ public class AdminInitializationService implements CommandLineRunner {
       return;
     }
 
-    User user = new User("admin", "admin@email.com", encoder.encode("admin123"), UserRole.ROLE_ADMIN, false, null, null, Gender.OTHER, LocalDate.EPOCH, 3, false, null);
+    User user = new User("admin", "admin@email.com", encoder.encode("admin123"),
+        UserRole.ROLE_ADMIN, false, null, null, Gender.OTHER, LocalDate.EPOCH, 3, false, null);
 
     userRepository.save(user);
   }

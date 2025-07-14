@@ -1,10 +1,12 @@
 package com.example.ootd.batch.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegionInfo implements java.io.Serializable {

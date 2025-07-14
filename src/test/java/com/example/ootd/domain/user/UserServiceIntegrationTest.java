@@ -48,11 +48,19 @@ public class UserServiceIntegrationTest {
 
   ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
   User user;
+  User admin;
 
   @BeforeEach
   void setUp(){
     user = userRepository.save(
         new User("test", "test@gmail.com", encoder.encode("test"))
+    );
+    admin = new User("admin", "admin@email.com", encoder.encode("admin123"));
+
+    admin.updateRole(UserRole.ROLE_ADMIN);
+
+    userRepository.save(
+        admin
     );
   }
 

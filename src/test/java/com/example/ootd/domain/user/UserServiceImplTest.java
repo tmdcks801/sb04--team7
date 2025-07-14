@@ -62,8 +62,8 @@ public class UserServiceImplTest {
 
   @BeforeEach
   void setUp(){
-    user1 = TestEntityFactory.createUser();
-    user2 = TestEntityFactory.createUser();
+    user1 = TestEntityFactory.createUser("test1@email.com", "test1");
+    user2 = TestEntityFactory.createUser("test2@email.com", "test2");
   }
 
 

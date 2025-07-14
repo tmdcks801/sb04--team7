@@ -1,6 +1,8 @@
 spring:
   application:
     name: ootd
+  cache:
+    type: caffeine  # 기본값: Caffeine 사용 (개발/로컬), 운영환경에서는 redis로 변경
   servlet:
     multipart:
       maxFileSize: 10MB # 파일 하나의 최대 크기

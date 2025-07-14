@@ -34,7 +34,7 @@ public class ImageServiceImplTest {
   private ImageServiceImpl imageService;
 
   // 테스트용 Image 객체
-  private final Image testImage = TestEntityFactory.createImage("1");
+  private final Image testImage = TestEntityFactory.createImageWithoutId("1");
 
   @Nested
   @DisplayName("upload() - 사진 업로드")

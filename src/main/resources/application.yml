@@ -38,7 +38,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: ootdboo1@gmail.com
-    password: ${GOOGLE_APP_PWD:test}
+    password: ${GOOGLE_APP_PWD}
     properties:
       mail:
         smtp:
@@ -50,12 +50,12 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:test}
-            client-secret: ${GOOGLE_CLIENT_SECRET:test}
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/google"
           kakao:
-            client-id: ${KAKAO_CLIENT_ID:test}
+            client-id: ${KAKAO_CLIENT_ID}
 #            client-secret: ${KAKAO_CLIENT_SECRET}
             client-name: kakao
             authorization-grant-type: authorization_code
@@ -75,8 +75,8 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:test}
-      database: ${NOTIFICATIN_DB:test}
+      uri: ${MONGODB_URI}
+      database: ${NOTIFICATIN_DB}
       uuid-representation: standard
       auto-index-creation: true
 
@@ -97,11 +97,11 @@ management:
 
 kakao:
   api:
-    key: ${KAKAO_API_KEY:test}
+    key: ${KAKAO_API_KEY}
 
 weather:
   api:
-    key: ${WEATHER_API_KEY:test}
+    key: ${WEATHER_API_KEY}
   batch:
     enabled: true
     grid-size: 10
@@ -146,10 +146,10 @@ ootd:
   storage:
     type: s3
     s3:
-      access-key: ${AWS_S3_ACCESS_KEY:test} # local -> .env, prod -> github secret
-      secret-key: ${AWS_S3_SECRET_KEY:test}
-      region: ${AWS_S3_REGION:test}
-      bucket: ${AWS_S3_BUCKET:test}
+      access-key: ${AWS_S3_ACCESS_KEY} # local -> .env, prod -> github secret
+      secret-key: ${AWS_S3_SECRET_KEY}
+      region: ${AWS_S3_REGION}
+      bucket: ${AWS_S3_BUCKET}
 
 logging:
   level:
@@ -168,5 +168,5 @@ app:
     access-token-expiration: 900000
     refresh-token-expiration: 604800000
 mongo:
-  uri: ${MONGODB_URI_LOG:test}
-  collection: ${MONGO_COLLECTION:test}
+  uri: ${MONGODB_URI_LOG}
+  collection: ${MONGO_COLLECTION}

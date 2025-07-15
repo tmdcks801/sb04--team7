@@ -134,4 +134,29 @@ public class TestEntityFactory {
         .windSpeed(WindSpeed.builder().windSpeed(0d).windAsWord(WindStrength.WEAK).build())
         .build();
   }
+
+  public static Weather createWeather(SkyStatus skyStatus,
+      PrecipitationType precipitationType) {
+
+    Weather weather = Weather.builder()
+        .regionName("서울")
+        .forecastedAt(LocalDateTime.now())
+        .forecastAt(LocalDateTime.now())
+        .skyStatus(skyStatus)
+        .precipitation(
+            Precipitation.builder().precipitationType(precipitationType)
+                .precipitationAmount(0d).precipitationProbability(0d)
+                .build()
+        )
+        .temperature(
+            Temperature.builder().temperatureCurrent(0d).temperatureMin(0d).temperatureMax(0d)
+                .temperatureComparedToDayBefore(0d).build())
+        .humidity(Humidity.builder().humidityCurrent(0d).humidityComparedToDayBefore(0d).build())
+        .windSpeed(WindSpeed.builder().windSpeed(0d).windAsWord(WindStrength.WEAK).build())
+        .build();
+
+    ReflectionTestUtils.setField(weather, "id", UUID.randomUUID());
+
+    return weather;
+  }
 }

@@ -88,6 +88,10 @@ dependencies {
     // Cache
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.github.ben-manes.caffeine:caffeine'
+
+    // AI
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
 }
 
 // queryDsl 설정

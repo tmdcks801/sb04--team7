@@ -109,12 +109,9 @@ public class FollowServiceImpl implements FollowService {
     User targetUser = userRepository.findById(userId)
         .orElseThrow(() -> new OotdException(FOLLOW_USER_NOT_FOUND));
 
-    // 내가 이 유저를 팔로우하고 있는지 확인
-    Optional<Follow> myFollowToTarget = followRepository.findByFollowerIdAndFolloweeId(currentUser.getId(), targetUser.getId());
-    boolean followingByMe = myFollowToTarget.isPresent();
 
-    // 내가 상대방을 팔로우하고 있는지 확인
     Optional<Follow> followingToTarget = followRepository.findByFollowerIdAndFolloweeId(currentUser.getId(), targetUser.getId());
+    boolean followingByMe = followingToTarget.isPresent();
     boolean followedByMe = followingToTarget.isPresent();
     UUID followedByMeId = followingToTarget.map(follow -> follow.getId()).orElse(null);
     

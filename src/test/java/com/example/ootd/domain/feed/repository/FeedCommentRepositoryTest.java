@@ -39,15 +39,13 @@ public class FeedCommentRepositoryTest {
   @Autowired
   private FeedCommentRepository feedCommentRepository;
 
-  private User user1;
-  private User user2;
   private UUID feedId;
   private final List<FeedComment> commentList = new ArrayList<>();
 
   @BeforeEach
   void setUp() {
-    user1 = userRepository.save(TestEntityFactory.createUserWithoutId("1"));
-    user2 = userRepository.save(TestEntityFactory.createUserWithoutId("2"));
+    User user1 = userRepository.save(TestEntityFactory.createUserWithoutId("1"));
+    User user2 = userRepository.save(TestEntityFactory.createUserWithoutId("2"));
     Weather weather = weatherRepository.save(
         TestEntityFactory.createWeatherWithoutId(SkyStatus.CLEAR, PrecipitationType.NONE));
     Feed feed = feedRepository.save(

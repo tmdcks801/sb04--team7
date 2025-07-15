@@ -26,7 +26,7 @@ public class WeatherMapper {
         new PrecipitationDto(
             weather.getPrecipitation().getPrecipitationType(),
             weather.getPrecipitation().getPrecipitationAmount(),
-            weather.getPrecipitation().getPrecipitationProbability()
+            weather.getPrecipitation().getPrecipitationProbability() / 100
         ),
         new HumidityDto(
             weather.getHumidity().getHumidityCurrent(),

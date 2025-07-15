@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -52,7 +53,8 @@ class WeatherLocationIntegrationTest {
 
   @MockitoBean
   private com.example.ootd.domain.location.api.KakaoApiClient kakaoApiClient;
-
+  @MockitoBean
+  private JavaMailSender sender;
   private Location testLocation;
   private LocalDateTime fixedForecastedAt; // 모든 데이터에 동일한 forecastedAt 사용
 

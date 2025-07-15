@@ -38,7 +38,7 @@ public class ClothesAttribute {
   @JoinColumn(name = "attribute_id", columnDefinition = "uuid")
   private Attribute attribute;  // 속성
 
-  @Column(nullable = false)
+  @Column(nullable = false, name = "\"value\"")
   private String value; // 옷에 해당하는 속성 내용
 
   @Builder

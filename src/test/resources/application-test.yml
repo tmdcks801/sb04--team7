@@ -6,12 +6,12 @@ spring:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
+    hikari:
+      driver-class-name: org.h2.Driver
   jpa:
     hibernate:
       ddl-auto: create-drop
-
     show-sql: true
-
     open-in-view: false
     properties:
       hibernate:
@@ -21,6 +21,41 @@ spring:
     multipart:
       maxFileSize: 5MB
       maxRequestSize: 10MB
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: never
+    data-source: none
+  sql:
+    init:
+      mode: never
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            scope: profile, email
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+          kakao:
+            client-id: test-kakao-client-id
+            client-name: kakao
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - profile_nickname
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
 
 kakao:
   api:
@@ -35,7 +70,11 @@ ootd:
     type: local
     local:
       root-path: /tmp/test-uploads
-
+    s3:
+      access-key: test-access-key
+      secret-key: test-secret-key
+      region: ap-northeast-2
+      bucket: test-bucket
 app:
   jwt:
     secret: "test-secret-key-for-testing-purposes-only"
@@ -47,3 +86,4 @@ logging:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
     org.hibernate.engine.jdbc.spi.SqlExceptionHelper: error
+

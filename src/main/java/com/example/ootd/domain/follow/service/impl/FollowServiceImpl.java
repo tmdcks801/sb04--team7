@@ -24,7 +24,9 @@ import com.example.ootd.domain.notification.service.inter.NotificationPublisherI
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.exception.OotdException;
+import com.example.ootd.security.CustomUserDetails;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,27 +97,35 @@ public class FollowServiceImpl implements FollowService {
   public FollowSummaryDto getSummaryFollow(UUID userId) {
     log.debug("팔로우 요약 조회 : userId: {}", userId);
 
-    // 유저 조회
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new OotdException(FOLLOW_USER_NOT_FOUND));
-
     // 팔로우 관계 요약 생성
     // MapStruct로 변경하려 했으나 DB 조회가 필요하여 직접 생성
     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    if (principal.equals("anonymousUser")) {
+    if ("anonymousUser".equals(principal)) {
       throw new OotdException(USER_NOT_FOUND);
     }
 
-    User follower = (User) principal;
-    User followee = userRepository.findById(userId)
+    User currentUser = ((CustomUserDetails) principal).getUser();
+    User targetUser = userRepository.findById(userId)
         .orElseThrow(() -> new OotdException(FOLLOW_USER_NOT_FOUND));
 
+    // 내가 이 유저를 팔로우하고 있는지 확인
+    Optional<Follow> myFollowToTarget = followRepository.findByFollowerIdAndFolloweeId(currentUser.getId(), targetUser.getId());
+    boolean followingByMe = myFollowToTarget.isPresent();
+
+    // 내가 상대방을 팔로우하고 있는지 확인
+    Optional<Follow> followingToTarget = followRepository.findByFollowerIdAndFolloweeId(currentUser.getId(), targetUser.getId());
+    boolean followedByMe = followingToTarget.isPresent();
+    UUID followedByMeId = followingToTarget.map(follow -> follow.getId()).orElse(null);
+    
+
     FollowSummaryDto summary = FollowSummaryDto.builder()
-        .followeeId(followee.getId())
-        .followerCount(followRepository.countByFolloweeId(followee.getId()))
-        .followingCount(followRepository.countByFollowerId(followee.getId()))
-        .followingByMe(followRepository.existsByFollowerIdAndFolloweeId(follower.getId(), followee.getId()))
+        .followedByMe(followedByMe)
+        .followedByMeId(followedByMeId)
+        .followeeId(targetUser.getId())
+        .followerCount(followRepository.countByFolloweeId(targetUser.getId()))
+        .followingCount(followRepository.countByFollowerId(targetUser.getId()))
+        .followingMe(followingByMe)
         .build();
 
 

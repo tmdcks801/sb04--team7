@@ -69,7 +69,7 @@ CREATE TABLE "users"
     location_id             UUID,
     image_id                UUID,
     birth_date              DATE,
-    gender                  SMALLINT,
+    gender                  VARCHAR(255),
     is_locked               BOOLEAN,
     temperature_sensitivity INTEGER,
     created_at              TIMESTAMP(6),

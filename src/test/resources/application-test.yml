@@ -21,6 +21,11 @@ spring:
     multipart:
       maxFileSize: 5MB
       maxRequestSize: 10MB
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
 
 kakao:
   api:

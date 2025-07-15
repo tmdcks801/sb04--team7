@@ -1,6 +1,9 @@
 spring:
   application:
     name: ootd
+  profiles:
+    active:
+      - ${SPRING_PROFILES_ACTIVE}
   cache:
     type: caffeine  # 기본값: Caffeine 사용 (개발/로컬), 운영환경에서는 redis로 변경
   servlet:
@@ -54,7 +57,7 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/google"
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
-#            client-secret: ${KAKAO_CLIENT_SECRET}
+            #            client-secret: ${KAKAO_CLIENT_SECRET}
             client-name: kakao
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"

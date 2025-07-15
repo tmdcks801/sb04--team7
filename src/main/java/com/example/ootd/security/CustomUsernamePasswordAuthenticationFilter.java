@@ -78,7 +78,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends
   /**
    * 로그인 성공시 호출 - SecurityContext에 인증 객체 저장 - 세션에도 사용자 정보 저장 - JwtSession 생성
    */
-  @Override//여기sse구독
+  @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       FilterChain chain, Authentication authResult) throws IOException, ServletException {
     SecurityContextHolder.getContext().setAuthentication(authResult);
@@ -96,15 +96,15 @@ public class CustomUsernamePasswordAuthenticationFilter extends
 //    }
 
     //여기서 sse로직
-    UUID lastEventId = null;
-    String lastIdHeader = request.getHeader("Last-Event-ID");
-    if (StringUtils.hasText(lastIdHeader)) {
-      try {
-        lastEventId = UUID.fromString(lastIdHeader);
-      } catch (IllegalArgumentException ignore) {//일단 무시
-      }
-    }
-    ssePushServiceInterface.subscribe(user.getId(), lastEventId);//여기까지
+//    UUID lastEventId = null;
+//    String lastIdHeader = request.getHeader("Last-Event-ID");
+//    if (StringUtils.hasText(lastIdHeader)) {
+//      try {
+//        lastEventId = UUID.fromString(lastIdHeader);
+//      } catch (IllegalArgumentException ignore) {//일단 무시
+//      }
+//    }
+//    ssePushServiceInterface.subscribe(user.getId(), lastEventId);//여기까지
 
     JwtSession session = jwtService.generateJwtSession(user);
 

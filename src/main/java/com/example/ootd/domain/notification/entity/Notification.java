@@ -11,6 +11,8 @@ import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -18,12 +20,23 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 @Document(collection = "notification")
 @Getter
+@CompoundIndexes({
+    @CompoundIndex(
+        name = "idx_receiver_createdAt_desc",
+        def = "{ 'receiverId': 1, 'createdAt': -1 }",
+        background = true
+    ),
+    @CompoundIndex(
+        name = "idx_receiver_createdAt_asc",
+        def = "{ 'receiverId': 1, 'createdAt': 1 }",
+        background = true
+    )
+})
 @NoArgsConstructor(access = PROTECTED)
 public class Notification {
 
   @MongoId(targetType = FieldType.STRING)
   private UUID id;
-  @Indexed
   private UUID receiverId;
   private Instant createdAt;// 몽고db에는 localdate타입이 없어서 instant 썼음
   private String title;

@@ -18,12 +18,15 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -31,14 +34,19 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @ExtendWith(MockitoExtension.class)
 class SsePushServiceInterfaceImplTest {
 
-  @Mock
-  NotificationRepository repository;
+  private NotificationRepository repository;
+  private NotificationMapper notificationMapper;
+  private TaskExecutor syncExecutor;
+  private SsePushServiceInterfaceImpl service;
 
-  @Mock
-  NotificationMapper notificationMapper;
+  @BeforeEach
+  void setUp() {
+    repository = mock(NotificationRepository.class, RETURNS_DEEP_STUBS);
+    notificationMapper = mock(NotificationMapper.class, RETURNS_DEEP_STUBS);
 
-  @InjectMocks
-  SsePushServiceInterfaceImpl service;
+    syncExecutor = new SyncTaskExecutor();
+    service = new SsePushServiceInterfaceImpl(repository, notificationMapper, syncExecutor);
+  }
 
   static class TestEmitter extends SseEmitter {
 
@@ -61,7 +69,7 @@ class SsePushServiceInterfaceImplTest {
 
   @Test
   void subscribe_withLastEvent_fetchesMissed() {
-    // given
+
     UUID receiverId = UUID.randomUUID();
     UUID lastEventId = UUID.randomUUID();
 
@@ -74,8 +82,8 @@ class SsePushServiceInterfaceImplTest {
     List<Notification> missed = Arrays.asList(firstMissed, secondMissed);
 
     when(repository.findById(lastEventId)).thenReturn(Optional.of(lastNotification));
-    when(repository.findAllByReceiverIdAndCreatedAtGreaterThanOrderByCreatedAtAsc(
-        receiverId, lastCreatedAt))
+    when(repository.findAllByReceiverIdAndCreatedAtGreaterThanOrderByCreatedAtAsc(receiverId,
+        lastCreatedAt))
         .thenReturn(missed);
 
     NotificationDto dto1 = mock(NotificationDto.class);
@@ -90,6 +98,7 @@ class SsePushServiceInterfaceImplTest {
     SseEmitter emitter = service.subscribe(receiverId, lastEventId);
 
     assertNotNull(emitter);
+
     verify(repository).findById(lastEventId);
     verify(repository)
         .findAllByReceiverIdAndCreatedAtGreaterThanOrderByCreatedAtAsc(receiverId, lastCreatedAt);

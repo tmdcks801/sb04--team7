@@ -9,9 +9,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-
     show-sql: true
-
     open-in-view: false
     properties:
       hibernate:
@@ -26,7 +24,9 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: always
-
+  sql:
+    init:
+      schema-locations: classpath:schema.sql
 kakao:
   api:
     key: test-kakao-key

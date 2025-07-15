@@ -96,15 +96,15 @@ public class CustomUsernamePasswordAuthenticationFilter extends
 //    }
 
     //여기서 sse로직
-    UUID lastEventId = null;
-    String lastIdHeader = request.getHeader("Last-Event-ID");
-    if (StringUtils.hasText(lastIdHeader)) {
-      try {
-        lastEventId = UUID.fromString(lastIdHeader);
-      } catch (IllegalArgumentException ignore) {//일단 무시
-      }
-    }
-    ssePushServiceInterface.subscribe(user.getId(), lastEventId);//여기까지
+//    UUID lastEventId = null;
+//    String lastIdHeader = request.getHeader("Last-Event-ID");
+//    if (StringUtils.hasText(lastIdHeader)) {
+//      try {
+//        lastEventId = UUID.fromString(lastIdHeader);
+//      } catch (IllegalArgumentException ignore) {//일단 무시
+//      }
+//    }
+//    ssePushServiceInterface.subscribe(user.getId(), lastEventId);//여기까지
 
     JwtSession session = jwtService.generateJwtSession(user);
 

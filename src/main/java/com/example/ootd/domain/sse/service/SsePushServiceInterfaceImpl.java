@@ -39,7 +39,7 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
   private static final long TIMEOUT = Duration.ofMinutes(30).toMillis();
 
   @Override //로그인할때 쓰면 될거같음, 타이밍 맞는지는 합치고 생각
-  @Transactional
+  @Transactional(readOnly = true)
   public SseEmitter subscribe(UUID receiverId, UUID lastEventId) {
     try {
       SseEmitter emitter = new SseEmitter(TIMEOUT);
@@ -72,7 +72,7 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
 
   @Override
   @Async("ssePushExecutor")
-  @Transactional
+  @Transactional(readOnly = true)
   public void push(NotificationDto dto) { //핸들러에서 씀, 구독중인거한테 알림보내기
     try {
       CopyOnWriteArrayList<SseEmitter> list = emitters.get(dto.receiverId());
@@ -82,6 +82,7 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
 
       list.forEach(em -> sendNotification(em, dto));
     } catch (SsePushException e) {
+      log.warn("sse 실패", e);
       throw new SsePushException(ErrorCode.FAIL_SSE_PUSH, e);
     }
   }

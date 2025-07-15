@@ -32,7 +32,6 @@ public class Message {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "receiver", nullable = false)
   private User receiver;
-  @CreationTimestamp
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
   @Column(name = "contents", length = 255)

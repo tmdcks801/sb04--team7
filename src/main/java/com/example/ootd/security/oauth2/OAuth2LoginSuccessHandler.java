@@ -37,7 +37,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
   private final ObjectMapper mapper = new ObjectMapper();
   private final SsePushServiceInterface ssePushServiceInterface;
 
-  @Override//여기sse구독
+  @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException, ServletException {
     SecurityContextHolder.getContext().setAuthentication(authentication);

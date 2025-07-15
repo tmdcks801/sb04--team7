@@ -60,7 +60,7 @@ public class AsyncConfig {
   }
 
   @Bean(name = "ssePushExecutor") //알람 푸시용   따로 비동기 쓸꺼면 만드세요
-  public Executor ssePushExecutor() {
+  public ThreadPoolTaskExecutor ssePushExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
     executor.setCorePoolSize(4);//일단 그냥 있는거로
     executor.setMaxPoolSize(16);

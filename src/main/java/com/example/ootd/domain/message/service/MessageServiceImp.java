@@ -56,7 +56,7 @@ public class MessageServiceImp implements MessageServiceInterface {
       DirectMessageDto dto = messageMapper.toDto(message);
       messagingTemplate.convertAndSend("/sub/direct-messages_" + message.getDmKey(), dto);
       notificationPublisherInterface.publish(
-          new NotificationRequest(receiverId, "메세지가 왔습니다", sender.getName() + "남으부터 메세지가 왔습니다",
+          new NotificationRequest(receiverId, sender.getName() + "님으부터 메세지", content,
               NotificationLevel.INFO));//이벤트
       return dto;
     } catch (FailSendMessageException e) {

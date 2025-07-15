@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,5 +23,6 @@ public interface NotificationRepository extends MongoRepository<Notification, UU
 
   List<Notification> findAllByReceiverIdAndCreatedAtGreaterThanOrderByCreatedAtAsc(
       UUID receiverId, Instant createdAt);
+
 
 }

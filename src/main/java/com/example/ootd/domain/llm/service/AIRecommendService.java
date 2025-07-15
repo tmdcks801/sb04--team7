@@ -15,11 +15,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AIRecommendService {
 
   private final OpenAIService openAIService;
@@ -60,13 +62,33 @@ public class AIRecommendService {
 
     // 5. 결과 JSON 문자열을 RecommendClothesDto 리스트로 파싱
     ObjectMapper mapper = new ObjectMapper();
-    Map<String, Object> result = mapper.readValue(recommendationJson, Map.class);
+    
+    // OpenAI 응답에서 JSON 부분만 추출 (설명 텍스트 제거)
+    String jsonPart = extractJsonFromResponse(recommendationJson);
+    Map<String, Object> result = mapper.readValue(jsonPart, Map.class);
     
     @SuppressWarnings("unchecked")
     List<Map<String, Object>> clothesData = (List<Map<String, Object>>) result.get("clothes");
     
+    if (clothesData == null) {
+      log.warn("AI 응답에서 clothes 데이터를 찾을 수 없습니다. 응답: {}", recommendationJson);
+      return RecommendationDto.builder()
+          .weatherId(weatherId)
+          .userId(userId)
+          .clothes(List.of())
+          .build();
+    }
+    
     List<RecommendClothesDto> recommendedClothes = clothesData.stream()
-        .map(this::convertToRecommendClothesDto)
+        .map(clothesMap -> {
+          try {
+            return convertToRecommendClothesDto(clothesMap);
+          } catch (Exception e) {
+            log.warn("의상 데이터 변환 실패: {}", clothesMap, e);
+            return null;
+          }
+        })
+        .filter(dto -> dto != null)
         .collect(Collectors.toList());
 
     return RecommendationDto.builder()
@@ -101,6 +123,21 @@ public class AIRecommendService {
             .value(attr.get("value").toString())
             .build())
         .collect(Collectors.toList());
+  }
+
+  /**
+   * AI 응답에서 JSON 부분만 추출 (설명 텍스트 제거)
+   */
+  private String extractJsonFromResponse(String response) {
+    int startIndex = response.indexOf("{");
+    int endIndex = response.lastIndexOf("}");
+    
+    if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
+      return response.substring(startIndex, endIndex + 1);
+    }
+    
+    // JSON을 찾지 못하면 전체 응답 반환
+    return response;
   }
 
   /**

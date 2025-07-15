@@ -46,7 +46,7 @@ CREATE TABLE clothes_attributes (
                                     id UUID NOT NULL PRIMARY KEY,
                                     attribute_id UUID NOT NULL,
                                     clothes_id UUID NOT NULL,
-                                    value VARCHAR(255) NOT NULL UNIQUE,
+                                    "value" VARCHAR(255) NOT NULL UNIQUE,
                                     CONSTRAINT uq_clothes_attr UNIQUE (attribute_id, clothes_id)
 );
 

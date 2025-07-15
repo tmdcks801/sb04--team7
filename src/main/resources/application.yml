@@ -29,9 +29,7 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: always
-  profiles:
-    active:
-      - dev
+
   config:
     import: optional:file:.env[.properties]
   mail:
@@ -167,6 +165,8 @@ app:
     secret: "F811B1184C98D8543B1351D93948481900aDYQ82347641"
     access-token-expiration: 900000
     refresh-token-expiration: 604800000
+  mail:
+    enabled: false
 mongo:
   uri: ${MONGODB_URI_LOG}
   collection: ${MONGO_COLLECTION}

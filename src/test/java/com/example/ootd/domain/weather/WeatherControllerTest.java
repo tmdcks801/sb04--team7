@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -53,6 +54,8 @@ class WeatherControllerTest {
   @MockitoBean
   private WeatherService weatherService;
 
+  @MockitoBean
+  private JavaMailSender sender;
   @Test
   @WithMockUser  // 인증된 사용자로 테스트
   @DisplayName("정상적인 날씨 조회 요청")

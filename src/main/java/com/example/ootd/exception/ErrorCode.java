@@ -46,8 +46,7 @@ public enum ErrorCode {
   INVALID_REQUEST("잘못된 요청입니다."),
 
   // User 에러
-  USER_NOT_FOUND("사용자 이메일을 찾을 수 없습니다."),
-  USER_ID_NOT_FOUND("사용자 id를 찾을 수 없습니다."),
+  USER_NOT_FOUND("사용자를 찾을 수 없습니다."),
 
   //메세지 에러
   FAIL_SEND_MESSAGE("메세지 전송 실패"),

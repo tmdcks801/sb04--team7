@@ -28,7 +28,7 @@ import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.dto.PageResponse;
 import com.example.ootd.exception.clothes.ClothesNotFountException;
-import com.example.ootd.exception.user.UserIdNotFoundException;
+import com.example.ootd.exception.user.UserNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +137,7 @@ public class ClothesServiceImplTest {
 
       // when & then
       assertThatThrownBy(() -> clothesService.create(request, file, request.ownerId()))
-          .isInstanceOf(UserIdNotFoundException.class);
+          .isInstanceOf(UserNotFoundException.class);
       verify(userRepository).findById(request.ownerId());
       verify(clothesRepository, never()).save(any());
     }

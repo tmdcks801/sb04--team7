@@ -5,6 +5,14 @@ import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.user.Gender;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.UserRole;
+import com.example.ootd.domain.weather.entity.Humidity;
+import com.example.ootd.domain.weather.entity.Precipitation;
+import com.example.ootd.domain.weather.entity.PrecipitationType;
+import com.example.ootd.domain.weather.entity.SkyStatus;
+import com.example.ootd.domain.weather.entity.Temperature;
+import com.example.ootd.domain.weather.entity.Weather;
+import com.example.ootd.domain.weather.entity.WindSpeed;
+import com.example.ootd.domain.weather.entity.WindStrength;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -103,5 +111,27 @@ public class TestEntityFactory {
     ReflectionTestUtils.setField(attribute, "id", UUID.randomUUID());
 
     return attribute;
+  }
+
+  // 테스트용 날씨 객체 반환
+  public static Weather createWeatherWithoutId(SkyStatus skyStatus,
+      PrecipitationType precipitationType) {
+
+    return Weather.builder()
+        .regionName("서울")
+        .forecastedAt(LocalDateTime.now())
+        .forecastAt(LocalDateTime.now())
+        .skyStatus(skyStatus)
+        .precipitation(
+            Precipitation.builder().precipitationType(precipitationType)
+                .precipitationAmount(0d).precipitationProbability(0d)
+                .build()
+        )
+        .temperature(
+            Temperature.builder().temperatureCurrent(0d).temperatureMin(0d).temperatureMax(0d)
+                .temperatureComparedToDayBefore(0d).build())
+        .humidity(Humidity.builder().humidityCurrent(0d).humidityComparedToDayBefore(0d).build())
+        .windSpeed(WindSpeed.builder().windSpeed(0d).windAsWord(WindStrength.WEAK).build())
+        .build();
   }
 }

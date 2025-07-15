@@ -82,11 +82,11 @@ public class ClothesRepositoryImplTest {
 
   @Nested
   @DisplayName("findByCondition() - 검색 조건에 맞는 옷 조회")
-  class findByConditionTest {
+  class FindByConditionTest {
 
     @Test
     @DisplayName("성공 - 기본 요건(limit, ownerId)만 있는 경우")
-    void findByConditionSuccessBasic() {
+    void findByCondition_success() {
 
       // given
       int limit = 5;
@@ -110,7 +110,7 @@ public class ClothesRepositoryImplTest {
 
     @Test
     @DisplayName("성공 - 기본요건 + type 작성하는 경우")
-    void findByConditionSuccessType() {
+    void findByCondition_success_type() {
 
       // given
       int limit = 5;
@@ -133,7 +133,7 @@ public class ClothesRepositoryImplTest {
 
 //    @Test
 //    @DisplayName("성공 - 커서 페이지네이션")
-//    void findByConditionSuccessCursor() {
+//    void findByCondition_success_cursor() {
 //
 //      // given
 //      int limit = 3;
@@ -157,11 +157,11 @@ public class ClothesRepositoryImplTest {
 
   @Nested
   @DisplayName("countByCondition() - 검색 조건에 맞는 옷 개수")
-  class countByConditionTest {
+  class CountByConditionTest {
 
     @Test
     @DisplayName("성공 - 타입, 사용자 id 입력 시 해당되는 옷 개수 반환")
-    void countByConditionSuccess() {
+    void countByCondition_success() {
 
       // given
       ClothesType type = ClothesType.BOTTOM;
@@ -175,7 +175,7 @@ public class ClothesRepositoryImplTest {
 
     @Test
     @DisplayName("성공 - 조건에 해당되는 옷이 없는 경우 0 반환")
-    void countByConditionSuccessZero() {
+    void countByCondition_success_null() {
 
       // given
       ClothesType type = ClothesType.ETC;

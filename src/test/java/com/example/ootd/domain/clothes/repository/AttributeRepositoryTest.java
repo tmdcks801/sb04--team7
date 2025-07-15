@@ -68,7 +68,7 @@ public class AttributeRepositoryTest {
 
     @Test
     @DisplayName("성공 - 기본요건만 있는 경우, 이름 오름차순")
-    void findByConditionSuccessNameAsc() {
+    void findByCondition_success_name_asc() {
 
       // given
       ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder().limit(5)
@@ -87,7 +87,7 @@ public class AttributeRepositoryTest {
 
     @Test
     @DisplayName("성공 - 기본요건만 있는 경우, 이름 내림차순")
-    void findByConditionSuccessNameDesc() {
+    void findByCondition_success_name_desc() {
 
       // given
       ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder().limit(5)
@@ -106,7 +106,7 @@ public class AttributeRepositoryTest {
 
     @Test
     @DisplayName("성공 - 기본요건만 있는 경우, 생성일 오름차순")
-    void findByConditionSuccessCreatedAtAsc() {
+    void findByCondition_success_createdAt_asc() {
 
       // given
       ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder().limit(5)
@@ -128,7 +128,7 @@ public class AttributeRepositoryTest {
 
     @Test
     @DisplayName("성공 - 기본요건만 있는 경우, 생성일 내림차순")
-    void findByConditionSuccessCreatedAtDesc() {
+    void findByCondition_success_createdAt_desc() {
 
       // given
       ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder().limit(5)
@@ -149,7 +149,7 @@ public class AttributeRepositoryTest {
 
     @Test
     @DisplayName("성공 - 커서 페이지네이션, 이름 오름차순")
-    void findByConditionSuccessNameAscCursor() {
+    void findByCondition_success_name_asc_cursor() {
 
       // given
       int limit = 5;
@@ -171,7 +171,7 @@ public class AttributeRepositoryTest {
 
     @Test
     @DisplayName("성공 - 커서 페이지네이션, 이름 내림차순")
-    void findByConditionSuccessNameDescCursor() {
+    void findByCondition_success_name_desc_cursor() {
 
       // given
       int limit = 5;
@@ -197,7 +197,7 @@ public class AttributeRepositoryTest {
     //
 //    @Test
 //    @DisplayName("성공 - 커서 페이지네이션, 생성일 오름차순")
-//    void findByConditionSuccessCreatedAtAscCursor() {
+//    void findByCondition_success_createdAt_asc_cursor() {
 //
 //      // given
 //      int limit = 5;
@@ -219,7 +219,7 @@ public class AttributeRepositoryTest {
 //
 //    @Test
 //    @DisplayName("성공 - 커서 페이지네이션, 생성일 내림차순")
-//    void findByConditionSuccessCreatedAtDescCursor() {
+//    void findByCondition_success_createdAt_desc_cursor() {
 //
 //      // given
 //      int limit = 5;
@@ -242,7 +242,7 @@ public class AttributeRepositoryTest {
 
     @Test
     @DisplayName("성공 - 키워드 검색, 속성명")
-    void findByConditionSuccessKeywordLikeName() {
+    void findByCondition_success_keyword_name() {
 
       // given
       ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder()
@@ -261,7 +261,7 @@ public class AttributeRepositoryTest {
 
     @Test
     @DisplayName("성공 - 키워드 검색, 속성 내용")
-    void findByConditionSuccessKeywordLikeDetails() {
+    void findByCondition_success_keyword_details() {
 
       // given
       ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder()
@@ -284,7 +284,7 @@ public class AttributeRepositoryTest {
 
     @Test
     @DisplayName("성공 - 키워드 입력 시 키워드가 포함되어 있는 속성 개수 반환")
-    void countByKeywordSuccess() {
+    void countByKeyword_success() {
 
       // given
       String keywordLike = "검색";
@@ -298,7 +298,7 @@ public class AttributeRepositoryTest {
 
     @Test
     @DisplayName("성공 - 조건에 해당되는 속성 없을 경우 0 반환")
-    void countByKeywordSuccessZero() {
+    void countByKeyword_success_null() {
 
       // given
       String keywordLike = "조건해당안됨";

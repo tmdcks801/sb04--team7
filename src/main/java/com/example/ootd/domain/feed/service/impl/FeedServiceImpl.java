@@ -259,7 +259,7 @@ public class FeedServiceImpl implements FeedService {
 
     log.debug("피드 댓글 목록 조회 시작: {}", condition);
 
-    List<FeedComment> comments = feedCommentRepository.findByCondition(condition);
+    List<FeedComment> comments = feedCommentRepository.findByCondition(condition, feedId);
     List<CommentDto> commentDtos = commentMapper.toDto(comments);
 
     boolean hasNext = (comments.size() > condition.limit());

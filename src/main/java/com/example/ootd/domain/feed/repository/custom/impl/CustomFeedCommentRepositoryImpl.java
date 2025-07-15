@@ -7,6 +7,7 @@ import com.example.ootd.domain.feed.repository.custom.CustomFeedCommentRepositor
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -18,12 +19,15 @@ public class CustomFeedCommentRepositoryImpl implements CustomFeedCommentReposit
   private final QFeedComment qFeedComment = QFeedComment.feedComment;
 
   @Override
-  public List<FeedComment> findByCondition(FeedCommentSearchCondition condition) {
+  public List<FeedComment> findByCondition(FeedCommentSearchCondition condition, UUID feedId) {
 
     return jpaQueryFactory
         .select(qFeedComment).distinct()
         .from(qFeedComment)
-        .where(cursorCondition(condition))
+        .where(
+            getWhere(feedId),
+            cursorCondition(condition)
+        )
         .orderBy(
             qFeedComment.createdAt.asc(),
             qFeedComment.id.asc()
@@ -35,6 +39,12 @@ public class CustomFeedCommentRepositoryImpl implements CustomFeedCommentReposit
   /**
    * where절
    */
+  // 피드 id
+  private BooleanExpression getWhere(UUID feedId) {
+    return qFeedComment.feed.id.eq(feedId);
+  }
+
+  // 커서 페이지네이션
   private BooleanExpression cursorCondition(FeedCommentSearchCondition condition) {
 
     if (condition.cursor() != null) {

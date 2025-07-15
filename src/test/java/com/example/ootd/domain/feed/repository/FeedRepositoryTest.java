@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.ootd.TestEntityFactory;
 import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.entity.Feed;
-import com.example.ootd.domain.image.service.S3Service;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.domain.weather.entity.PrecipitationType;
@@ -22,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest // 의존이 너무 많아서 SpringBootTest 사용
@@ -36,9 +34,6 @@ public class FeedRepositoryTest {
   private UserRepository userRepository;
   @Autowired
   private WeatherRepository weatherRepository;
-
-  @MockitoBean
-  private S3Service s3Service; // 외부 호출 막기
 
   private User user;
   private Weather weather;

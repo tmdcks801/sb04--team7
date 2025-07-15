@@ -3,6 +3,7 @@ package com.example.ootd.domain.feed.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.ootd.TestEntityFactory;
+import com.example.ootd.config.TestMailConfig;
 import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.entity.Feed;
 import com.example.ootd.domain.user.User;
@@ -20,12 +21,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest // 의존이 너무 많아서 SpringBootTest 사용
 @ActiveProfiles("test")
 @Transactional
+@Import(TestMailConfig.class)
 public class FeedRepositoryTest {
 
   @Autowired

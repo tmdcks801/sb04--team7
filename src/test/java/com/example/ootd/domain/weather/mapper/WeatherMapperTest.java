@@ -1,11 +1,13 @@
 package com.example.ootd.domain.weather.mapper;
 
+import com.example.ootd.config.TestMailConfig;
 import com.example.ootd.domain.location.Location;
 import com.example.ootd.domain.weather.dto.WeatherDto;
 import com.example.ootd.domain.weather.entity.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -13,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
-
+@Import(TestMailConfig.class)
 @DisplayName("WeatherMapper 테스트")
 class WeatherMapperTest {
 
@@ -24,12 +26,12 @@ class WeatherMapperTest {
     @BeforeEach
     void setUp() {
         testDateTime = LocalDateTime.of(2024, 12, 15, 14, 0);
-        
+
         // 테스트 위치 생성
         List<String> locationNames = List.of("부산광역시", "남구", "대연동", "");
         testLocation = new Location(35.1595, 129.0756, 98, 76, locationNames);
         ReflectionTestUtils.setField(testLocation, "id", UUID.randomUUID());
-        
+
         // 테스트 날씨 생성
         testWeather = Weather.builder()
             .regionName("부산광역시 남구")
@@ -56,7 +58,7 @@ class WeatherMapperTest {
                 .windAsWord(WindStrength.WEAK)
                 .build())
             .build();
-        
+
         ReflectionTestUtils.setField(testWeather, "id", UUID.randomUUID());
     }
 
@@ -73,22 +75,22 @@ class WeatherMapperTest {
         assertThat(result.forecastAt()).isEqualTo(testWeather.getForecastAt());
         assertThat(result.locationNames()).isEqualTo(testLocation.getLocationNames());
         assertThat(result.skyStatus()).isEqualTo(SkyStatus.CLEAR);
-        
+
         // Temperature 검증
         assertThat(result.temperature().current()).isEqualTo(15.0);
         assertThat(result.temperature().min()).isEqualTo(10.0);
         assertThat(result.temperature().max()).isEqualTo(20.0);
         assertThat(result.temperature().comparedToDayBefore()).isEqualTo(-1.0);
-        
+
         // Precipitation 검증
         assertThat(result.precipitation().type()).isEqualTo(PrecipitationType.NONE);
         assertThat(result.precipitation().amount()).isEqualTo(0.0);
-        assertThat(result.precipitation().probability()).isEqualTo(20.0);
-        
+        assertThat(result.precipitation().probability()).isEqualTo(0.2);
+
         // Humidity 검증
         assertThat(result.humidity().current()).isEqualTo(60.0);
         assertThat(result.humidity().comparedToDayBefore()).isEqualTo(5.0);
-        
+
         // WindSpeed 검증
         assertThat(result.windSpeed().speed()).isEqualTo(3.5);
         assertThat(result.windSpeed().asWord()).isEqualTo(WindStrength.WEAK);
@@ -123,7 +125,7 @@ class WeatherMapperTest {
                 .windAsWord(WindStrength.STRONG)
                 .build())
             .build();
-        
+
         ReflectionTestUtils.setField(rainyWeather, "id", UUID.randomUUID());
 
         // When
@@ -133,7 +135,7 @@ class WeatherMapperTest {
         assertThat(result.skyStatus()).isEqualTo(SkyStatus.CLOUDY);
         assertThat(result.precipitation().type()).isEqualTo(PrecipitationType.RAIN);
         assertThat(result.precipitation().amount()).isEqualTo(5.0);
-        assertThat(result.precipitation().probability()).isEqualTo(80.0);
+        assertThat(result.precipitation().probability()).isEqualTo(0.8);
         assertThat(result.windSpeed().asWord()).isEqualTo(WindStrength.STRONG);
     }
 
@@ -166,7 +168,7 @@ class WeatherMapperTest {
                 .windAsWord(WindStrength.MODERATE)
                 .build())
             .build();
-        
+
         ReflectionTestUtils.setField(snowyWeather, "id", UUID.randomUUID());
 
         // When

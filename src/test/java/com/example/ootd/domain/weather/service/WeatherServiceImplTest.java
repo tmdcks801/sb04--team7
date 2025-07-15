@@ -46,7 +46,7 @@ class WeatherServiceImplTest {
     @BeforeEach
     void setUp() {
         testDateTime = LocalDateTime.of(2024, 12, 15, 14, 0);
-        
+
         mockLocation = new WeatherAPILocation(
             35.1595, 129.0756, 98, 76,
             List.of("부산광역시", "남구", "대연동", "")
@@ -61,9 +61,9 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         List<Weather> mockWeatherList = createThreeDayWeatherData();
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(mockLocation);
         when(weatherRepository.findWeathersByRegionAndDateRange(
@@ -82,7 +82,7 @@ class WeatherServiceImplTest {
             .isEqualTo(testDateTime.toLocalDate().plusDays(1));
         assertThat(result.get(2).forecastAt().toLocalDate())
             .isEqualTo(testDateTime.toLocalDate().plusDays(2));
-        
+
         verify(locationService).getGridAndLocation(latitude, longitude);
         verify(weatherRepository).findWeathersByRegionAndDateRange(
             eq("부산광역시 남구"), any(), any());
@@ -96,7 +96,7 @@ class WeatherServiceImplTest {
         double longitude = 129.0756;
 
         // When & Then
-        assertThatThrownBy(() -> 
+        assertThatThrownBy(() ->
             weatherService.getThreeDayWeather(invalidLatitude, longitude, testDateTime))
             .isInstanceOf(InvalidCoordinatesException.class);
     }
@@ -107,17 +107,17 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         WeatherAPILocation insufficientLocation = new WeatherAPILocation(
             latitude, longitude, 98, 76,
             List.of("부산광역시") // 부족한 지역명
         );
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(insufficientLocation);
 
         // When & Then
-        assertThatThrownBy(() -> 
+        assertThatThrownBy(() ->
             weatherService.getThreeDayWeather(latitude, longitude, testDateTime))
             .isInstanceOf(WeatherNotFoundException.class);
     }
@@ -128,7 +128,7 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(mockLocation);
         when(weatherRepository.findWeathersByRegionAndDateRange(
@@ -136,7 +136,7 @@ class WeatherServiceImplTest {
             .thenReturn(Collections.emptyList());
 
         // When & Then
-        assertThatThrownBy(() -> 
+        assertThatThrownBy(() ->
             weatherService.getThreeDayWeather(latitude, longitude, testDateTime))
             .isInstanceOf(WeatherNotFoundException.class);
     }
@@ -147,11 +147,11 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         List<Weather> insufficientWeatherData = List.of(
             createMockWeather("부산광역시 남구", testDateTime)
         ); // 1일치만 제공
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(mockLocation);
         when(weatherRepository.findWeathersByRegionAndDateRange(
@@ -159,7 +159,7 @@ class WeatherServiceImplTest {
             .thenReturn(insufficientWeatherData);
 
         // When & Then
-        assertThatThrownBy(() -> 
+        assertThatThrownBy(() ->
             weatherService.getThreeDayWeather(latitude, longitude, testDateTime))
             .isInstanceOf(WeatherDataInsufficientException.class);
     }
@@ -170,12 +170,12 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenThrow(new RuntimeException("Location service error"));
 
         // When & Then
-        assertThatThrownBy(() -> 
+        assertThatThrownBy(() ->
             weatherService.getThreeDayWeather(latitude, longitude, testDateTime))
             .isInstanceOf(WeatherNotFoundException.class);
     }
@@ -201,7 +201,7 @@ class WeatherServiceImplTest {
             .humidity(createMockHumidity())
             .windSpeed(createMockWindSpeed())
             .build();
-        
+
         ReflectionTestUtils.setField(weather, "id", UUID.randomUUID());
         return weather;
     }
@@ -212,12 +212,12 @@ class WeatherServiceImplTest {
             createMockWeather("부산광역시 남구", testDateTime),
             createMockWeather("부산광역시 남구", testDateTime.plusHours(3)),
             createMockWeather("부산광역시 남구", testDateTime.plusHours(6)),
-            
+
             // 내일
             createMockWeather("부산광역시 남구", testDateTime.plusDays(1)),
             createMockWeather("부산광역시 남구", testDateTime.plusDays(1).plusHours(3)),
             createMockWeather("부산광역시 남구", testDateTime.plusDays(1).plusHours(6)),
-            
+
             // 모레
             createMockWeather("부산광역시 남구", testDateTime.plusDays(2)),
             createMockWeather("부산광역시 남구", testDateTime.plusDays(2).plusHours(3)),
@@ -264,17 +264,17 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         // 정확한 시간의 날씨 데이터 생성
         Weather exactTimeWeather = createMockWeather("부산광역시 남구", testDateTime);
         Weather otherTimeWeather = createMockWeather("부산광역시 남구", testDateTime.plusHours(1));
-        
+
         List<Weather> weatherList = Arrays.asList(
             exactTimeWeather, otherTimeWeather,
             createMockWeather("부산광역시 남구", testDateTime.plusDays(1)),
             createMockWeather("부산광역시 남구", testDateTime.plusDays(2))
         );
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(mockLocation);
         when(weatherRepository.findWeathersByRegionAndDateRange(any(), any(), any()))
@@ -296,17 +296,17 @@ class WeatherServiceImplTest {
         double latitude = 35.1595;
         double longitude = 129.0756;
         LocalDateTime targetTime = testDateTime; // 14:00
-        
+
         // 정확한 시간(14:00)은 없고 13:00과 15:00만 있음
         Weather closerTime = createMockWeather("부산광역시 남구", testDateTime.minusHours(1)); // 13:00
         Weather fartherTime = createMockWeather("부산광역시 남구", testDateTime.plusHours(1)); // 15:00
-        
+
         List<Weather> weatherList = Arrays.asList(
             closerTime, fartherTime,
             createMockWeather("부산광역시 남구", testDateTime.plusDays(1)),
             createMockWeather("부산광역시 남구", testDateTime.plusDays(2))
         );
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(mockLocation);
         when(weatherRepository.findWeathersByRegionAndDateRange(any(), any(), any()))
@@ -327,21 +327,21 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         // 내일 여러 시간대의 날씨 (강수 확률이 다름)
-        Weather tomorrowMorning = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather tomorrowMorning = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime.plusDays(1).withHour(9), 20.0, 0.0, PrecipitationType.NONE);
-        Weather tomorrowAfternoon = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather tomorrowAfternoon = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime.plusDays(1).withHour(15), 80.0, 5.0, PrecipitationType.RAIN);
-        Weather tomorrowEvening = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather tomorrowEvening = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime.plusDays(1).withHour(21), 60.0, 2.0, PrecipitationType.RAIN);
-        
+
         List<Weather> weatherList = Arrays.asList(
             createMockWeather("부산광역시 남구", testDateTime), // 오늘
             tomorrowMorning, tomorrowAfternoon, tomorrowEvening, // 내일
             createMockWeather("부산광역시 남구", testDateTime.plusDays(2)) // 모레
         );
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(mockLocation);
         when(weatherRepository.findWeathersByRegionAndDateRange(any(), any(), any()))
@@ -352,10 +352,10 @@ class WeatherServiceImplTest {
 
         // Then
         assertThat(result).hasSize(3);
-        
+
         // 내일 날씨는 최악의 강수 데이터(80%, 5.0mm, RAIN)가 적용되어야 함
         WeatherDto tomorrowWeather = result.get(1);
-        assertThat(tomorrowWeather.precipitation().probability()).isEqualTo(80.0);
+        assertThat(tomorrowWeather.precipitation().probability()).isEqualTo(0.8);
         assertThat(tomorrowWeather.precipitation().amount()).isEqualTo(5.0);
         assertThat(tomorrowWeather.precipitation().type()).isEqualTo(PrecipitationType.RAIN);
     }
@@ -366,21 +366,21 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         // 오늘 정확한 시간의 날씨 (강수 확률 30%)
-        Weather todayWeather = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather todayWeather = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime, 30.0, 1.0, PrecipitationType.RAIN);
-        
+
         // 오늘 다른 시간의 날씨 (강수 확률 90% - 더 높음)
-        Weather todayWorseWeather = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather todayWorseWeather = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime.plusHours(3), 90.0, 10.0, PrecipitationType.RAIN);
-        
+
         List<Weather> weatherList = Arrays.asList(
             todayWeather, todayWorseWeather,
             createMockWeather("부산광역시 남구", testDateTime.plusDays(1)),
             createMockWeather("부산광역시 남구", testDateTime.plusDays(2))
         );
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(mockLocation);
         when(weatherRepository.findWeathersByRegionAndDateRange(any(), any(), any()))
@@ -391,10 +391,10 @@ class WeatherServiceImplTest {
 
         // Then
         assertThat(result).hasSize(3);
-        
+
         // 오늘 날씨는 정확한 시간의 데이터 그대로 사용 (30%, 1.0mm)
         WeatherDto todayResult = result.get(0);
-        assertThat(todayResult.precipitation().probability()).isEqualTo(30.0);
+        assertThat(todayResult.precipitation().probability()).isEqualTo(0.3);
         assertThat(todayResult.precipitation().amount()).isEqualTo(1.0);
     }
 
@@ -404,23 +404,23 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         // 내일 다양한 강수 타입의 날씨
         // NONE(0) < RAIN(1) < RAIN_SNOW(2) < SNOW(3) < SHOWER(4) 순서로 ordinal 값 증가
         // 강수 확률을 동일하게 만들어 타입으로만 비교하도록 함
-        Weather rainWeather = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather rainWeather = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime.plusDays(1).withHour(9), 50.0, 3.0, PrecipitationType.RAIN);
-        Weather snowWeather = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather snowWeather = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime.plusDays(1).withHour(15), 50.0, 3.0, PrecipitationType.SNOW); // 동일한 확률과 양
-        Weather noneWeather = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather noneWeather = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime.plusDays(1).withHour(21), 50.0, 3.0, PrecipitationType.NONE); // 동일한 확률과 양
-        
+
         List<Weather> weatherList = Arrays.asList(
             createMockWeather("부산광역시 남구", testDateTime), // 오늘
             rainWeather, snowWeather, noneWeather, // 내일
             createMockWeather("부산광역시 남구", testDateTime.plusDays(2)) // 모레
         );
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(mockLocation);
         when(weatherRepository.findWeathersByRegionAndDateRange(any(), any(), any()))
@@ -441,21 +441,21 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         // 내일 강수 확률은 같지만 강수량이 다른 날씨
-        Weather lightRain = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather lightRain = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime.plusDays(1).withHour(9), 70.0, 2.0, PrecipitationType.RAIN);
-        Weather heavyRain = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather heavyRain = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime.plusDays(1).withHour(15), 70.0, 8.0, PrecipitationType.RAIN);
-        Weather mediumRain = createWeatherWithPrecipitation("부산광역시 남구", 
+        Weather mediumRain = createWeatherWithPrecipitation("부산광역시 남구",
             testDateTime.plusDays(1).withHour(21), 70.0, 5.0, PrecipitationType.RAIN);
-        
+
         List<Weather> weatherList = Arrays.asList(
             createMockWeather("부산광역시 남구", testDateTime), // 오늘
             lightRain, heavyRain, mediumRain, // 내일
             createMockWeather("부산광역시 남구", testDateTime.plusDays(2)) // 모레
         );
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(mockLocation);
         when(weatherRepository.findWeathersByRegionAndDateRange(any(), any(), any()))
@@ -476,21 +476,21 @@ class WeatherServiceImplTest {
         // Given
         double latitude = 35.1595;
         double longitude = 129.0756;
-        
+
         // 오늘과 모레 데이터만 있고 내일 데이터가 없음
         List<Weather> weatherList = Arrays.asList(
             createMockWeather("부산광역시 남구", testDateTime), // 오늘
             // 내일 데이터 없음
             createMockWeather("부산광역시 남구", testDateTime.plusDays(2)) // 모레
         );
-        
+
         when(locationService.getGridAndLocation(latitude, longitude))
             .thenReturn(mockLocation);
         when(weatherRepository.findWeathersByRegionAndDateRange(any(), any(), any()))
             .thenReturn(weatherList);
 
         // When & Then
-        assertThatThrownBy(() -> 
+        assertThatThrownBy(() ->
             weatherService.getThreeDayWeather(latitude, longitude, testDateTime))
             .isInstanceOf(WeatherDataInsufficientException.class);
     }
@@ -499,20 +499,20 @@ class WeatherServiceImplTest {
     @DisplayName("극단적인 좌표값 처리")
     void getThreeDayWeather_ExtremeCoordinates() {
         // When & Then - 위도 극값
-        assertThatThrownBy(() -> 
+        assertThatThrownBy(() ->
             weatherService.getThreeDayWeather(-91.0, 127.0, testDateTime))
             .isInstanceOf(InvalidCoordinatesException.class);
-        
-        assertThatThrownBy(() -> 
+
+        assertThatThrownBy(() ->
             weatherService.getThreeDayWeather(91.0, 127.0, testDateTime))
             .isInstanceOf(InvalidCoordinatesException.class);
-        
+
         // When & Then - 경도 극값
-        assertThatThrownBy(() -> 
+        assertThatThrownBy(() ->
             weatherService.getThreeDayWeather(37.5, -181.0, testDateTime))
             .isInstanceOf(InvalidCoordinatesException.class);
-        
-        assertThatThrownBy(() -> 
+
+        assertThatThrownBy(() ->
             weatherService.getThreeDayWeather(37.5, 181.0, testDateTime))
             .isInstanceOf(InvalidCoordinatesException.class);
     }
@@ -525,7 +525,7 @@ class WeatherServiceImplTest {
             .precipitationProbability(probability)
             .precipitationAmount(amount)
             .build();
-        
+
         Weather weather = Weather.builder()
             .regionName(regionName)
             .forecastedAt(LocalDateTime.now())
@@ -536,7 +536,7 @@ class WeatherServiceImplTest {
             .humidity(createMockHumidity())
             .windSpeed(createMockWindSpeed())
             .build();
-        
+
         ReflectionTestUtils.setField(weather, "id", UUID.randomUUID());
         return weather;
     }

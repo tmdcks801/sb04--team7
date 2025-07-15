@@ -11,6 +11,6 @@ public record FollowSummaryDto(
     long followingCount,
     boolean followedByMe,
     UUID followedByMeId,
-    boolean followingByMe
+    boolean followingMe
 ) {
 }

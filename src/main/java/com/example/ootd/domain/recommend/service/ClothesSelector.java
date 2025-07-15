@@ -103,7 +103,7 @@ public class ClothesSelector {
           + info.temperatureSensitivity();
     } catch (Exception e) {
       log.error("체감온도 계산 중 오류: {}", e.getMessage());
-      return 20.0; // 기본값
+      return 20.0;
     }
   }
 

@@ -31,7 +31,7 @@ import com.example.ootd.domain.weather.repository.WeatherRepository;
 import com.example.ootd.dto.PageResponse;
 import com.example.ootd.exception.feed.FeedLikeNotFoundException;
 import com.example.ootd.exception.feed.FeedNotFoundException;
-import com.example.ootd.exception.user.UserIdNotFoundException;
+import com.example.ootd.exception.user.UserNotFoundException;
 import com.example.ootd.exception.weather.WeatherNotFoundException;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +68,7 @@ public class FeedServiceImpl implements FeedService {
     log.debug("피드 등록 시작: {}", request);
 
     User author = userRepository.findById(request.authorId())
-        .orElseThrow(() -> UserIdNotFoundException.withId(request.authorId()));
+        .orElseThrow(() -> UserNotFoundException.withId(request.authorId()));
 
     Weather weather = weatherRepository.findById(request.weatherId())
         .orElseThrow(() -> WeatherNotFoundException.withId(request.weatherId()));
@@ -178,7 +178,7 @@ public class FeedServiceImpl implements FeedService {
 
     Feed feed = getFeedById(feedId);
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> UserIdNotFoundException.withId(userId));
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     FeedLike feedLike = new FeedLike(feed, user);
     feedLikeRepository.save(feedLike);
@@ -224,7 +224,7 @@ public class FeedServiceImpl implements FeedService {
 
     Feed feed = getFeedById(request.feedId());
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> UserIdNotFoundException.withId(userId));
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     FeedComment comment = FeedComment.builder()
         .feed(feed)
@@ -260,7 +260,6 @@ public class FeedServiceImpl implements FeedService {
     log.debug("피드 댓글 목록 조회 시작: {}", condition);
 
     List<FeedComment> comments = feedCommentRepository.findByCondition(condition, feedId);
-    List<CommentDto> commentDtos = commentMapper.toDto(comments);
 
     boolean hasNext = (comments.size() > condition.limit());
     String nextCursor = null;
@@ -269,11 +268,13 @@ public class FeedServiceImpl implements FeedService {
 
     // 다음 페이지 있는 경우
     if (hasNext) {
-      commentDtos.remove(commentDtos.size() - 1);   // 다음 페이지 확인용 마지막 요소 삭제
-      CommentDto lastComment = commentDtos.get(commentDtos.size() - 1);
-      nextCursor = lastComment.createdAt().toString();
-      nextIdAfter = lastComment.id();
+      comments.remove(comments.size() - 1);   // 다음 페이지 확인용 마지막 요소 삭제
+      FeedComment lastComment = comments.get(comments.size() - 1);
+      nextCursor = lastComment.getCreatedAt().toString();
+      nextIdAfter = lastComment.getId();
     }
+
+    List<CommentDto> commentDtos = commentMapper.toDto(comments);
 
     PageResponse<CommentDto> response = PageResponse.<CommentDto>builder()
         .data(commentDtos)

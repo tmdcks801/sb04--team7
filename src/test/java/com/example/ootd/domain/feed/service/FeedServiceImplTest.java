@@ -38,6 +38,8 @@ import com.example.ootd.domain.weather.dto.WeatherSummaryDto;
 import com.example.ootd.domain.weather.entity.Weather;
 import com.example.ootd.domain.weather.repository.WeatherRepository;
 import com.example.ootd.dto.PageResponse;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -94,6 +96,7 @@ public class FeedServiceImplTest {
   class CreateFeedTest {
 
     @Test
+    @DisplayName("성공 - 등록 성공")
     void createFeed_success() {
       // given
       UUID authorId = UUID.randomUUID();
@@ -176,6 +179,7 @@ public class FeedServiceImplTest {
   class UpdateFeedTest {
 
     @Test
+    @DisplayName("성공 - 수정 성공")
     void updateFeed_success() {
       // given
       Feed feed = Feed.builder().content("old content").build();
@@ -197,6 +201,7 @@ public class FeedServiceImplTest {
   class FindFeedByConditionTest {
 
     @Test
+    @DisplayName("성공 - 목록 조회 성공, 다음 페이지 없는 경우")
     void findFeedByCondition_success() {
       // given
       FeedSearchCondition condition = FeedSearchCondition.builder()
@@ -267,6 +272,88 @@ public class FeedServiceImplTest {
       verify(feedLikeRepository).findAllByUserId(userId);
       verify(feedRepository).countByCondition(condition);
     }
+
+    @Test
+    @DisplayName("성공 - 목록 조회 성공, 다음 페이지 있는 경우")
+    void findFeedByCondition_success_has_next_page() {
+      // given
+      FeedSearchCondition condition = FeedSearchCondition.builder()
+          .limit(1)
+          .sortBy("createdAt")
+          .sortDirection("ASCENDING")
+          .build();
+
+      User author = TestEntityFactory.createUser();
+
+      Weather weather = Weather.builder()
+          .id(weatherId)
+          .build();
+
+      Feed feed1 = Feed.builder()
+          .user(author)
+          .weather(weather)
+          .content("테스트 피드 내용1")
+          .build();
+      ReflectionTestUtils.setField(feed1, "id", feedId);
+      ReflectionTestUtils.setField(feed1, "createdAt", LocalDateTime.now());
+      Feed feed2 = Feed.builder()
+          .user(author)
+          .weather(weather)
+          .content("테스트 피드 내용2")
+          .build();
+      ReflectionTestUtils.setField(feed2, "id", feedId);
+      ReflectionTestUtils.setField(feed2, "createdAt", LocalDateTime.now());
+
+      // 좋아요 맵
+      FeedLike feedLike = new FeedLike(feed1, author);
+
+      given(feedRepository.findByCondition(condition)).willReturn(
+          new ArrayList<>(List.of(feed1, feed2)));
+      given(feedLikeRepository.findAllByUserId(userId)).willReturn(List.of(feedLike));
+      given(feedMapper.toDto(eq(List.of(feed1)), anyMap())).willReturn(List.of(
+          FeedDto.builder()
+              .id(feedId)
+              .author(new AuthorDto(userId, author.getName(), "https://example.com/profile.jpg"))
+              .weather(new WeatherSummaryDto(weatherId, null, null, null))
+              .ootds(List.of(
+                  OotdDto.builder()
+                      .clothesId(UUID.randomUUID())
+                      .name("청바지")
+                      .imageUrl("https://example.com/clothes.jpg")
+                      .type(null)
+                      .attributes(List.of(
+                          ClothesAttributeWithDefDto.builder()
+                              .definitionId(UUID.randomUUID())
+                              .definitionName("색상")
+                              .selectableValues(List.of("검정", "청색"))
+                              .value("청색")
+                              .build()
+                      ))
+                      .build()
+              ))
+              .content("테스트 피드 내용")
+              .likeCount(1L)
+              .commentCount(2)
+              .likedByMe(true)
+              .build()
+      ));
+      given(feedRepository.countByCondition(condition)).willReturn(2L);
+
+      // when
+      PageResponse<FeedDto> result = feedService.findFeedByCondition(condition, userId);
+
+      // then
+      assertThat(result).isNotNull();
+      assertThat(result.data()).hasSize(1);
+      assertThat(result.hasNext()).isTrue();
+      assertThat(result.totalCount()).isEqualTo(2);
+      assertThat(result.data().get(0).content()).isEqualTo("테스트 피드 내용");
+      assertThat(result.data().get(0).author().name()).isEqualTo("test-name");
+
+      verify(feedRepository).findByCondition(condition);
+      verify(feedLikeRepository).findAllByUserId(userId);
+      verify(feedRepository).countByCondition(condition);
+    }
   }
 
   @Nested
@@ -274,6 +361,7 @@ public class FeedServiceImplTest {
   class DeleteFeedTest {
 
     @Test
+    @DisplayName("성공 - 삭제 성공")
     void deleteFeed_success() {
       // given
       Feed feed = Feed.builder().build();
@@ -292,6 +380,7 @@ public class FeedServiceImplTest {
   class LikeFeedTest {
 
     @Test
+    @DisplayName("성공 - 좋아요 성공")
     void likeFeed_success() {
       // given
       Feed feed = Feed.builder().user(TestEntityFactory.createUser()).build();
@@ -315,6 +404,7 @@ public class FeedServiceImplTest {
   class DeleteFeedLikeTest {
 
     @Test
+    @DisplayName("성공 - 좋아요 삭제 성공")
     void deleteFeedLike_success() {
       Feed feed = Feed.builder().build();
       FeedLike like = new FeedLike(feed, TestEntityFactory.createUser());
@@ -335,6 +425,7 @@ public class FeedServiceImplTest {
   class CreateCommentTest {
 
     @Test
+    @DisplayName("성공 - 댓글 등록 성공")
     void createComment_success() {
 
       // given
@@ -362,6 +453,7 @@ public class FeedServiceImplTest {
   class FindCommentByConditionTest {
 
     @Test
+    @DisplayName("성공 - 댓글 목록 조회 성공, 다음 페이지 없는 경우")
     void findCommentByCondition_success() {
       // given
       UUID feedId = UUID.randomUUID();
@@ -378,7 +470,7 @@ public class FeedServiceImplTest {
 
       List<FeedComment> commentList = List.of(comment);
 
-      given(feedCommentRepository.findByCondition(condition)).willReturn(commentList);
+      given(feedCommentRepository.findByCondition(condition, feedId)).willReturn(commentList);
       given(commentMapper.toDto(commentList)).willReturn(List.of(
           CommentDto.builder()
               .id(comment.getId())
@@ -400,7 +492,57 @@ public class FeedServiceImplTest {
       assertThat(result.data().get(0).content()).isEqualTo("테스트 댓글");
       assertThat(result.data().get(0).author().name()).isEqualTo("댓글 작성자");
 
-      verify(feedCommentRepository).findByCondition(condition);
+      verify(feedCommentRepository).findByCondition(condition, feedId);
+      verify(feedCommentRepository).countByFeedId(feedId);
+      verify(commentMapper).toDto(commentList);
+    }
+
+    @Test
+    @DisplayName("성공 - 댓글 목록 조회 성공, 다음 페이지 있는 경우")
+    void findCommentByCondition_success_has_next_page() {
+      // given
+      UUID feedId = UUID.randomUUID();
+      UUID userId = UUID.randomUUID();
+
+      FeedCommentSearchCondition condition = FeedCommentSearchCondition.builder()
+          .limit(1)
+          .build();
+
+      FeedComment comment1 = FeedComment.builder()
+          .content("테스트 댓글1")
+          .user(TestEntityFactory.createUser())
+          .build();
+      ReflectionTestUtils.setField(comment1, "createdAt", LocalDateTime.now());
+      FeedComment comment2 = FeedComment.builder()
+          .content("테스트 댓글2")
+          .user(TestEntityFactory.createUser())
+          .build();
+
+      List<FeedComment> commentList = new ArrayList<>(List.of(comment1, comment2));
+
+      given(feedCommentRepository.findByCondition(condition, feedId)).willReturn(commentList);
+      given(commentMapper.toDto(commentList)).willReturn(List.of(
+          CommentDto.builder()
+              .id(comment1.getId())
+              .author(new AuthorDto(userId, "댓글 작성자", "https://example.com/profile.jpg"))
+              .content("테스트 댓글1")
+              .createdAt(comment1.getCreatedAt())
+              .build()
+      ));
+      given(feedCommentRepository.countByFeedId(feedId)).willReturn(2L);
+
+      // when
+      PageResponse<CommentDto> result = feedService.findCommentByCondition(feedId, condition);
+
+      // then
+      assertThat(result).isNotNull();
+      assertThat(result.data()).hasSize(1);
+      assertThat(result.hasNext()).isTrue();
+      assertThat(result.totalCount()).isEqualTo(2L);
+      assertThat(result.data().get(0).content()).isEqualTo("테스트 댓글1");
+      assertThat(result.data().get(0).author().name()).isEqualTo("댓글 작성자");
+
+      verify(feedCommentRepository).findByCondition(condition, feedId);
       verify(feedCommentRepository).countByFeedId(feedId);
       verify(commentMapper).toDto(commentList);
     }

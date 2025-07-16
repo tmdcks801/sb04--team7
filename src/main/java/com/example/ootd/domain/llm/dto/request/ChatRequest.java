@@ -1,5 +1,6 @@
 package com.example.ootd.domain.llm.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import lombok.Builder;
 
@@ -11,9 +12,11 @@ public record ChatRequest(
 ) {
 
   @Builder
+  @JsonIgnoreProperties(ignoreUnknown = true)
   public record Message(
       String role,       // "system", "user", "assistant"
-      String content     // 프롬프트 내용
+      String content,    // 프롬프트 내용
+      String refusal     // OpenAI API refusal 필드
   ) {
   }
 }

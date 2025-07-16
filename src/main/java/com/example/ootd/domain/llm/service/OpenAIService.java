@@ -67,12 +67,14 @@ public class OpenAIService {
             해당 정보에 맞게 의상을 추천해 주세요.
             
             추천 규칙:
-            1. 각 타입(TOP, BOTTOM, SHOES, DRESS, OUTER, ACCESSORY 등)별로 최대 1개씩만 선택하세요
-            2. 같은 타입의 옷을 중복으로 추천하지 마세요
-            3. 반드시 입력된 clothes 목록에서만 선택하세요
-            4. clothesId, imageUrl, attributes는 입력된 옷의 실제 정보를 그대로 사용하세요
-            5. 옷의 모든 attributes를 보여주세요
-            6. 추천한 이유를 알려주세요
+            1. 각 타입(TOP, BOTTOM, SHOES)별로 최대 1개씩만 선택하세요
+            2. 당일 기온이 20도 이상이면 DRESS, 20도 미만이면 OUTER 최대 1개씩만 추천하세요
+            3. TOP, BOTTOM, SHOES, DRESS, OUTER 제외한 타입들은 랜덤으로 최대 1개씩만 추천하세요
+            4. 같은 타입의 옷(TOP, BOTTOM, SHOES, DRESS, OUTER)을 중복으로 추천하지 마세요
+            5. 반드시 입력된 clothes 목록에서만 선택하세요
+            6. clothesId, imageUrl, attributes는 입력된 옷의 실제 정보를 그대로 사용하세요
+            7. 옷의 모든 attributes를 보여주세요
+            8. 추천한 이유를 알려주세요
 
             결과는 반드시 다음과 같은 JSON 구조로 출력하세요:
             {

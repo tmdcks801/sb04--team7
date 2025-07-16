@@ -80,6 +80,7 @@ public class SecurityConfig {
                 .requestMatchers("/sub").permitAll()
                 .requestMatchers("/pub").permitAll()
                 .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/api/batch/weather/**").hasRole("ADMIN")
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
                 .permitAll()
 

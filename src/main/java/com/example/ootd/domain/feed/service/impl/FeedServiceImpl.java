@@ -31,6 +31,7 @@ import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.domain.weather.entity.Weather;
 import com.example.ootd.domain.weather.repository.WeatherRepository;
 import com.example.ootd.dto.PageResponse;
+import com.example.ootd.exception.feed.FeedLikeAlreadyExistsException;
 import com.example.ootd.exception.feed.FeedLikeNotFoundException;
 import com.example.ootd.exception.feed.FeedNotFoundException;
 import com.example.ootd.exception.user.UserNotFoundException;
@@ -186,6 +187,11 @@ public class FeedServiceImpl implements FeedService {
   public FeedDto likeFeed(UUID feedId, UUID userId) {
 
     log.debug("피드 좋아요 시작: feedId={}, userId={}", feedId, userId);
+
+    // 이미 좋아요 존재하는 경우 예외처리
+    if (isFeedLiked(feedId, userId)) {
+      throw FeedLikeAlreadyExistsException.withFeedIdAndUserId(feedId, userId);
+    }
 
     Feed feed = getFeedById(feedId);
     User user = userRepository.findById(userId)

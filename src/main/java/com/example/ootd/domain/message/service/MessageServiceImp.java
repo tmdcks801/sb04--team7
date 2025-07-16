@@ -53,11 +53,14 @@ public class MessageServiceImp implements MessageServiceInterface {
           .orElseThrow(() -> new IllegalArgumentException("Receiver 없음 : " + receiverId));
       Message message = Message.createMessage(sender, receiver, content);
       messageRepository.save(message);
+
       DirectMessageDto dto = messageMapper.toDto(message);
+
       messagingTemplate.convertAndSend("/sub/direct-messages_" + message.getDmKey(), dto);
       notificationPublisherInterface.publish(
           new NotificationRequest(receiverId, sender.getName() + " 님으로부터 메세지", content,
               NotificationLevel.INFO));//이벤트
+
       return dto;
     } catch (FailSendMessageException e) {
       log.error("메세지 전송중 오류");

@@ -20,18 +20,6 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 @Document(collection = "notification")
 @Getter
-@CompoundIndexes({
-    @CompoundIndex(
-        name = "idx_receiver_createdAt_desc",
-        def = "{ 'receiverId': 1, 'createdAt': -1 }",
-        background = true
-    ),
-    @CompoundIndex(
-        name = "idx_receiver_createdAt_asc",
-        def = "{ 'receiverId': 1, 'createdAt': 1 }",
-        background = true
-    )
-})
 @NoArgsConstructor(access = PROTECTED)
 public class Notification {
 

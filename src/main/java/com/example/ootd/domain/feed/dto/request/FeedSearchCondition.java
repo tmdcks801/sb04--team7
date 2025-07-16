@@ -23,4 +23,23 @@ public record FeedSearchCondition(
     UUID authorIdEqual
 ) {
 
+  // 캐시 키값 반환
+  public String toSimpleKye() {
+    return String.format(
+        "cursor=%s:idAfter=%s:limit=%s:sortBy=%s:sortDirection=%s:keyword=%s:sky=%s:rain=%s:author=%s",
+        nullToStr(cursor),
+        nullToStr(idAfter),
+        limit,
+        sortBy,
+        sortDirection,
+        nullToStr(keywordLike),
+        nullToStr(skyStatusEqual),
+        nullToStr(precipitationTypeEqual),
+        nullToStr(authorIdEqual)
+    );
+  }
+
+  private String nullToStr(Object o) {
+    return o == null ? "null" : o.toString();
+  }
 }

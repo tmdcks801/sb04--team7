@@ -22,6 +22,13 @@ public interface FeedMapper {
   @Mapping(target = "likedByMe", source = "likedByMe")
   FeedDto toDto(Feed feed, boolean likedByMe);
 
+  @Mapping(target = "author", source = "feed.user")
+  @Mapping(target = "weather", source = "feed.weather")
+  @Mapping(target = "ootds", source = "feed.feedClothes")
+  FeedDto toDto(Feed feed);
+
+  List<FeedDto> toDto(List<Feed> feeds);
+
   default List<FeedDto> toDto(List<Feed> feeds, Map<UUID, FeedLike> likedByMeMap) {
     return feeds.stream()
         .map(feed -> toDto(feed, likedByMeMap.containsKey(feed.getId())))

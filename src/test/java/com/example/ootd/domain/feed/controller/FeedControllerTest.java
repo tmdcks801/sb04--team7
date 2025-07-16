@@ -51,7 +51,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @WebMvcTest(FeedController.class)
 @WithMockUser(roles = "USER")
-class FeedControllerTest {
+class
+
+FeedControllerTest {
 
   @Autowired
   MockMvc mockMvc;

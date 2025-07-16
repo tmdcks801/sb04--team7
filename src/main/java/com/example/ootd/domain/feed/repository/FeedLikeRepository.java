@@ -27,4 +27,15 @@ public interface FeedLikeRepository extends JpaRepository<FeedLike, UUID> {
        WHERE fl.user.id = :userId
       """)
   List<FeedLike> findAllByUserId(@Param("userId") UUID userId);
+
+  @Query("""
+      SELECT f.id, COUNT(fl) 
+        FROM Feed f
+        LEFT JOIN FeedLike fl ON fl.feed.id = f.id
+       WHERE f.id IN :feedIds
+       GROUP BY f.id
+      """)
+  List<Object[]> countLikesByFeedIds(@Param("feedIds") List<UUID> feedIds);
+
+  long countByFeedId(UUID feedId);
 }

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -31,6 +32,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+  private final Environment environment;
 
   /**
    * 기초 세팅을 위한 임시 필터체인
@@ -54,38 +57,43 @@ public class SecurityConfig {
         .formLogin(AbstractHttpConfigurer::disable)
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth.requestMatchers(
-                    "/",
-                    "/assets/**",
-                    "/static/**",
-                    "/favicon.ico",
-                    "/closet-hanger-logo.png",
-                    "/index.html",
-                    "/vite.svg",
-                    "/actuator/health",
-                    "/actuator/prometheus"
-                ).permitAll()
-                .requestMatchers("/oauth2/callback").permitAll()
-                .requestMatchers("/api/auth/me").permitAll()
-                .requestMatchers("/api/auth/sign-out").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/users/*/role").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                .requestMatchers("/test/me").hasRole("USER")
-                .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
-                .requestMatchers("/sub").permitAll()
-                .requestMatchers("/pub").permitAll()
-                .requestMatchers("/ws/**").permitAll()
-                .requestMatchers("/api/batch/weather/**").hasRole("ADMIN")
-                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
-                .permitAll()
+        .authorizeHttpRequests(auth -> {
+          auth.requestMatchers(
+                      "/",
+                      "/assets/**",
+                      "/static/**",
+                      "/favicon.ico",
+                      "/closet-hanger-logo.png",
+                      "/index.html",
+                      "/vite.svg",
+                      "/actuator/health",
+                      "/actuator/prometheus"
+                  ).permitAll()
+                  .requestMatchers("/oauth2/callback").permitAll()
+                  .requestMatchers("/api/auth/me").permitAll()
+                  .requestMatchers("/api/auth/sign-out").permitAll()
+                  .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+                  .requestMatchers(HttpMethod.PATCH, "/api/users/*/role").hasRole("ADMIN")
+                  .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+                  .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
+                  .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                  .requestMatchers("/test/me").hasRole("USER")
+                  .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
+                  .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+                  .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+                  .requestMatchers("/sub").permitAll()
+                  .requestMatchers("/pub").permitAll()
+                  .requestMatchers("/ws/**").permitAll()
+                  .requestMatchers("/api/batch/weather/**").hasRole("ADMIN");
 
-                .anyRequest().authenticated()
-        )
+          // dev 프로파일에서만 Swagger 허용
+          if (java.util.Arrays.asList(environment.getActiveProfiles()).contains("dev")) {
+            auth.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
+                .permitAll();
+          }
+
+          auth.anyRequest().authenticated();
+        })
         .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo ->
                 userInfo.userService(customOAuth2UserService))
             .successHandler(oAuth2LoginSuccessHandler)

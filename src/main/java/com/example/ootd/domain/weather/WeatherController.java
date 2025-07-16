@@ -1,5 +1,6 @@
 package com.example.ootd.domain.weather;
 
+import com.example.ootd.config.api.WeatherApi;
 import com.example.ootd.domain.location.dto.WeatherAPILocation;
 import com.example.ootd.domain.location.service.LocationService;
 import com.example.ootd.domain.weather.dto.WeatherDto;
@@ -16,21 +17,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/weathers")
 @RequiredArgsConstructor
-public class WeatherController {
+public class WeatherController implements WeatherApi {
 
   private final LocationService locationService;
   private final WeatherService weatherService;
 
+  @Override
   @GetMapping
-  public ResponseEntity<List<WeatherDto>> getWeatherByLocation(
+  public ResponseEntity<List<WeatherDto>> getWeather(
       @RequestParam(required = true) double longitude,
       @RequestParam(required = true) double latitude) {
     return ResponseEntity.ok(
         weatherService.getThreeDayWeather(latitude, longitude, LocalDateTime.now()));
   }
 
+  @Override
   @GetMapping("/location")
-  public ResponseEntity<WeatherAPILocation> getLocation(
+  public ResponseEntity<WeatherAPILocation> getWeatherLocation(
       @RequestParam(required = true) double longitude,
       @RequestParam(required = true) double latitude) {
     return ResponseEntity.ok(

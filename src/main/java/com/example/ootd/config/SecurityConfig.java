@@ -3,7 +3,6 @@ package com.example.ootd.config;
 import com.example.ootd.security.CustomUserDetailsService;
 import com.example.ootd.security.CustomUsernamePasswordAuthenticationFilter;
 import com.example.ootd.security.jwt.JwtAuthenticationFilter;
-import com.example.ootd.security.jwt.JwtService;
 import com.example.ootd.security.oauth2.CustomOAuth2UserService;
 import com.example.ootd.security.oauth2.OAuth2LoginSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,15 +10,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
@@ -28,17 +26,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-//import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-//import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+  private final Environment environment;
 
   /**
    * 기초 세팅을 위한 임시 필터체인
@@ -62,35 +57,43 @@ public class SecurityConfig {
         .formLogin(AbstractHttpConfigurer::disable)
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth.requestMatchers(
-                    "/",
-                    "/assets/**",
-                    "/static/**",
-                    "/favicon.ico",
-                    "/closet-hanger-logo.png",
-                    "/index.html",
-                    "/vite.svg",
-                    "/actuator/health",
-                    "/actuator/prometheus"
-                ).permitAll()
-                .requestMatchers("/oauth2/callback").permitAll()
-                .requestMatchers("/api/auth/me").permitAll()
-                .requestMatchers("/api/auth/sign-out").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/users/*/role").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                .requestMatchers("/test/me").hasRole("USER")
-                .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
-                .requestMatchers("/sub").permitAll()
-                .requestMatchers("/pub").permitAll()
-                .requestMatchers("/ws/**").permitAll()
+        .authorizeHttpRequests(auth -> {
+          auth.requestMatchers(
+                      "/",
+                      "/assets/**",
+                      "/static/**",
+                      "/favicon.ico",
+                      "/closet-hanger-logo.png",
+                      "/index.html",
+                      "/vite.svg",
+                      "/actuator/health",
+                      "/actuator/prometheus"
+                  ).permitAll()
+                  .requestMatchers("/oauth2/callback").permitAll()
+                  .requestMatchers("/api/auth/me").permitAll()
+                  .requestMatchers("/api/auth/sign-out").permitAll()
+                  .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+                  .requestMatchers(HttpMethod.PATCH, "/api/users/*/role").hasRole("ADMIN")
+                  .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+                  .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
+                  .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                  .requestMatchers("/test/me").hasRole("USER")
+                  .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
+                  .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+                  .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+                  .requestMatchers("/sub").permitAll()
+                  .requestMatchers("/pub").permitAll()
+                  .requestMatchers("/ws/**").permitAll()
+                  .requestMatchers("/api/batch/weather/**").hasRole("ADMIN");
 
-                .anyRequest().authenticated()
-        )
+          // dev 프로파일에서만 Swagger 허용
+          if (java.util.Arrays.asList(environment.getActiveProfiles()).contains("dev")) {
+            auth.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
+                .permitAll();
+          }
+
+          auth.anyRequest().authenticated();
+        })
         .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo ->
                 userInfo.userService(customOAuth2UserService))
             .successHandler(oAuth2LoginSuccessHandler)

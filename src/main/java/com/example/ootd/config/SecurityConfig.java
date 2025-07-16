@@ -3,7 +3,6 @@ package com.example.ootd.config;
 import com.example.ootd.security.CustomUserDetailsService;
 import com.example.ootd.security.CustomUsernamePasswordAuthenticationFilter;
 import com.example.ootd.security.jwt.JwtAuthenticationFilter;
-import com.example.ootd.security.jwt.JwtService;
 import com.example.ootd.security.oauth2.CustomOAuth2UserService;
 import com.example.ootd.security.oauth2.OAuth2LoginSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,10 +15,8 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
@@ -28,11 +25,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-//import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-//import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Slf4j
 @Configuration
@@ -88,6 +80,8 @@ public class SecurityConfig {
                 .requestMatchers("/sub").permitAll()
                 .requestMatchers("/pub").permitAll()
                 .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
+                .permitAll()
 
                 .anyRequest().authenticated()
         )

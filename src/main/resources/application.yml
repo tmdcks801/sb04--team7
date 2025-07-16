@@ -173,3 +173,11 @@ app:
 mongo:
   uri: ${MONGODB_URI_LOG}
   collection: ${MONGO_COLLECTION}
+
+# Swagger/OpenAPI 설정
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

@@ -47,6 +47,8 @@ dependencies {
     testImplementation 'org.springframework.kafka:spring-kafka-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.12.0'
+
 
     //비동기 재시도
     implementation 'org.springframework.retry:spring-retry'

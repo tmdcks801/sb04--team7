@@ -3,6 +3,14 @@
 > 날씨 기반 패션 추천 및 소셜 플랫폼
 
 ## 👥 팀원
+<div align="center">
+
+|                                                          허지웅                                                           |                                                          김승찬                                                          |                                                           변희재                                                           |                                                         한성지                                                          |                                                         전성삼                                                         |
+|:----------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------:|
+| <img width="160" alt="image" src="https://github.com/user-attachments/assets/a0983e23-5e56-4b7a-b7ea-54dcf42163c3" /> | <img width="160" alt="image" src="https://github.com/user-attachments/assets/7131ced3-394c-46b6-b34c-2ddc0090fc0d" /> | <img width="160" alt="image" src="https://github.com/user-attachments/assets/437e67e2-cac3-498b-97b8-05d0d8067ac7" /> | <img width="160" alt="image" src="https://github.com/user-attachments/assets/333dd901-694d-4287-b377-d8aed9719484" /> | <img width="160" alt="image" src="https://github.com/user-attachments/assets/cfbd9313-8de2-4c69-bdbe-0fd1406bd4c2" alt="hodu31">|
+|                                        [Kiki1875b](https://github.com/Kiki1875b)                                         |                                         [tmdcks801](https://github.com/tmdcks801)                                         |                                        [Heyaaz](https://github.com/Heyaaz)                                        |                                         [hyanyul](https://github.com/hyanyul)                                          |                                          [hodu31](https://github.com/hodu31)                                        |
+
+</div>
 
 ## 📖 프로젝트 소개
 

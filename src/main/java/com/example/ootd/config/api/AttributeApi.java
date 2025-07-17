@@ -1,5 +1,6 @@
 package com.example.ootd.config.api;
 
+import com.example.ootd.config.api.dto.AttributePageResponse;
 import com.example.ootd.domain.clothes.dto.data.ClothesAttributeDefDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesAttributeDefCreateRequest;
 import com.example.ootd.domain.clothes.dto.request.ClothesAttributeDefUpdateRequest;
@@ -23,7 +24,7 @@ public interface AttributeApi {
       @ApiResponse(
           responseCode = "200",
           description = "의상 속성 정의 조회 성공",
-          content = @Content(schema = @Schema(implementation = PageResponse.class))),
+          content = @Content(schema = @Schema(implementation = AttributePageResponse.class))),
       @ApiResponse(
           responseCode = "400",
           description = "의상 속성 정의 조회 실패",

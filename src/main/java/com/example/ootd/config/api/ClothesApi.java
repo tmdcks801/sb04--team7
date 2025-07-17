@@ -1,5 +1,6 @@
 package com.example.ootd.config.api;
 
+import com.example.ootd.config.api.dto.ClothesPageResponse;
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesCreateRequest;
 import com.example.ootd.domain.clothes.dto.request.ClothesSearchCondition;
@@ -25,7 +26,7 @@ public interface ClothesApi {
       @ApiResponse(
           responseCode = "200",
           description = "의상 조회 성공",
-          content = @Content(schema = @Schema(implementation = PageResponse.class))),
+          content = @Content(schema = @Schema(implementation = ClothesPageResponse.class))),
       @ApiResponse(
           responseCode = "400",
           description = "의상 조회 실패",

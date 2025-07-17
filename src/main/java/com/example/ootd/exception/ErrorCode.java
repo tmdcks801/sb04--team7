@@ -17,6 +17,7 @@ public enum ErrorCode {
   // Feed 에러
   FEED_NOT_FOUND("피드를 찾을 수 없습니다."),
   FEED_LIKE_NOT_FOUND("피드 좋아요 정보를 찾을 수 없습니다."),
+  FEED_LIKE_DUPLICATE("이미 좋아요를 누른 피드입니다."),
 
   // Image 에러
   IMAGE_NOT_FOUND("이미지를 찾을 수 없습니다."),

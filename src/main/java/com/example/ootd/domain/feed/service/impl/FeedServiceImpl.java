@@ -19,6 +19,8 @@ import com.example.ootd.domain.feed.repository.FeedCommentRepository;
 import com.example.ootd.domain.feed.repository.FeedLikeRepository;
 import com.example.ootd.domain.feed.repository.FeedRepository;
 import com.example.ootd.domain.feed.service.FeedService;
+import com.example.ootd.domain.feed.service.cache.FeedCacheService;
+import com.example.ootd.domain.feed.service.cache.FeedLikeCacheService;
 import com.example.ootd.domain.follow.repository.FollowRepository;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.dto.NotificationRequest;
@@ -29,6 +31,7 @@ import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.domain.weather.entity.Weather;
 import com.example.ootd.domain.weather.repository.WeatherRepository;
 import com.example.ootd.dto.PageResponse;
+import com.example.ootd.exception.feed.FeedLikeAlreadyExistsException;
 import com.example.ootd.exception.feed.FeedLikeNotFoundException;
 import com.example.ootd.exception.feed.FeedNotFoundException;
 import com.example.ootd.exception.user.UserNotFoundException;
@@ -61,6 +64,8 @@ public class FeedServiceImpl implements FeedService {
   private final FeedMapper feedMapper;
   private final CommentMapper commentMapper;
   private final NotificationPublisherInterface notificationPublisher;
+  private final FeedCacheService feedCacheService;
+  private final FeedLikeCacheService feedLikeCacheService;
 
   @Override
   public FeedDto createFeed(FeedCreateRequest request) {
@@ -90,6 +95,7 @@ public class FeedServiceImpl implements FeedService {
     }
 
     feedRepository.save(feed);
+    feedCacheService.evictFeedCache();
 
     // 팔로워에게 알림 발송
     List<UUID> followerIds = followRepository.findFollowersByFolloweeId(request.authorId());
@@ -113,6 +119,7 @@ public class FeedServiceImpl implements FeedService {
 
     Feed feed = getFeedById(feedId);
     feed.updateContent(request.content());
+    feedCacheService.evictFeedCache();
 
     FeedDto dto = feedMapper.toDto(feed, isFeedLiked(feedId, userId));
 
@@ -127,35 +134,39 @@ public class FeedServiceImpl implements FeedService {
 
     log.debug("피드 목록 조회 시작: userId={}, request={}", userId, condition);
 
-    List<Feed> feeds = feedRepository.findByCondition(condition);
+    PageResponse<FeedDto> cachedResponse = feedCacheService.findCachedFeedDtos(condition);
+
+    List<UUID> feedIds = cachedResponse.data().stream().map(FeedDto::id).toList();
+
     Map<UUID, FeedLike> feedLikeMap = getFeedLikeMapByUserId(userId);
+    Map<UUID, Long> likeCountMap = feedLikeCacheService.getLikeCountMap(feedIds);
 
-    boolean hasNext = (feeds.size() > condition.limit());
-    String nextCursor = null;
-    UUID nextIdAfter = null;
-    long totalCount = feedRepository.countByCondition(condition);
-
-    // 다음 페이지 있는 경우
-    if (hasNext) {
-      feeds.remove(feeds.size() - 1);   // 다음 페이지 확인용 마지막 요소 삭제
-      Feed lastFeed = feeds.get(feeds.size() - 1);
-      nextCursor = getNextCursor(lastFeed, condition.sortBy());
-      nextIdAfter = lastFeed.getId();
-    }
-
-    List<FeedDto> feedDtos = feedMapper.toDto(feeds, feedLikeMap);
+    List<FeedDto> userFeedDtos = cachedResponse.data().stream()
+        .map(dto -> FeedDto.builder()
+            .id(dto.id())
+            .createdAt(dto.createdAt())
+            .updatedAt(dto.updatedAt())
+            .author(dto.author())
+            .weather(dto.weather())
+            .ootds(dto.ootds())
+            .content(dto.content())
+            .likeCount(likeCountMap.getOrDefault(dto.id(), 0L))
+            .commentCount(dto.commentCount())
+            .likedByMe(feedLikeMap.containsKey(dto.id()))
+            .build())
+        .toList();
 
     PageResponse<FeedDto> response = PageResponse.<FeedDto>builder()
-        .data(feedDtos)
-        .hasNext(hasNext)
-        .nextCursor(nextCursor)
-        .nextIdAfter(nextIdAfter)
+        .data(userFeedDtos)
+        .hasNext(cachedResponse.hasNext())
+        .nextCursor(cachedResponse.nextCursor())
+        .nextIdAfter(cachedResponse.nextIdAfter())
         .sortBy(condition.sortBy())
         .sortDirection(condition.sortDirection())
-        .totalCount(totalCount)
+        .totalCount(cachedResponse.totalCount())
         .build();
 
-    log.info("피드 목록 조회 완료: userId={}, feedCount={}", userId, feedDtos.size());
+    log.info("피드 목록 조회 완료: userId={}, feedCount={}", userId, userFeedDtos.size());
 
     return response;
   }
@@ -167,6 +178,7 @@ public class FeedServiceImpl implements FeedService {
 
     Feed feed = getFeedById(feedId);
     feedRepository.delete(feed);
+    feedCacheService.evictFeedCache();
 
     log.info("피드 삭제 완료");
   }
@@ -176,12 +188,18 @@ public class FeedServiceImpl implements FeedService {
 
     log.debug("피드 좋아요 시작: feedId={}, userId={}", feedId, userId);
 
+    // 이미 좋아요 존재하는 경우 예외처리
+    if (isFeedLiked(feedId, userId)) {
+      throw FeedLikeAlreadyExistsException.withFeedIdAndUserId(feedId, userId);
+    }
+
     Feed feed = getFeedById(feedId);
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     FeedLike feedLike = new FeedLike(feed, user);
     feedLikeRepository.save(feedLike);
+    feedLikeCacheService.updateLikeCount(feedId);
 
     feed.increaseLikeCount(); // TODO: 동시성 문제 해결
 
@@ -211,6 +229,7 @@ public class FeedServiceImpl implements FeedService {
 
     FeedLike feedLike = getFeedLikeByFeedIdAndUserId(feedId, userId);
     feedLikeRepository.delete(feedLike);
+    feedLikeCacheService.updateLikeCount(feedId);
 
     feed.decreaseLikeCount(); // TODO: 동시성 문제 해결
 

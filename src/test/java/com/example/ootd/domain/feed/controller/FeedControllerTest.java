@@ -1,7 +1,13 @@
 package com.example.ootd.domain.feed.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -10,6 +16,7 @@ import com.example.ootd.TestPrincipalUser;
 import com.example.ootd.domain.feed.dto.data.CommentDto;
 import com.example.ootd.domain.feed.dto.data.FeedDto;
 import com.example.ootd.domain.feed.dto.request.CommentCreateRequest;
+import com.example.ootd.domain.feed.dto.request.FeedCommentSearchCondition;
 import com.example.ootd.domain.feed.dto.request.FeedCreateRequest;
 import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.dto.request.FeedUpdateRequest;
@@ -30,6 +37,7 @@ import com.example.ootd.security.jwt.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +59,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @WebMvcTest(FeedController.class)
 @WithMockUser(roles = "USER")
-class FeedControllerTest {
+class
+
+FeedControllerTest {
 
   @Autowired
   MockMvc mockMvc;
@@ -122,7 +132,7 @@ class FeedControllerTest {
 
       given(feedService.createFeed(request)).willReturn(response);
 
-      mockMvc.perform(MockMvcRequestBuilders.post("/api/feeds")
+      mockMvc.perform(post("/api/feeds")
               .contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(request))
               .with(csrf()))
@@ -160,6 +170,16 @@ class FeedControllerTest {
     }
 
     @Test
+    @DisplayName("피드 삭제 성공")
+    void deleteFeed() throws Exception {
+      mockMvc.perform(delete("/api/feeds/{feedId}", feedId)
+              .with(csrf()))
+          .andExpect(status().isNoContent());
+
+      then(feedService).should().deleteFeed(feedId);
+    }
+
+    @Test
     @DisplayName("피드 목록 조회")
     void findFeed() throws Exception {
       FeedDto feedDto = FeedDto.builder()
@@ -190,7 +210,7 @@ class FeedControllerTest {
 
       given(feedService.findFeedByCondition(condition, user.getId())).willReturn(response);
 
-      mockMvc.perform(MockMvcRequestBuilders.get("/api/feeds")
+      mockMvc.perform(get("/api/feeds")
               .param("limit", "10")
               .param("sortBy", "createdAt")
               .param("sortDirection", "DESCENDING")
@@ -218,12 +238,82 @@ class FeedControllerTest {
 
       given(feedService.createComment(request, user.getId())).willReturn(response);
 
-      mockMvc.perform(MockMvcRequestBuilders.post("/api/feeds/{feedId}/comments", feedId)
+      mockMvc.perform(post("/api/feeds/{feedId}/comments", feedId)
               .contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(request))
               .with(csrf()))
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.content").value("댓글입니다"));
     }
+
+    @Test
+    @DisplayName("피드 댓글 조회 성공")
+    void findFeedComments() throws Exception {
+      CommentDto commentDto = new CommentDto(UUID.randomUUID(),
+          new AuthorDto(user.getId(), user.getName(), null),
+          "댓글입니다", LocalDateTime.now(), feedId);
+      PageResponse<CommentDto> response = new PageResponse<>(
+          List.of(commentDto),
+          false,
+          null,
+          null,
+          "createdAt",
+          "DESCENDING",
+          1L
+      );
+
+      FeedCommentSearchCondition condition = FeedCommentSearchCondition.builder()
+          .limit(10)
+          .build();
+
+      given(feedService.findCommentByCondition(eq(feedId), any())).willReturn(response);
+
+      mockMvc.perform(get("/api/feeds/{feedId}/comments", feedId)
+              .param("limit", "10")
+              .param("sortBy", "createdAt")
+              .param("sortDirection", "DESCENDING"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.data[0].content").value("댓글입니다"));
+    }
+  }
+
+  @Nested
+  class FeedLikeApi {
+
+    @Test
+    @DisplayName("피드 좋아요 등록 성공")
+    void createFeedLike() throws Exception {
+      FeedDto feedDto = FeedDto.builder()
+          .id(feedId)
+          .author(new AuthorDto(user.getId(), user.getName(), null))
+          .weather(null)
+          .ootds(Collections.emptyList())
+          .content("좋아요한 피드")
+          .likeCount(1)
+          .commentCount(0)
+          .likedByMe(true)
+          .createdAt(LocalDateTime.now())
+          .updatedAt(LocalDateTime.now())
+          .build();
+
+      given(feedService.likeFeed(feedId, user.getId())).willReturn(feedDto);
+
+      mockMvc.perform(post("/api/feeds/{feedId}/like", feedId)
+              .with(csrf()))
+          .andExpect(status().isCreated())
+          .andExpect(jsonPath("$.likedByMe").value(true))
+          .andExpect(jsonPath("$.likeCount").value(1));
+    }
+
+    @Test
+    @DisplayName("피드 좋아요 삭제 성공")
+    void deleteFeedLike() throws Exception {
+      mockMvc.perform(delete("/api/feeds/{feedId}/like", feedId)
+              .with(csrf()))
+          .andExpect(status().isNoContent());
+
+      then(feedService).should().deleteFeedLike(feedId, user.getId());
+    }
+
   }
 }

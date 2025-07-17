@@ -80,30 +80,10 @@ OOTD는 실시간 날씨 정보를 기반으로 개인화된 패션 추천을 �
 - **Validation**: Bean Validation
 
 ## 🏗️ 아키텍처
+<img width="965" height="483" alt="image" src="https://github.com/user-attachments/assets/264fbb8a-66ea-4f31-a123-63ede44f2786" />
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Client App    │    │   Web Client    │    │  Admin Panel    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │   Load Balancer │
-                    └─────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │  Spring Boot    │
-                    │   Application   │
-                    └─────────────────┘
-                                 │
-              ┌──────────────────┼──────────────────┐
-              │                  │                  │
-    ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-    │   PostgreSQL    │ │    MongoDB      │ │     Redis       │
-    │   (Main DB)     │ │  (Document)     │ │    (Cache)      │
-    └─────────────────┘ └─────────────────┘ └─────────────────┘
-```
+<img width="392" height="458" alt="image" src="https://github.com/user-attachments/assets/48801080-ec2b-47fb-a422-30d4a8908083" />
+
 
 ## 📋 API 엔드포인트
 

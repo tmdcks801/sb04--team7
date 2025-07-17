@@ -79,12 +79,6 @@ OOTD는 실시간 날씨 정보를 기반으로 개인화된 패션 추천을 �
 - **Mapping**: MapStruct
 - **Validation**: Bean Validation
 
-## 🏗️ 아키텍처
-<img width="965" height="483" alt="image" src="https://github.com/user-attachments/assets/264fbb8a-66ea-4f31-a123-63ede44f2786" />
-
-<img width="392" height="458" alt="image" src="https://github.com/user-attachments/assets/48801080-ec2b-47fb-a422-30d4a8908083" />
-
-
 ## 📋 API 엔드포인트
 
 ### 인증 & 사용자
@@ -205,6 +199,12 @@ docker-compose up prometheus grafana
 | `REDIS_HOST` | Redis 호스트 | `localhost` |
 | `AWS_S3_BUCKET` | S3 버킷명 | - |
 | `JWT_SECRET` | JWT 시크릿 키 | - |
+
+
+## 🏗️ 아키텍처
+<img width="965" height="483" alt="image" src="https://github.com/user-attachments/assets/264fbb8a-66ea-4f31-a123-63ede44f2786" />
+
+<img width="392" height="458" alt="image" src="https://github.com/user-attachments/assets/48801080-ec2b-47fb-a422-30d4a8908083" />
 
 ## 📝 개발 가이드
 

@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 @Tag(name = "의상 속성 정의 관리", description = "의상 속성 정의 관련 API")
 public interface AttributeApi {
 
-  @Operation(summary = "의상 속성 정의 목록 조회", description = "검색 조건에 맞는 의상 속성 정의를 조회합니다.")
+  @Operation(summary = "의상 속성 정의 목록 조회", description = "의상 속성 정의 목록 조회 API")
   @ApiResponses({
       @ApiResponse(
           responseCode = "200",
@@ -45,7 +45,7 @@ public interface AttributeApi {
           content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
       @ApiResponse(
           responseCode = "409",
-          description = "의상 속성 정의 등록 실패 - 이미 존재하는 속성 정의",
+          description = "의상 속성 정의 등록 실패",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   ResponseEntity<ClothesAttributeDefDto> create(ClothesAttributeDefCreateRequest request);
@@ -53,10 +53,12 @@ public interface AttributeApi {
   @Operation(summary = "의상 속성 정의 삭제", description = "의상 속성 정의 삭제 API")
   @ApiResponses(value = {
       @ApiResponse(
-          responseCode = "204", description = "의상 속성 정의 삭제 성공"
+          responseCode = "204",
+          description = "의상 속성 정의 삭제 성공"
       ),
       @ApiResponse(
-          responseCode = "404", description = "의상 속성 정의 삭제 실패 - 존재하지 않는 의상 속성",
+          responseCode = "404",
+          description = "의상 속성 정의 삭제 실패",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   ResponseEntity<Void> delete(UUID definitionId);

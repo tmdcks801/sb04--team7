@@ -37,7 +37,7 @@ public class OpenAIService {
 
     // 2. ChatRequest 구성
     ChatRequest.Message message = new ChatRequest.Message("user", prompt, null);
-    ChatRequest request = new ChatRequest("gpt-4.1-nano", List.of(message), 0.2);
+    ChatRequest request = new ChatRequest("gpt-3.5-turbo", List.of(message), 0.8);
 
     // 3. HTTP 요청 구성
     HttpHeaders headers = new org.springframework.http.HttpHeaders();
@@ -72,7 +72,7 @@ public class OpenAIService {
             규칙외의 추가적인 추천은 절대 하지 마세요.
             
             추천 규칙:
-            1. 각 type(TOP, BOTTOM, SHOES)별 최대 1벌씩만 선택합니다.
+            1. 각 type(TOP, BOTTOM, SHOES)별 각각 1벌씩만 선택합니다.
                - 예: 상의 1벌을 추천했다면 다른 상의는 추천하지 않고, 하의 1벌을 추천했다면 다른 하의는 추천하지 마세요.
                - 각 타입이 절대 중복되게 추천하지 마세요.
             

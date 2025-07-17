@@ -1,6 +1,5 @@
 package com.example.ootd.config.api.dto;
 
-import com.example.ootd.domain.feed.dto.data.CommentDto;
 import com.example.ootd.domain.feed.dto.data.FeedDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;

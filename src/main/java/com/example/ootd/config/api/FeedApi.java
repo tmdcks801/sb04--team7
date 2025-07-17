@@ -1,5 +1,7 @@
 package com.example.ootd.config.api;
 
+import com.example.ootd.config.api.dto.CommentPageResponse;
+import com.example.ootd.config.api.dto.FeedPageResponse;
 import com.example.ootd.domain.feed.dto.data.CommentDto;
 import com.example.ootd.domain.feed.dto.data.FeedDto;
 import com.example.ootd.domain.feed.dto.request.CommentCreateRequest;
@@ -27,7 +29,7 @@ public interface FeedApi {
       @ApiResponse(
           responseCode = "200",
           description = "피드 목록 조회 성공",
-          content = @Content(schema = @Schema(implementation = PageResponse.class))),
+          content = @Content(schema = @Schema(implementation = FeedPageResponse.class))),
       @ApiResponse(
           responseCode = "400",
           description = "피드 목록 조회 실패",
@@ -121,7 +123,7 @@ public interface FeedApi {
       @ApiResponse(
           responseCode = "200",
           description = "피드 댓글 목록 조회 성공",
-          content = @Content(schema = @Schema(implementation = PageResponse.class))),
+          content = @Content(schema = @Schema(implementation = CommentPageResponse.class))),
       @ApiResponse(
           responseCode = "400",
           description = "피드 댓글 목록 조회 실패",

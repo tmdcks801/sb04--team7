@@ -15,7 +15,7 @@ public class BlackListFlushScheduler {
   private final StringRedisTemplate redisTemplate;
   private final AutoBlackList blackList;
 
-  @Scheduled(fixedDelay = 10000)
+  //@Scheduled(fixedDelay = 10000)
   public void recover(){
 
     if (isRedisAlive()){

@@ -1,7 +1,10 @@
 package com.example.ootd.security.jwt.blacklist;
 
+import com.example.ootd.security.jwt.suspicious_token.SuspiciousToken;
+import com.example.ootd.security.jwt.suspicious_token.SuspiciousTokenRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +18,7 @@ public class AutoBlackList implements BlackList {
 
   private final InMemoryBlackList memoryBlackList;
   private final RedisBlacklist redisBlacklist;
-  private  final StringRedisTemplate redisTemplate;
+  private final SuspiciousTokenRepository suspiciousTokenRepository;
 
 
   @Override
@@ -57,5 +60,14 @@ public class AutoBlackList implements BlackList {
         log.warn("Flush failed. reason: {}", e.getMessage());
       }
     });
+  }
+
+  public void flushSuspiciousToRedis(){
+    List<SuspiciousToken> tokenList = suspiciousTokenRepository.findAll();
+
+    tokenList
+        .forEach(token -> {
+          redisBlacklist.addToBlacklist(token.getJti(), token.getExpirationTime());
+        });
   }
 }

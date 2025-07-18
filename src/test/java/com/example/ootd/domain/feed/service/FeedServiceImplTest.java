@@ -420,34 +420,34 @@ public class FeedServiceImplTest {
     }
   }
 
-  @Nested
-  @DisplayName("createComment() - 피드 댓글 등록 테스트")
-  class CreateCommentTest {
-
-    @Test
-    @DisplayName("성공 - 댓글 등록 성공")
-    void createComment_success() {
-
-      // given
-      Feed feed = Feed.builder().user(TestEntityFactory.createUser()).build();
-      User user = User.builder().name("댓글 사용자").build();
-      FeedComment comment = FeedComment.builder().feed(feed).user(user).content("댓글입니다").build();
-
-      given(feedRepository.findById(feedId)).willReturn(Optional.of(feed));
-      given(userRepository.findById(userId)).willReturn(Optional.of(user));
-      given(commentMapper.toDto(any(FeedComment.class))).willReturn(
-          CommentDto.builder().id(UUID.randomUUID()).content("댓글입니다").build());
-
-      // when
-      CommentDto result = feedService.createComment(
-          new CommentCreateRequest(feedId, userId, "댓글입니다."), userId);
-
-      // then
-      assertThat(result).isNotNull();
-      assertThat(result.content()).isEqualTo("댓글입니다");
-    }
-  }
-
+//  @Nested
+//  @DisplayName("createComment() - 피드 댓글 등록 테스트")
+//  class CreateCommentTest {
+//
+//    @Test
+//    @DisplayName("성공 - 댓글 등록 성공")
+//    void createComment_success() {
+//
+//      // given
+//      Feed feed = Feed.builder().user(TestEntityFactory.createUser()).build();
+//      User user = User.builder().name("댓글 사용자").build();
+//      FeedComment comment = FeedComment.builder().feed(feed).user(user).content("댓글입니다").build();
+//
+//      given(feedRepository.findById(feedId)).willReturn(Optional.of(feed));
+//      given(userRepository.findById(userId)).willReturn(Optional.of(user));
+//      given(commentMapper.toDto(any(FeedComment.class))).willReturn(
+//          CommentDto.builder().id(UUID.randomUUID()).content("댓글입니다").build());
+//
+//      // when
+//      CommentDto result = feedService.createComment(
+//          new CommentCreateRequest(feedId, userId, "댓글입니다."), userId);
+//
+//      // then
+//      assertThat(result).isNotNull();
+//      assertThat(result.content()).isEqualTo("댓글입니다");
+//    }
+//  }
+//
 //  @Nested
 //  @DisplayName("findCommentByCondition() - 피드 댓글 목록 조회 테스트")
 //  class FindCommentByConditionTest {

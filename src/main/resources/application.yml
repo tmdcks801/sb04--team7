@@ -126,6 +126,11 @@ weather:
     file:
       path: classpath:regions.csv
 
+recommendation:
+  preload:
+    enabled: true
+    cron: "0 0 7 * * *"  # 매일 오전 7시
+
 info:
   name: ootd
   version: 1.7.0

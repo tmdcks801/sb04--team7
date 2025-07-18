@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import org.springframework.boot.autoconfigure.cache.CacheProperties.Redis;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -62,6 +64,16 @@ public class CacheConfig {
     GenericJackson2JsonRedisSerializer jsonSerializer =
         new GenericJackson2JsonRedisSerializer(objectMapper);
 
+    // AI 추천 캐시
+    RedisCacheConfiguration aiRecommendationConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(Duration.ofHours(24))
+        .serializeKeysWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(jsonSerializer))
+        .disableCachingNullValues();
+
+
     // 통합 Redis 캐시 설정
     RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofHours(24)) // 24시간 TTL
@@ -73,6 +85,36 @@ public class CacheConfig {
 
     return RedisCacheManager.builder(redisConnectionFactory)
         .cacheDefaults(config)
+        .withCacheConfiguration("aiRecommendations", aiRecommendationConfig)
         .build();
   }
+
+  // ai 의상 추천
+  @Bean
+  @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
+  public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    RedisTemplate<String, Object> template = new RedisTemplate<>();
+    template.setConnectionFactory(redisConnectionFactory);
+    
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
+    objectMapper.activateDefaultTyping(
+        LaissezFaireSubTypeValidator.instance,
+        ObjectMapper.DefaultTyping.NON_FINAL,
+        JsonTypeInfo.As.PROPERTY
+    );
+    objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    
+    GenericJackson2JsonRedisSerializer jsonSerializer = 
+        new GenericJackson2JsonRedisSerializer(objectMapper);
+    
+    template.setKeySerializer(new StringRedisSerializer());
+    template.setValueSerializer(jsonSerializer);
+    template.setHashKeySerializer(new StringRedisSerializer());
+    template.setHashValueSerializer(jsonSerializer);
+    
+    template.afterPropertiesSet();
+    return template;
+  }
+
 }

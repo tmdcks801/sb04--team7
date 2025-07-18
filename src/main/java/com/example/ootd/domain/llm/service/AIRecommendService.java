@@ -10,14 +10,17 @@ import com.example.ootd.domain.weather.entity.Weather;
 import com.example.ootd.domain.weather.repository.WeatherRepository;
 import com.example.ootd.security.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -28,12 +31,53 @@ public class AIRecommendService {
   private final WeatherRepository weatherRepository;
   private final UserRepository userRepository;
   private final ClothesRepository clothesRepository;
+  private final RedisTemplate<String, Object> redisTemplate;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public RecommendationDto recommendClothes(UUID weatherId) throws Exception {
 
     UUID userId = getCurrentUserId();
+    
+    // 1. 먼저 배치로 미리 생성된 캐시 확인
+    String batchCacheKey = "aiRecommendation::" + weatherId + ":" + userId;
+    
+    try {
+      String cachedJson = (String) redisTemplate.opsForValue().get(batchCacheKey);
+      if (cachedJson != null) {
+        RecommendationDto cached = objectMapper.readValue(cachedJson, RecommendationDto.class);
+        log.info("배치 캐시 히트: userId={}, weatherId={}", userId, weatherId);
+        return cached;
+      }
+    } catch (Exception e) {
+      log.warn("캐시 조회 실패: {}", e.getMessage());
+      // 캐시 조회 실패 시 계속 진행
+    }
+    
+    // 2. 캐시 미스 - 실시간 AI 호출 후 캐시에 저장
+    log.warn("캐시 미스 발생 - 실시간 AI 호출: userId={}, weatherId={}", userId, weatherId);
+    RecommendationDto result = performAIRecommendation(weatherId, userId);
+    
+    // 실시간 호출 결과도 캐시에 저장 (JSON 문자열로 저장, 24시간 TTL)
+    try {
+      String resultJson = objectMapper.writeValueAsString(result);
+      redisTemplate.opsForValue().set(batchCacheKey, resultJson, Duration.ofHours(24));
+      log.info("캐시 저장 성공: userId={}, weatherId={}", userId, weatherId);
+    } catch (Exception e) {
+      log.warn("캐시 저장 실패: {}", e.getMessage());
+      // 캐시 저장 실패해도 결과는 반환
+    }
+    
+    return result;
+  }
 
-    // 1. 날씨 조회
+  public RecommendationDto recommendClothesForPreload(UUID weatherId, UUID userId) throws Exception {
+    return performAIRecommendation(weatherId, userId);
+  }
+
+  // 실제 AI 추천 로직
+  private RecommendationDto performAIRecommendation(UUID weatherId, UUID userId) throws Exception {
+
+    // 1. 데이터 조회
     Weather weather = weatherRepository.findById(weatherId).orElseThrow();
     User user = userRepository.findById(userId).orElseThrow();
     List<Clothes> clothesList = clothesRepository.findByUserId(user.getId());

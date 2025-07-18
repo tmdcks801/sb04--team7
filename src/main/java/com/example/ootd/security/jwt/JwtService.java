@@ -4,6 +4,8 @@ import com.example.ootd.domain.user.User;
 import com.example.ootd.exception.ErrorCode;
 import com.example.ootd.exception.OotdException;
 import com.example.ootd.security.jwt.blacklist.BlackList;
+import com.example.ootd.security.jwt.suspicious_token.SuspiciousToken;
+import com.example.ootd.security.jwt.suspicious_token.SuspiciousTokenRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -40,6 +42,8 @@ public class JwtService {
 
   private final BlackList autoBlackList;
 
+  private final SuspiciousTokenRepository suspiciousTokenRepository;
+
   // JwtSession 객체 생성 및 저장 (이미 존재한다면 삭제 + 블렉리스트 등록)
   @Transactional
   public JwtSession generateJwtSession(User user) {
@@ -55,12 +59,6 @@ public class JwtService {
 
       jwtSessionRepository.delete(session);
     }
-//        .ifPresent(session -> {
-//          Instant expirationTime = extractExpiry(session.getAccessToken());
-//          BlackList.addToBlacklist(session.getAccessToken(), expirationTime);
-//
-//          jwtSessionRepository.delete(session);
-//        });
 
     jwtSessionRepository.flush(); // TODO : 이유 분석.. 왜 delete 가 먼저 적용 안되는지
 
@@ -72,17 +70,19 @@ public class JwtService {
 
     return jwtSessionRepository.save(session);
   }
-
   @Transactional
+  public JwtSession validateAndRotateRefreshToken(String token){
+    if(!validateToken(token)){
+      throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
+    }
+
+    return rotateRefreshToken(token);
+  }
+
   public JwtSession rotateRefreshToken(String token){
 
     JwtSession session = jwtSessionRepository.findByRefreshToken(token)
         .orElseThrow(() -> new OotdException(ErrorCode.AUTHENTICATION_FAILED));
-
-    if(!validateToken(token)){
-      jwtSessionRepository.delete(session);
-      throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
-    }
 
     String jti = extractJti(session.getRefreshToken());
 
@@ -104,9 +104,14 @@ public class JwtService {
     try {
 
       String jti = extractJti(token);
-
       if (autoBlackList.isBlacklisted(jti)) {
-        log.warn("블랙리스트에 등록된 토큰입니다. TOKEN : {}", token); // TODO : 사후 처리
+        log.warn("블랙리스트에 등록된 토큰입니다. TOKEN : {}", token); // TODO :사후 처리
+        Instant exp = extractExpiry(token);
+
+        suspiciousTokenRepository.findById(jti).ifPresentOrElse(
+            t -> {},
+            () -> suspiciousTokenRepository.save(new SuspiciousToken(jti, exp))
+        );
         return false;
       }
 
@@ -148,7 +153,7 @@ public class JwtService {
           .parseClaimsJws(refreshToken)
           .getBody();
 
-      return claims.getId();
+      return claims.getId() != null ? claims.getId() : "";
     } catch (Exception e){
       return "";
     }

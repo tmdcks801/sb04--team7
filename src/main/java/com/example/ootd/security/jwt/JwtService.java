@@ -42,7 +42,7 @@ public class JwtService {
 
   private final BlackList autoBlackList;
 
-  private final SuspiciousTokenRepository suspiciousTokenRepository;
+  private final TokenValidator tokenValidator;
 
   // JwtSession 객체 생성 및 저장 (이미 존재한다면 삭제 + 블렉리스트 등록)
   @Transactional
@@ -85,8 +85,6 @@ public class JwtService {
         .orElseThrow(() -> new OotdException(ErrorCode.AUTHENTICATION_FAILED));
 
     String jti = extractJti(session.getRefreshToken());
-
-//    autoBlackList.addToBlacklist(jti, extractExpiry(session.getAccessToken()));
     autoBlackList.addToBlacklist(jti, extractExpiry(session.getRefreshToken()));
 
     User user = session.getUser();
@@ -100,34 +98,7 @@ public class JwtService {
 
   // 토큰 유효성 검증
   public boolean validateToken(String token) {
-
-    try {
-
-      String jti = extractJti(token);
-      if (autoBlackList.isBlacklisted(jti)) {
-        log.warn("블랙리스트에 등록된 토큰입니다. TOKEN : {}", token); // TODO :사후 처리
-        Instant exp = extractExpiry(token);
-
-        suspiciousTokenRepository.findById(jti).ifPresentOrElse(
-            t -> {},
-            () -> suspiciousTokenRepository.save(new SuspiciousToken(jti, exp))
-        );
-        return false;
-      }
-
-      Jwts.parserBuilder()
-          .setSigningKey(getSigningKey())
-          .build()
-          .parseClaimsJws(token);
-
-      return true;
-    } catch (ExpiredJwtException e) {
-      log.warn("토큰이 만료되었습니다: {}", e.getMessage());
-      return false;
-    } catch (JwtException e) {
-      log.warn("유효하지 않은 토큰입니다: {}", e.getMessage());
-      return false;
-    }
+    return tokenValidator.validate(token, extractJti(token), getSigningKey(), extractExpiry(token));
   }
 
   @Transactional

@@ -20,19 +20,18 @@ public class RedisRecoveryConfig {
 
   @PostConstruct
   public void registerListener(){
-    log.info("LISTENING...");
     CircuitBreaker cb = circuitBreakerRegistry.circuitBreaker("redisBlacklist");
 
     cb.getEventPublisher()
         .onStateTransition(event -> {
 
-          log.info("CB Event: {} → {}", event.getStateTransition().getFromState(), event.getStateTransition().getToState());
+          log.debug("CB Event: {} → {}", event.getStateTransition().getFromState(), event.getStateTransition().getToState());
 
 
           // 테스트 및 검증용
           if (event.getStateTransition() == StateTransition.OPEN_TO_HALF_OPEN) {
 
-            log.info("[CB OPEN → HALF_OPEN] triggering test call...");
+            log.debug("[CB OPEN → HALF_OPEN] triggering test call...");
 
             try {
               autoBlackList.addToBlacklist("probe-" + UUID.randomUUID(), Instant.now().plusSeconds(30));
@@ -43,8 +42,10 @@ public class RedisRecoveryConfig {
 
 
           if (event.getStateTransition() == StateTransition.HALF_OPEN_TO_CLOSED) {
-            log.info("[CB HALF_OPEN → CLOSED] Redis recovered. Flushing blacklist.");
+            log.debug("[CB HALF_OPEN → CLOSED] Redis recovered. Flushing blacklist.");
+
             autoBlackList.flushInMemoryToRedis();
+            autoBlackList.flushSuspiciousToRedis();
           }
         });
   }

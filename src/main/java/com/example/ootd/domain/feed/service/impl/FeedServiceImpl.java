@@ -19,6 +19,7 @@ import com.example.ootd.domain.feed.repository.FeedCommentRepository;
 import com.example.ootd.domain.feed.repository.FeedLikeRepository;
 import com.example.ootd.domain.feed.repository.FeedRepository;
 import com.example.ootd.domain.feed.service.FeedService;
+import com.example.ootd.domain.feed.service.cache.FeedCommentCacheService;
 import com.example.ootd.domain.follow.repository.FollowRepository;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.dto.NotificationRequest;
@@ -62,6 +63,7 @@ public class FeedServiceImpl implements FeedService {
   private final FeedMapper feedMapper;
   private final CommentMapper commentMapper;
   private final NotificationPublisherInterface notificationPublisher;
+  private final FeedCommentCacheService feedCommentCacheService;
 
   @Override
   public FeedDto createFeed(FeedCreateRequest request) {
@@ -240,6 +242,8 @@ public class FeedServiceImpl implements FeedService {
         .build();
 
     feedCommentRepository.save(comment);
+    feedCommentCacheService.deleteAllCommentCacheByFeedId(request.feedId());
+
     feed.increaseCommentCount();  // TODO: 동시성 문제 해결
 
     // 피드 작성자에게 알림
@@ -266,22 +270,21 @@ public class FeedServiceImpl implements FeedService {
 
     log.debug("피드 댓글 목록 조회 시작: {}", condition);
 
-    List<FeedComment> comments = feedCommentRepository.findByCondition(condition, feedId);
+    List<CommentDto> commentDtos = feedCommentCacheService.getCachedComments(feedId,
+        condition);
 
-    boolean hasNext = (comments.size() > condition.limit());
+    boolean hasNext = commentDtos.size() > condition.limit();
     String nextCursor = null;
     UUID nextIdAfter = null;
     long totalCount = feedCommentRepository.countByFeedId(feedId);
 
     // 다음 페이지 있는 경우
     if (hasNext) {
-      comments.remove(comments.size() - 1);   // 다음 페이지 확인용 마지막 요소 삭제
-      FeedComment lastComment = comments.get(comments.size() - 1);
-      nextCursor = lastComment.getCreatedAt().toString();
-      nextIdAfter = lastComment.getId();
+      commentDtos.remove(commentDtos.size() - 1);
+      CommentDto lastComment = commentDtos.get(commentDtos.size() - 1);
+      nextCursor = lastComment.createdAt().toString();
+      nextIdAfter = lastComment.id();
     }
-
-    List<CommentDto> commentDtos = commentMapper.toDto(comments);
 
     PageResponse<CommentDto> response = PageResponse.<CommentDto>builder()
         .data(commentDtos)
@@ -293,7 +296,7 @@ public class FeedServiceImpl implements FeedService {
         .totalCount(totalCount)
         .build();
 
-    log.info("피드 댓글 목록 조회 완료: feedId={}, commentCount={}", feedId, commentDtos.size());
+    log.info("피드 댓글 목록 조회 완료: feedId={}, commentCount={}", feedId, response.data().size());
 
     return response;
   }

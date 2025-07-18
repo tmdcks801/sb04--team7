@@ -59,38 +59,40 @@ public class SecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> {
           auth.requestMatchers(
-                      "/",
-                      "/assets/**",
-                      "/static/**",
-                      "/favicon.ico",
-                      "/closet-hanger-logo.png",
-                      "/index.html",
-                      "/vite.svg",
-                      "/actuator/health",
-                      "/actuator/prometheus"
-                  ).permitAll()
-                  .requestMatchers("/oauth2/callback").permitAll()
-                  .requestMatchers("/api/auth/me").permitAll()
-                  .requestMatchers("/api/auth/sign-out").permitAll()
-                  .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
-                  .requestMatchers(HttpMethod.PATCH, "/api/users/*/role").hasRole("ADMIN")
-                  .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
-                  .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
-                  .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                  .requestMatchers("/test/me").hasRole("USER")
-                  .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
-                  .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
-                  .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
-                  .requestMatchers("/sub").permitAll()
-                  .requestMatchers("/pub").permitAll()
-                  .requestMatchers("/ws/**").permitAll()
-                  .requestMatchers("/api/batch/weather/**").hasRole("ADMIN");
+                  "/",
+                  "/assets/**",
+                  "/static/**",
+                  "/favicon.ico",
+                  "/closet-hanger-logo.png",
+                  "/index.html",
+                  "/vite.svg",
+                  "/actuator/health",
+                  "/actuator/prometheus"
+              ).permitAll()
+              .requestMatchers("/oauth2/callback").permitAll()
+              .requestMatchers("/api/auth/me").permitAll()
+              .requestMatchers("/api/auth/sign-out").permitAll()
+              .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+              .requestMatchers(HttpMethod.PATCH, "/api/users/*/role").hasRole("ADMIN")
+              .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+              .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
+              .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+              .requestMatchers("/test/me").hasRole("USER")
+              .requestMatchers(HttpMethod.POST, "/api/clothes/attribute-defs").hasRole("ADMIN")
+              .requestMatchers(HttpMethod.DELETE, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+              .requestMatchers(HttpMethod.PATCH, "/api/clothes/attribute-defs/**").hasRole("ADMIN")
+              .requestMatchers("/sub").permitAll()
+              .requestMatchers("/pub").permitAll()
+              .requestMatchers("/ws/**").permitAll()
+              .requestMatchers("/api/batch/weather/**").hasRole("ADMIN");
 
           // dev 프로파일에서만 Swagger 허용
           if (java.util.Arrays.asList(environment.getActiveProfiles()).contains("dev")) {
             auth.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
                 .permitAll();
           }
+//          auth.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**")
+//              .permitAll();
 
           auth.anyRequest().authenticated();
         })

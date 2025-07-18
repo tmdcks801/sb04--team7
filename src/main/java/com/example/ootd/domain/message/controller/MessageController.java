@@ -1,5 +1,6 @@
 package com.example.ootd.domain.message.controller;
 
+import com.example.ootd.config.api.MessageApi;
 import com.example.ootd.domain.message.dto.DirectMessageRequest;
 import com.example.ootd.domain.message.dto.MessagePaginationDto;
 import com.example.ootd.domain.message.dto.MessagePaginationRequest;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/direct-messages")
-public class MessageController {
+public class MessageController implements MessageApi {
 
   private final MessageServiceInterface messageService;
 

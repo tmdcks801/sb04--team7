@@ -28,7 +28,7 @@ public class RecommendationPreloadService {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Async("preloadTaskExecutor")
-  @Scheduled(cron = "0 0 7 * * *") // 매일 아침 7시
+  @Scheduled(cron = "0 45 15 * * *") // 매일 아침 7시
   public void preloadMorningRecommendations() {
     log.info("의상 추천 배치 시작");
 

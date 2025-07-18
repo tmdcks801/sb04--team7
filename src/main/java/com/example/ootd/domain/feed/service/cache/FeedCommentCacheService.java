@@ -9,4 +9,5 @@ import org.springframework.stereotype.Service;
 @CacheConfig(cacheNames = "feed_comment")
 public class FeedCommentCacheService {
 
+
 }

@@ -12,7 +12,7 @@ import com.example.ootd.security.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +31,7 @@ public class AIRecommendService {
   private final WeatherRepository weatherRepository;
   private final UserRepository userRepository;
   private final ClothesRepository clothesRepository;
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final StringRedisTemplate stringRedisTemplate;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   public RecommendationDto recommendClothes(UUID weatherId) throws Exception {
@@ -42,14 +42,20 @@ public class AIRecommendService {
     String batchCacheKey = "aiRecommendation::" + weatherId + ":" + userId;
     
     try {
-      String cachedJson = (String) redisTemplate.opsForValue().get(batchCacheKey);
+      log.info("캐시 조회 시도: key={}", batchCacheKey);
+      
+      String cachedJson = stringRedisTemplate.opsForValue().get(batchCacheKey);
+      log.info("캐시 조회 결과: json={}", cachedJson != null ? "존재(" + cachedJson.length() + "자)" : "null");
+      
       if (cachedJson != null) {
         RecommendationDto cached = objectMapper.readValue(cachedJson, RecommendationDto.class);
         log.info("배치 캐시 히트: userId={}, weatherId={}", userId, weatherId);
         return cached;
+      } else {
+        log.warn("캐시 미스: key={} 데이터 없음", batchCacheKey);
       }
     } catch (Exception e) {
-      log.warn("캐시 조회 실패: {}", e.getMessage());
+      log.warn("캐시 조회 실패: key={}, error={}", batchCacheKey, e.getMessage());
       // 캐시 조회 실패 시 계속 진행
     }
     
@@ -60,7 +66,7 @@ public class AIRecommendService {
     // 실시간 호출 결과도 캐시에 저장 (JSON 문자열로 저장, 24시간 TTL)
     try {
       String resultJson = objectMapper.writeValueAsString(result);
-      redisTemplate.opsForValue().set(batchCacheKey, resultJson, Duration.ofHours(24));
+      stringRedisTemplate.opsForValue().set(batchCacheKey, resultJson, Duration.ofHours(24));
       log.info("캐시 저장 성공: userId={}, weatherId={}", userId, weatherId);
     } catch (Exception e) {
       log.warn("캐시 저장 실패: {}", e.getMessage());

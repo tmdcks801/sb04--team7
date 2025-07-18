@@ -89,29 +89,20 @@ public class CacheConfig {
         .build();
   }
 
-  // ai 의상 추천
+  // ai 의상 추천 - StringRedisTemplate과 동일한 직렬화 방식 사용
   @Bean
   @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
   public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
     RedisTemplate<String, Object> template = new RedisTemplate<>();
     template.setConnectionFactory(redisConnectionFactory);
     
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.registerModule(new JavaTimeModule());
-    objectMapper.activateDefaultTyping(
-        LaissezFaireSubTypeValidator.instance,
-        ObjectMapper.DefaultTyping.NON_FINAL,
-        JsonTypeInfo.As.PROPERTY
-    );
-    objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    // StringRedisTemplate과 동일하게 String 직렬화 사용
+    StringRedisSerializer stringSerializer = new StringRedisSerializer();
     
-    GenericJackson2JsonRedisSerializer jsonSerializer = 
-        new GenericJackson2JsonRedisSerializer(objectMapper);
-    
-    template.setKeySerializer(new StringRedisSerializer());
-    template.setValueSerializer(jsonSerializer);
-    template.setHashKeySerializer(new StringRedisSerializer());
-    template.setHashValueSerializer(jsonSerializer);
+    template.setKeySerializer(stringSerializer);
+    template.setValueSerializer(stringSerializer);
+    template.setHashKeySerializer(stringSerializer);
+    template.setHashValueSerializer(stringSerializer);
     
     template.afterPropertiesSet();
     return template;

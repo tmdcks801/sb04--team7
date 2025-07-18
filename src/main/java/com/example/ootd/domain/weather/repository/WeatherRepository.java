@@ -61,13 +61,16 @@ public interface WeatherRepository extends JpaRepository<Weather, UUID> {
   int deleteOldWeatherDataPreservingFeedReferences(@Param("cutoffDate") LocalDateTime cutoffDate);
 
   @Query(value = """
-    SELECT * FROM weather w 
+    SELECT DISTINCT w.* FROM weather w 
     WHERE w.forecast_at::date = CURRENT_DATE
-    AND w.region_name = (
-        SELECT l.location_names FROM locations l 
+    AND EXISTS (
+        SELECT 1 FROM locations l 
         JOIN users u ON u.location_id = l.id 
         WHERE u.id = :userId
-        LIMIT 1
+        AND (
+            l.location_names::text LIKE '%' || w.region_name || '%'
+            OR l.location_names::jsonb @> to_jsonb(ARRAY[w.region_name])
+        )
     )
     ORDER BY w.forecast_at
     """, nativeQuery = true)

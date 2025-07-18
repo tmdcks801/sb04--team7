@@ -276,7 +276,7 @@ public class FeedServiceImpl implements FeedService {
     boolean hasNext = commentDtos.size() > condition.limit();
     String nextCursor = null;
     UUID nextIdAfter = null;
-    long totalCount = feedCommentRepository.countByFeedId(feedId);
+    long totalCount = feedCommentCacheService.getCachedCommentsCount(feedId);
 
     // 다음 페이지 있는 경우
     if (hasNext) {

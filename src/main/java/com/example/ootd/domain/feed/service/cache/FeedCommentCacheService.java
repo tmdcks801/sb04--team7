@@ -41,7 +41,17 @@ public class FeedCommentCacheService {
     return commentMapper.toDto(comments);
   }
 
+  // 댓글 개수 캐시 저장
+  @Cacheable(key = "#feedId")
+  public long getCachedCommentsCount(UUID feedId) {
+
+    log.debug("댓글(개수) 캐시 MISS 발생 - feedId={}", feedId);
+
+    return feedCommentRepository.countByFeedId(feedId);
+  }
+
   public void deleteAllCommentCacheByFeedId(UUID feedId) {
+
     Set<String> keys = cacheManager.getCache("feed_comment_key").get(feedId, Set.class);
     Cache commentCache = cacheManager.getCache("feed_comment");
 
@@ -49,11 +59,13 @@ public class FeedCommentCacheService {
       for (String key : keys) {
         commentCache.evict(key);
       }
+      commentCache.evict(feedId);   // 댓글 캐시 삭제 시 댓글 개수 캐시도 삭제
     }
 
     cacheManager.getCache("feed_comment_key").evict(feedId);
   }
 
+  // feed_comment의 키들 저장
   private void saveKey(UUID feedId, FeedCommentSearchCondition condition) {
 
     String key = "feedId=" + feedId + condition.toSimpleKey();

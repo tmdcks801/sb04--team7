@@ -4,6 +4,7 @@ import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.location.Location;
 import com.example.ootd.domain.user.dto.ProfileUpdateRequest;
 import com.example.ootd.security.Provider;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -43,7 +44,7 @@ public class User {
   @JoinColumn(name = "image_id", nullable = true)
   private Image image;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
   @JoinColumn(name = "location_id")
   private Location location;
 

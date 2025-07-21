@@ -89,9 +89,15 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.github.ben-manes.caffeine:caffeine'
 
+
+    // circuit breaker
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
+    implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.2.0'
+
     // AI
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
 }
 
 // queryDsl 설정

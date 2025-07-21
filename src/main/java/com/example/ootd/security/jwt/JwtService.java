@@ -3,6 +3,9 @@ package com.example.ootd.security.jwt;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.exception.ErrorCode;
 import com.example.ootd.exception.OotdException;
+import com.example.ootd.security.jwt.blacklist.BlackList;
+import com.example.ootd.security.jwt.suspicious_token.SuspiciousToken;
+import com.example.ootd.security.jwt.suspicious_token.SuspiciousTokenRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -12,7 +15,6 @@ import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,10 @@ public class JwtService {
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final JwtSessionRepository jwtSessionRepository;
 
+  private final BlackList autoBlackList;
+
+  private final TokenValidator tokenValidator;
+
   // JwtSession 객체 생성 및 저장 (이미 존재한다면 삭제 + 블렉리스트 등록)
   @Transactional
   public JwtSession generateJwtSession(User user) {
@@ -47,16 +53,12 @@ public class JwtService {
       JwtSession session = sessionOptional.get();
 
       Instant expirationTime = extractExpiry(session.getAccessToken());
-      BlackList.addToBlacklist(session.getAccessToken(), expirationTime);
+      String jti = extractJti(session.getRefreshToken());
+
+      autoBlackList.addToBlacklist(jti, expirationTime);
 
       jwtSessionRepository.delete(session);
     }
-//        .ifPresent(session -> {
-//          Instant expirationTime = extractExpiry(session.getAccessToken());
-//          BlackList.addToBlacklist(session.getAccessToken(), expirationTime);
-//
-//          jwtSessionRepository.delete(session);
-//        });
 
     jwtSessionRepository.flush(); // TODO : 이유 분석.. 왜 delete 가 먼저 적용 안되는지
 
@@ -68,20 +70,22 @@ public class JwtService {
 
     return jwtSessionRepository.save(session);
   }
-
   @Transactional
+  public JwtSession validateAndRotateRefreshToken(String token){
+    if(!validateToken(token)){
+      throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
+    }
+
+    return rotateRefreshToken(token);
+  }
+
   public JwtSession rotateRefreshToken(String token){
 
     JwtSession session = jwtSessionRepository.findByRefreshToken(token)
         .orElseThrow(() -> new OotdException(ErrorCode.AUTHENTICATION_FAILED));
 
-    if(!validateToken(token)){
-      jwtSessionRepository.delete(session);
-      throw new OotdException(ErrorCode.AUTHENTICATION_FAILED);
-    }
-
-    BlackList.addToBlacklist(session.getAccessToken(), extractExpiry(session.getAccessToken()));
-    BlackList.addToBlacklist(session.getRefreshToken(), extractExpiry(session.getRefreshToken()));
+    String jti = extractJti(session.getRefreshToken());
+    autoBlackList.addToBlacklist(jti, extractExpiry(session.getRefreshToken()));
 
     User user = session.getUser();
     String newAccessToken = generateAccessToken(user);
@@ -94,26 +98,7 @@ public class JwtService {
 
   // 토큰 유효성 검증
   public boolean validateToken(String token) {
-    try {
-
-      if (BlackList.isBlacklisted(token)) {
-        log.warn("블랙리스트에 등록된 토큰입니다. TOKEN : {}", token); // TODO : 사후 처리
-        return false;
-      }
-
-      Jwts.parserBuilder()
-          .setSigningKey(getSigningKey())
-          .build()
-          .parseClaimsJws(token);
-
-      return true;
-    } catch (ExpiredJwtException e) {
-      log.warn("토큰이 만료되었습니다: {}", e.getMessage());
-      return false;
-    } catch (JwtException e) {
-      log.warn("유효하지 않은 토큰입니다: {}", e.getMessage());
-      return false;
-    }
+    return tokenValidator.validate(token, extractJti(token), getSigningKey(), extractExpiry(token));
   }
 
   @Transactional
@@ -121,11 +106,30 @@ public class JwtService {
     JwtSession session = jwtSessionRepository.findByRefreshToken(token)
         .orElseThrow(() -> new OotdException(ErrorCode.AUTHENTICATION_FAILED));
 
-    BlackList.addToBlacklist(session.getAccessToken(), extractExpiry(session.getAccessToken()));
-    BlackList.addToBlacklist(session.getRefreshToken(), extractExpiry(session.getRefreshToken()));
+//    autoBlackList.addToBlacklist(session.getAccessToken(), extractExpiry(session.getAccessToken()));
+
+    autoBlackList.addToBlacklist(
+        extractJti(session.getRefreshToken()),
+        extractExpiry(session.getRefreshToken())
+    );
 
     jwtSessionRepository.delete(session);
   }
+
+  public String extractJti(String refreshToken) {
+    try{
+      Claims claims = Jwts.parserBuilder()
+          .setSigningKey(getSigningKey())
+          .build()
+          .parseClaimsJws(refreshToken)
+          .getBody();
+
+      return claims.getId() != null ? claims.getId() : "";
+    } catch (Exception e){
+      return "";
+    }
+  }
+
   // 만료 시간 추출
   public Instant extractExpiry(String token){
     try{
@@ -186,9 +190,11 @@ public class JwtService {
   private String generateRefreshToken(UUID userId){
     Instant now = Instant.now();
     Instant expirationTime = now.plusMillis(refreshTokenExpiration);
+    String jti = UUID.randomUUID().toString();
 
     return Jwts.builder()
         .claim("userId", userId.toString())
+        .setId(jti)
         .claim("type", "REFRESH")
         .setIssuedAt(Date.from(now))
         .setExpiration(Date.from(expirationTime))

@@ -28,6 +28,7 @@ import com.example.ootd.domain.feed.mapper.FeedMapper;
 import com.example.ootd.domain.feed.repository.FeedCommentRepository;
 import com.example.ootd.domain.feed.repository.FeedLikeRepository;
 import com.example.ootd.domain.feed.repository.FeedRepository;
+import com.example.ootd.domain.feed.service.cache.FeedCommentCacheService;
 import com.example.ootd.domain.feed.service.impl.FeedServiceImpl;
 import com.example.ootd.domain.follow.repository.FollowRepository;
 import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
@@ -76,6 +77,8 @@ public class FeedServiceImplTest {
   private CommentMapper commentMapper;
   @Mock
   private NotificationPublisherInterface notificationPublisher;
+  @Mock
+  private FeedCommentCacheService feedCommentCacheService;
 
   @InjectMocks
   private FeedServiceImpl feedService;
@@ -420,131 +423,119 @@ public class FeedServiceImplTest {
     }
   }
 
-//  @Nested
-//  @DisplayName("createComment() - 피드 댓글 등록 테스트")
-//  class CreateCommentTest {
-//
-//    @Test
-//    @DisplayName("성공 - 댓글 등록 성공")
-//    void createComment_success() {
-//
-//      // given
-//      Feed feed = Feed.builder().user(TestEntityFactory.createUser()).build();
-//      User user = User.builder().name("댓글 사용자").build();
-//      FeedComment comment = FeedComment.builder().feed(feed).user(user).content("댓글입니다").build();
-//
-//      given(feedRepository.findById(feedId)).willReturn(Optional.of(feed));
-//      given(userRepository.findById(userId)).willReturn(Optional.of(user));
-//      given(commentMapper.toDto(any(FeedComment.class))).willReturn(
-//          CommentDto.builder().id(UUID.randomUUID()).content("댓글입니다").build());
-//
-//      // when
-//      CommentDto result = feedService.createComment(
-//          new CommentCreateRequest(feedId, userId, "댓글입니다."), userId);
-//
-//      // then
-//      assertThat(result).isNotNull();
-//      assertThat(result.content()).isEqualTo("댓글입니다");
-//    }
-//  }
-//
-//  @Nested
-//  @DisplayName("findCommentByCondition() - 피드 댓글 목록 조회 테스트")
-//  class FindCommentByConditionTest {
-//
-//    @Test
-//    @DisplayName("성공 - 댓글 목록 조회 성공, 다음 페이지 없는 경우")
-//    void findCommentByCondition_success() {
-//      // given
-//      UUID feedId = UUID.randomUUID();
-//      UUID userId = UUID.randomUUID();
-//
-//      FeedCommentSearchCondition condition = FeedCommentSearchCondition.builder()
-//          .limit(10)
-//          .build();
-//
-//      FeedComment comment = FeedComment.builder()
-//          .content("테스트 댓글")
-//          .user(TestEntityFactory.createUser())
-//          .build();
-//
-//      List<FeedComment> commentList = List.of(comment);
-//
-//      given(feedCommentRepository.findByCondition(condition, feedId)).willReturn(commentList);
-//      given(commentMapper.toDto(commentList)).willReturn(List.of(
-//          CommentDto.builder()
-//              .id(comment.getId())
-//              .author(new AuthorDto(userId, "댓글 작성자", "https://example.com/profile.jpg"))
-//              .content("테스트 댓글")
-//              .createdAt(comment.getCreatedAt())
-//              .build()
-//      ));
-//      given(feedCommentRepository.countByFeedId(feedId)).willReturn(1L);
-//
-//      // when
-//      PageResponse<CommentDto> result = feedService.findCommentByCondition(feedId, condition);
-//
-//      // then
-//      assertThat(result).isNotNull();
-//      assertThat(result.data()).hasSize(1);
-//      assertThat(result.hasNext()).isFalse();
-//      assertThat(result.totalCount()).isEqualTo(1L);
-//      assertThat(result.data().get(0).content()).isEqualTo("테스트 댓글");
-//      assertThat(result.data().get(0).author().name()).isEqualTo("댓글 작성자");
-//
-//      verify(feedCommentRepository).findByCondition(condition, feedId);
-//      verify(feedCommentRepository).countByFeedId(feedId);
-//      verify(commentMapper).toDto(commentList);
-//    }
-//
-//    @Test
-//    @DisplayName("성공 - 댓글 목록 조회 성공, 다음 페이지 있는 경우")
-//    void findCommentByCondition_success_has_next_page() {
-//      // given
-//      UUID feedId = UUID.randomUUID();
-//      UUID userId = UUID.randomUUID();
-//
-//      FeedCommentSearchCondition condition = FeedCommentSearchCondition.builder()
-//          .limit(1)
-//          .build();
-//
-//      FeedComment comment1 = FeedComment.builder()
-//          .content("테스트 댓글1")
-//          .user(TestEntityFactory.createUser())
-//          .build();
-//      ReflectionTestUtils.setField(comment1, "createdAt", LocalDateTime.now());
-//      FeedComment comment2 = FeedComment.builder()
-//          .content("테스트 댓글2")
-//          .user(TestEntityFactory.createUser())
-//          .build();
-//
-//      List<FeedComment> commentList = new ArrayList<>(List.of(comment1, comment2));
-//
-//      given(feedCommentRepository.findByCondition(condition, feedId)).willReturn(commentList);
-//      given(commentMapper.toDto(commentList)).willReturn(List.of(
-//          CommentDto.builder()
-//              .id(comment1.getId())
-//              .author(new AuthorDto(userId, "댓글 작성자", "https://example.com/profile.jpg"))
-//              .content("테스트 댓글1")
-//              .createdAt(comment1.getCreatedAt())
-//              .build()
-//      ));
-//      given(feedCommentRepository.countByFeedId(feedId)).willReturn(2L);
-//
-//      // when
-//      PageResponse<CommentDto> result = feedService.findCommentByCondition(feedId, condition);
-//
-//      // then
-//      assertThat(result).isNotNull();
-//      assertThat(result.data()).hasSize(1);
-//      assertThat(result.hasNext()).isTrue();
-//      assertThat(result.totalCount()).isEqualTo(2L);
-//      assertThat(result.data().get(0).content()).isEqualTo("테스트 댓글1");
-//      assertThat(result.data().get(0).author().name()).isEqualTo("댓글 작성자");
-//
-//      verify(feedCommentRepository).findByCondition(condition, feedId);
-//      verify(feedCommentRepository).countByFeedId(feedId);
-//      verify(commentMapper).toDto(commentList);
-//    }
-//  }
+  @Nested
+  @DisplayName("createComment() - 피드 댓글 등록 테스트")
+  class CreateCommentTest {
+
+    @Test
+    @DisplayName("성공 - 댓글 등록 성공")
+    void createComment_success() {
+
+      // given
+      Feed feed = Feed.builder().user(TestEntityFactory.createUser()).build();
+      User user = User.builder().name("댓글 사용자").build();
+
+      given(feedRepository.findById(feedId)).willReturn(Optional.of(feed));
+      given(userRepository.findById(userId)).willReturn(Optional.of(user));
+      given(commentMapper.toDto(any(FeedComment.class))).willReturn(
+          CommentDto.builder().id(UUID.randomUUID()).content("댓글입니다").build());
+
+      // when
+      CommentDto result = feedService.createComment(
+          new CommentCreateRequest(feedId, userId, "댓글입니다."), userId);
+
+      // then
+      assertThat(result).isNotNull();
+      assertThat(result.content()).isEqualTo("댓글입니다");
+    }
+  }
+
+  @Nested
+  @DisplayName("findCommentByCondition() - 피드 댓글 목록 조회 테스트")
+  class FindCommentByConditionTest {
+
+    @Test
+    @DisplayName("성공 - 댓글 목록 조회 성공, 다음 페이지 없는 경우")
+    void findCommentByCondition_success() {
+      // given
+      UUID feedId = UUID.randomUUID();
+      UUID userId = UUID.randomUUID();
+
+      FeedCommentSearchCondition condition = FeedCommentSearchCondition.builder()
+          .limit(10)
+          .build();
+
+      FeedComment comment = FeedComment.builder()
+          .content("테스트 댓글")
+          .user(TestEntityFactory.createUser())
+          .build();
+
+      List<CommentDto> commentDtoList = new ArrayList<>(List.of(
+          CommentDto.builder()
+              .id(comment.getId())
+              .author(new AuthorDto(userId, "댓글 작성자", "https://example.com/profile.jpg"))
+              .content("테스트 댓글")
+              .createdAt(comment.getCreatedAt())
+              .build()
+      ));
+
+      given(feedCommentCacheService.getCachedComments(feedId, condition)).willReturn(
+          commentDtoList);
+      given(feedCommentCacheService.getCachedCommentsCount(feedId)).willReturn(1L);
+
+      // when
+      PageResponse<CommentDto> result = feedService.findCommentByCondition(feedId, condition);
+
+      // then
+      assertThat(result).isNotNull();
+      assertThat(result.data()).hasSize(1);
+      assertThat(result.hasNext()).isFalse();
+      assertThat(result.totalCount()).isEqualTo(1L);
+      assertThat(result.data().get(0).content()).isEqualTo("테스트 댓글");
+      assertThat(result.data().get(0).author().name()).isEqualTo("댓글 작성자");
+
+      verify(feedCommentCacheService).getCachedComments(feedId, condition);
+      verify(feedCommentCacheService).getCachedCommentsCount(feedId);
+    }
+
+    @Test
+    @DisplayName("성공 - 댓글 목록 조회 성공, 다음 페이지 있는 경우")
+    void findCommentByCondition_success_has_next_page() {
+      // given
+      UUID feedId = UUID.randomUUID();
+      UUID userId = UUID.randomUUID();
+
+      FeedCommentSearchCondition condition = FeedCommentSearchCondition.builder()
+          .limit(1)
+          .build();
+
+      CommentDto commentDto1 = CommentDto.builder()
+          .id(UUID.randomUUID())
+          .author(new AuthorDto(userId, "댓글 작성자1", "https://example.com/profile.jpg"))
+          .content("테스트 댓글1").createdAt(LocalDateTime.now()).feedId(feedId).build();
+      CommentDto commentDto2 = CommentDto.builder()
+          .id(UUID.randomUUID())
+          .author(new AuthorDto(userId, "댓글 작성자2", "https://example.com/profile.jpg"))
+          .content("테스트 댓글2").createdAt(LocalDateTime.now()).feedId(feedId).build();
+
+      List<CommentDto> commentList = new ArrayList<>(List.of(commentDto1, commentDto2));
+
+      given(feedCommentCacheService.getCachedComments(feedId, condition)).willReturn(commentList);
+      given(feedCommentCacheService.getCachedCommentsCount(feedId)).willReturn(2L);
+
+      // when
+      PageResponse<CommentDto> result = feedService.findCommentByCondition(feedId, condition);
+
+      // then
+      assertThat(result).isNotNull();
+      assertThat(result.data()).hasSize(1);
+      assertThat(result.hasNext()).isTrue();
+      assertThat(result.totalCount()).isEqualTo(2L);
+      assertThat(result.data().get(0).content()).isEqualTo("테스트 댓글1");
+      assertThat(result.data().get(0).author().name()).isEqualTo("댓글 작성자1");
+
+      verify(feedCommentCacheService).getCachedComments(feedId, condition);
+      verify(feedCommentCacheService).getCachedCommentsCount(feedId);
+    }
+  }
 }

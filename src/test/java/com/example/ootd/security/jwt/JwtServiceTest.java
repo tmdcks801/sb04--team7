@@ -31,6 +31,8 @@ public class JwtServiceTest {
 
   @Mock
   private BlackList blackList;
+  @Mock
+  private TokenValidator validator;
 
   private final String TEST_SECRET = "thisismytestsecretkeyanditshouldbelongenoughforjwtsigning";
   private final long TEST_ACCESS_TOKEN_EXPIRATION = 3600000;
@@ -127,7 +129,7 @@ public class JwtServiceTest {
     ReflectionTestUtils.setField(jwtService, "accessTokenExpiration", 1L);
     given(jwtSessionRepository.findByUser_Id(any())).willReturn(Optional.empty());
     given(jwtSessionRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
-
+    given(validator.validate(any(), any(), any(), any())).willReturn(false);
 
     // when
     JwtSession session = jwtService.generateJwtSession(user);

@@ -88,6 +88,10 @@ dependencies {
     // Cache
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.github.ben-manes.caffeine:caffeine'
+
+    // AI
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
 }
 
 // queryDsl 설정
@@ -162,7 +166,8 @@ jacocoTestReport {
 
                     // 특정 패키지 제외
                     '**/converter/**',  // Converter 클래스들
-                    '**/util/**'  // Utility 클래스들
+                    '**/util/**',  // Utility 클래스들
+                    '**/llm/**' // llm 클래스들
             ])
         }))
     }

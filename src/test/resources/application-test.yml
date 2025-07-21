@@ -1,6 +1,17 @@
 spring:
   application:
     name: ootd-test
+  cache:
+    type: caffeine
+  data:
+    redis:
+      host: localhost
+      port: 6379
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: test_notification
+      uuid-representation: standard
+      auto-index-creation: true
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
@@ -64,6 +75,8 @@ kakao:
 weather:
   api:
     key: test-weather-key
+
+OPENAI_API_KEY: test-openai-key
 
 ootd:
   storage:

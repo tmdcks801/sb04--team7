@@ -19,8 +19,7 @@ import com.example.ootd.domain.feed.repository.FeedCommentRepository;
 import com.example.ootd.domain.feed.repository.FeedLikeRepository;
 import com.example.ootd.domain.feed.repository.FeedRepository;
 import com.example.ootd.domain.feed.service.FeedService;
-import com.example.ootd.domain.feed.service.cache.FeedCacheService;
-import com.example.ootd.domain.feed.service.cache.FeedLikeCacheService;
+import com.example.ootd.domain.feed.service.cache.FeedCommentCacheService;
 import com.example.ootd.domain.follow.repository.FollowRepository;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.dto.NotificationRequest;
@@ -64,8 +63,7 @@ public class FeedServiceImpl implements FeedService {
   private final FeedMapper feedMapper;
   private final CommentMapper commentMapper;
   private final NotificationPublisherInterface notificationPublisher;
-  private final FeedCacheService feedCacheService;
-  private final FeedLikeCacheService feedLikeCacheService;
+  private final FeedCommentCacheService feedCommentCacheService;
 
   @Override
   public FeedDto createFeed(FeedCreateRequest request) {
@@ -95,7 +93,6 @@ public class FeedServiceImpl implements FeedService {
     }
 
     feedRepository.save(feed);
-    feedCacheService.evictFeedCache();
 
     // 팔로워에게 알림 발송
     List<UUID> followerIds = followRepository.findFollowersByFolloweeId(request.authorId());
@@ -119,7 +116,6 @@ public class FeedServiceImpl implements FeedService {
 
     Feed feed = getFeedById(feedId);
     feed.updateContent(request.content());
-    feedCacheService.evictFeedCache();
 
     FeedDto dto = feedMapper.toDto(feed, isFeedLiked(feedId, userId));
 
@@ -134,39 +130,36 @@ public class FeedServiceImpl implements FeedService {
 
     log.debug("피드 목록 조회 시작: userId={}, request={}", userId, condition);
 
-    PageResponse<FeedDto> cachedResponse = feedCacheService.findCachedFeedDtos(condition);
+    List<Feed> feeds = feedRepository.findByCondition(condition);
 
-    List<UUID> feedIds = cachedResponse.data().stream().map(FeedDto::id).toList();
+    boolean hasNext = (feeds.size() > condition.limit());
+    String nextCursor = null;
+    UUID nextIdAfter = null;
+    long totalCount = feedRepository.countByCondition(condition);
+
+    // 다음 페이지 있는 경우
+    if (hasNext) {
+      feeds.remove(feeds.size() - 1);   // 다음 페이지 확인용 마지막 요소 삭제
+      Feed lastFeed = feeds.get(feeds.size() - 1);
+      nextCursor = getNextCursor(lastFeed, condition.sortBy());
+      nextIdAfter = lastFeed.getId();
+    }
 
     Map<UUID, FeedLike> feedLikeMap = getFeedLikeMapByUserId(userId);
-    Map<UUID, Long> likeCountMap = feedLikeCacheService.getLikeCountMap(feedIds);
 
-    List<FeedDto> userFeedDtos = cachedResponse.data().stream()
-        .map(dto -> FeedDto.builder()
-            .id(dto.id())
-            .createdAt(dto.createdAt())
-            .updatedAt(dto.updatedAt())
-            .author(dto.author())
-            .weather(dto.weather())
-            .ootds(dto.ootds())
-            .content(dto.content())
-            .likeCount(likeCountMap.getOrDefault(dto.id(), 0L))
-            .commentCount(dto.commentCount())
-            .likedByMe(feedLikeMap.containsKey(dto.id()))
-            .build())
-        .toList();
+    List<FeedDto> feedDtos = feedMapper.toDto(feeds, feedLikeMap);
 
     PageResponse<FeedDto> response = PageResponse.<FeedDto>builder()
-        .data(userFeedDtos)
-        .hasNext(cachedResponse.hasNext())
-        .nextCursor(cachedResponse.nextCursor())
-        .nextIdAfter(cachedResponse.nextIdAfter())
+        .data(feedDtos)
+        .hasNext(hasNext)
+        .nextCursor(nextCursor)
+        .nextIdAfter(nextIdAfter)
         .sortBy(condition.sortBy())
         .sortDirection(condition.sortDirection())
-        .totalCount(cachedResponse.totalCount())
+        .totalCount(totalCount)
         .build();
 
-    log.info("피드 목록 조회 완료: userId={}, feedCount={}", userId, userFeedDtos.size());
+    log.info("피드 목록 조회 완료: userId={}, feedCount={}", userId, feedDtos.size());
 
     return response;
   }
@@ -178,7 +171,6 @@ public class FeedServiceImpl implements FeedService {
 
     Feed feed = getFeedById(feedId);
     feedRepository.delete(feed);
-    feedCacheService.evictFeedCache();
 
     log.info("피드 삭제 완료");
   }
@@ -199,7 +191,6 @@ public class FeedServiceImpl implements FeedService {
 
     FeedLike feedLike = new FeedLike(feed, user);
     feedLikeRepository.save(feedLike);
-    feedLikeCacheService.updateLikeCount(feedId);
 
     feed.increaseLikeCount(); // TODO: 동시성 문제 해결
 
@@ -229,7 +220,6 @@ public class FeedServiceImpl implements FeedService {
 
     FeedLike feedLike = getFeedLikeByFeedIdAndUserId(feedId, userId);
     feedLikeRepository.delete(feedLike);
-    feedLikeCacheService.updateLikeCount(feedId);
 
     feed.decreaseLikeCount(); // TODO: 동시성 문제 해결
 
@@ -252,6 +242,8 @@ public class FeedServiceImpl implements FeedService {
         .build();
 
     feedCommentRepository.save(comment);
+    feedCommentCacheService.deleteAllCommentCacheByFeedId(request.feedId());
+
     feed.increaseCommentCount();  // TODO: 동시성 문제 해결
 
     // 피드 작성자에게 알림
@@ -278,22 +270,21 @@ public class FeedServiceImpl implements FeedService {
 
     log.debug("피드 댓글 목록 조회 시작: {}", condition);
 
-    List<FeedComment> comments = feedCommentRepository.findByCondition(condition, feedId);
+    List<CommentDto> commentDtos = feedCommentCacheService.getCachedComments(feedId,
+        condition);
 
-    boolean hasNext = (comments.size() > condition.limit());
+    boolean hasNext = commentDtos.size() > condition.limit();
     String nextCursor = null;
     UUID nextIdAfter = null;
-    long totalCount = feedCommentRepository.countByFeedId(feedId);
+    long totalCount = feedCommentCacheService.getCachedCommentsCount(feedId);
 
     // 다음 페이지 있는 경우
     if (hasNext) {
-      comments.remove(comments.size() - 1);   // 다음 페이지 확인용 마지막 요소 삭제
-      FeedComment lastComment = comments.get(comments.size() - 1);
-      nextCursor = lastComment.getCreatedAt().toString();
-      nextIdAfter = lastComment.getId();
+      commentDtos.remove(commentDtos.size() - 1);
+      CommentDto lastComment = commentDtos.get(commentDtos.size() - 1);
+      nextCursor = lastComment.createdAt().toString();
+      nextIdAfter = lastComment.id();
     }
-
-    List<CommentDto> commentDtos = commentMapper.toDto(comments);
 
     PageResponse<CommentDto> response = PageResponse.<CommentDto>builder()
         .data(commentDtos)
@@ -305,7 +296,7 @@ public class FeedServiceImpl implements FeedService {
         .totalCount(totalCount)
         .build();
 
-    log.info("피드 댓글 목록 조회 완료: feedId={}, commentCount={}", feedId, commentDtos.size());
+    log.info("피드 댓글 목록 조회 완료: feedId={}, commentCount={}", feedId, response.data().size());
 
     return response;
   }

@@ -84,7 +84,7 @@ public class CacheConfig {
 
     // 통합 Redis 캐시 설정
     RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-        .entryTtl(Duration.ofHours(24)) // 24시간 TTL
+        .entryTtl(Duration.ofHours(5)) // 24시간 TTL
         .serializeKeysWith(RedisSerializationContext.SerializationPair
             .fromSerializer(new StringRedisSerializer()))
         .serializeValuesWith(RedisSerializationContext.SerializationPair

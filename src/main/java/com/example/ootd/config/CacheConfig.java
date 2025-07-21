@@ -73,6 +73,14 @@ public class CacheConfig {
             .fromSerializer(jsonSerializer))
         .disableCachingNullValues();
 
+    //notification
+    RedisCacheConfiguration notificationConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(Duration.ofHours(24))
+        .serializeKeysWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(jsonSerializer))
+        .disableCachingNullValues();
 
     // 통합 Redis 캐시 설정
     RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
@@ -86,24 +94,26 @@ public class CacheConfig {
     return RedisCacheManager.builder(redisConnectionFactory)
         .cacheDefaults(config)
         .withCacheConfiguration("aiRecommendations", aiRecommendationConfig)
+        .withCacheConfiguration("notification", notificationConfig)
         .build();
   }
 
   // ai 의상 추천 - StringRedisTemplate과 동일한 직렬화 방식 사용
   @Bean
   @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
-  public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+  public RedisTemplate<String, Object> redisTemplate(
+      RedisConnectionFactory redisConnectionFactory) {
     RedisTemplate<String, Object> template = new RedisTemplate<>();
     template.setConnectionFactory(redisConnectionFactory);
-    
+
     // StringRedisTemplate과 동일하게 String 직렬화 사용
     StringRedisSerializer stringSerializer = new StringRedisSerializer();
-    
+
     template.setKeySerializer(stringSerializer);
     template.setValueSerializer(stringSerializer);
     template.setHashKeySerializer(stringSerializer);
     template.setHashValueSerializer(stringSerializer);
-    
+
     template.afterPropertiesSet();
     return template;
   }

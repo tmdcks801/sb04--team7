@@ -1,6 +1,7 @@
 package com.example.ootd.domain.recommend.controller;
 
 import com.example.ootd.domain.llm.service.AIRecommendService;
+import com.example.ootd.domain.recommend.controller.api.RecommendApi;
 import com.example.ootd.domain.recommend.dto.RecommendationDto;
 import com.example.ootd.domain.recommend.service.RecommendService;
 import java.util.UUID;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/recommendations")
 @Slf4j
-public class RecommendController {
+public class RecommendController implements RecommendApi {
 
   private final RecommendService recommendService;
   private final AIRecommendService aiRecommendService;

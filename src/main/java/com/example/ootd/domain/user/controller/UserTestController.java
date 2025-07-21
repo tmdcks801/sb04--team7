@@ -2,6 +2,8 @@ package com.example.ootd.domain.user.controller;
 
 
 import com.example.ootd.security.CustomUserDetails;
+import com.example.ootd.security.jwt.JwtService;
+import com.example.ootd.security.jwt.blacklist.InMemoryBlackList;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +18,7 @@ import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,7 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserTestController {
   private final SessionRegistry sessionRegistry;
   private final JavaMailSender mailSender;
-
+  private final InMemoryBlackList blackList;
+  private final JwtService jwtService;
   @GetMapping("/me")
   public String whoAmI(Authentication authentication) {
     return "현재 로그인한 사용자: " + authentication.getName();
@@ -88,5 +92,11 @@ public class UserTestController {
     mailSender.send(message);
 
     return "메일을 보냈습니다.";
+  }
+
+  @PostMapping("/blacklist")
+  public void addTokenToBlacklist(@RequestBody TokenDto token){
+    System.out.println(token);
+    blackList.addToBlacklist(token.token(), jwtService.extractExpiry(token.token()));
   }
 }

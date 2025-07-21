@@ -54,7 +54,8 @@ public class AuthServiceImpl implements AuthService{
   public String refreshToken(HttpServletRequest req, HttpServletResponse res){
 
     String refreshToken = extractRefreshTokenFromCookie(req);
-    JwtSession newSession = jwtService.rotateRefreshToken(refreshToken);
+
+    JwtSession newSession = jwtService.validateAndRotateRefreshToken(refreshToken);
     Cookie newCookie = new Cookie("refresh_token", newSession.getRefreshToken());
 
     newCookie.setHttpOnly(true);

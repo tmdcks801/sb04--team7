@@ -76,6 +76,8 @@ weather:
   api:
     key: test-weather-key
 
+OPENAI_API_KEY: test-openai-key
+
 ootd:
   storage:
     type: local

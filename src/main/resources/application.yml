@@ -11,6 +11,8 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      timeout: 1s
+
     mongodb:
       uri: ${MONGODB_URI}
       database: ${NOTIFICATIN_DB}
@@ -126,6 +128,11 @@ weather:
     file:
       path: classpath:regions.csv
 
+recommendation:
+  preload:
+    enabled: true
+    cron: "0 0 6 * * *"  # 매일 오전 6시
+
 info:
   name: ootd
   version: 1.7.0
@@ -184,3 +191,15 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      redisBlacklist:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 300s
+        permittedNumberOfCallsInHalfOpenState: 2

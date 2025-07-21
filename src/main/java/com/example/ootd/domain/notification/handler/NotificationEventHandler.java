@@ -28,7 +28,6 @@ public class NotificationEventHandler {
 //  )   //push가 비동기라 애는 비동기 필요없음
   public void handle(NotificationDto dto) {
     try {
-      log.debug("알림발행");
       ssePushServiceInterface.push(dto);
     } catch (Exception ex) {
       log.error("알람 푸시 실패", dto, ex);
@@ -41,7 +40,6 @@ public class NotificationEventHandler {
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
   public void handle(NotificationBulk bulk) {
     bulk.notificationDtoList().forEach(this::safePush);//리스트에 있는거 하나씩, 실패시 로그만
-
   }
 
   private void safePush(NotificationDto dto) {

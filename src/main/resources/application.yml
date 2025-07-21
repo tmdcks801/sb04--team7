@@ -121,9 +121,9 @@ weather:
       retention-days: 2                # 보존할 일수 (2일)
       cron: "0 0 3 * * *"             # 매일 새벽 3시 실행
       preserve-feed-referenced: true   # Feed 참조 데이터 보존 여부
-  regions:
-    file:
-      path: classpath:regions.csv
+  region:
+    csv:
+      s3-key: region-csv/regions.csv    # S3에서 CSV 파일 경로
 
 info:
   name: ootd

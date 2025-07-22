@@ -203,9 +203,10 @@ public class FeedServiceImpl implements FeedService {
 
     FeedLike feedLike = new FeedLike(feed, user);
     feedLikeRepository.save(feedLike);
+    feed.increaseLikeCount();
 
     feedLikeCacheService.refreshFeedLikeMap(userId);
-    feedCacheService.likeCountIncrease(feed);
+    feedCacheService.updateCount(feed);
 
     // 피드 작성자에게 알림
     notificationPublisher.publish(
@@ -233,9 +234,10 @@ public class FeedServiceImpl implements FeedService {
 
     FeedLike feedLike = getFeedLikeByFeedIdAndUserId(feedId, userId);
     feedLikeRepository.delete(feedLike);
+    feed.decreaseLikeCount();
 
     feedLikeCacheService.refreshFeedLikeMap(userId);
-    feedCacheService.likeCountDecrease(feed);
+    feedCacheService.updateCount(feed);
 
     log.info("피드 좋아요 삭제 완료");
   }

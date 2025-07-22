@@ -63,50 +63,21 @@ public class FeedCacheService {
   public void evictFeedCache(UUID feedId) {
   }
 
-  // 좋아요 수 증가
-  public void likeCountIncrease(Feed feed) {
-
+  // 좋아요 수 업데이트
+  public void updateCount(Feed feed) {
     Cache cache = cacheManager.getCache("feed");
-
     if (cache == null) {
       log.warn("Feed cache is not available");
       return;
     }
 
-    FeedCountDto currentFeedCountDto = cache.get(feed.getId(), FeedCountDto.class);
+    FeedCountDto updatedDto = new FeedCountDto(
+        feed.getId(),
+        feed.getLikeCount(),
+        feed.getCommentCount()
+    );
 
-    long likeCount = feed.getLikeCount();
-    long commentCount = feed.getCommentCount();
-    if (currentFeedCountDto != null) {
-      likeCount = currentFeedCountDto.currentLikeCount();
-      commentCount = currentFeedCountDto.currentCommentCount();
-    }
-    FeedCountDto updatedFeedCountDto = new FeedCountDto(feed.getId(), likeCount + 1, commentCount);
-
-    cache.put(feed.getId(), updatedFeedCountDto);
-  }
-
-  // 좋아요 수 감소
-  public void likeCountDecrease(Feed feed) {
-
-    Cache cache = cacheManager.getCache("feed");
-
-    if (cache == null) {
-      log.warn("Feed cache is not available");
-      return;
-    }
-
-    FeedCountDto currentFeedCountDto = cache.get(feed.getId(), FeedCountDto.class);
-
-    long likeCount = feed.getLikeCount();
-    long commentCount = feed.getCommentCount();
-    if (currentFeedCountDto != null) {
-      likeCount = currentFeedCountDto.currentLikeCount();
-      commentCount = currentFeedCountDto.currentCommentCount();
-    }
-    FeedCountDto updatedFeedCountDto = new FeedCountDto(feed.getId(), likeCount - 1, commentCount);
-
-    cache.put(feed.getId(), updatedFeedCountDto);
+    cache.put(feed.getId(), updatedDto);
   }
 
   // 댓글 수 증가

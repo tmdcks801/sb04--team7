@@ -30,19 +30,19 @@ public interface FeedMapper {
   @Mapping(target = "commentCount", source = "commentCount")
   FeedDto toDto(Feed feed, boolean likedByMe, long likeCount, int commentCount);
 
-  default List<FeedDto> toDto(List<Feed> feeds, Map<UUID, Boolean> likedByMeMap) {
+  default List<FeedDto> toDto(List<Feed> feeds, Map<String, Boolean> likedByMeMap) {
     return feeds.stream()
-        .map(feed -> toDto(feed, likedByMeMap.containsKey(feed.getId())))
+        .map(feed -> toDto(feed, likedByMeMap.containsKey(feed.getId().toString())))
         .toList();
   }
 
-  default List<FeedDto> toDto(List<Feed> feeds, Map<UUID, Boolean> likedByMeMap,
+  default List<FeedDto> toDto(List<Feed> feeds, Map<String, Boolean> likedByMeMap,
       Map<UUID, FeedCountDto> feedStatesMap) {
 
     return feeds.stream()
         .map(feed -> {
           UUID feedId = feed.getId();
-          boolean likedByMe = likedByMeMap.containsKey(feedId);
+          boolean likedByMe = likedByMeMap.containsKey(feedId.toString());
 
           FeedCountDto countDto = feedStatesMap.get(feedId);
           long likeCount = 0;

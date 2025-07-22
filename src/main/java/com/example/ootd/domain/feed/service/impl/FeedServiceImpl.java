@@ -153,7 +153,7 @@ public class FeedServiceImpl implements FeedService {
       nextIdAfter = lastFeed.getId();
     }
 
-    Map<UUID, Boolean> feedLikeMap = feedLikeCacheService.getFeedLikeMapByUserId(userId);
+    Map<String, Boolean> feedLikeMap = feedLikeCacheService.getFeedLikeMapByUserId(userId);
     Map<UUID, FeedCountDto> feedCountDtoMap = feedCacheService.getFeedStates(feedIds);
 
     List<FeedDto> feedDtos = feedMapper.toDto(feeds, feedLikeMap, feedCountDtoMap);
@@ -324,9 +324,9 @@ public class FeedServiceImpl implements FeedService {
   // 해당 피드에 좋아요 했는지 여부
   private boolean isFeedLiked(UUID feedId, UUID userId) {
 
-    Map<UUID, Boolean> likedMap = feedLikeCacheService.getFeedLikeMapByUserId(userId);
+    Map<String, Boolean> likedMap = feedLikeCacheService.getFeedLikeMapByUserId(userId);
 
-    return (likedMap.get(feedId) != null);
+    return (likedMap.get(feedId.toString()) != null);
   }
 
   // 피드 좋아요 조회

@@ -53,6 +53,18 @@ public class AIRecommendService {
         return cached;
       } else {
         log.warn("캐시 미스: key={} 데이터 없음", batchCacheKey);
+        
+        // 2. 같은 지역의 다른 시간대 캐시 확인
+        Weather currentWeather = weatherRepository.findById(weatherId).orElseThrow();
+        String fallbackCacheKey = findCacheKeyByRegionAndUser(currentWeather.getRegionName(), userId);
+        if (fallbackCacheKey != null) {
+          String fallbackCachedJson = stringRedisTemplate.opsForValue().get(fallbackCacheKey);
+          if (fallbackCachedJson != null) {
+            RecommendationDto cached = objectMapper.readValue(fallbackCachedJson, RecommendationDto.class);
+            log.info("지역 기반 캐시 히트: userId={}, region={}, fallbackKey={}", userId, currentWeather.getRegionName(), fallbackCacheKey);
+            return cached;
+          }
+        }
       }
     } catch (Exception e) {
       log.warn("캐시 조회 실패: key={}, error={}", batchCacheKey, e.getMessage());
@@ -188,6 +200,34 @@ public class AIRecommendService {
     
     // JSON을 찾지 못하면 전체 응답 반환
     return response;
+  }
+
+  /**
+   * 지역과 사용자 기준으로 기존 캐시 키 찾기
+   */
+  private String findCacheKeyByRegionAndUser(String regionName, UUID userId) {
+    try {
+      // Redis에서 해당 사용자의 모든 캐시 키 조회
+      var keys = stringRedisTemplate.keys("aiRecommendation::*:" + userId);
+      if (keys != null) {
+        for (String key : keys) {
+          // 키에서 weatherId 추출
+          String weatherId = key.split("::")[1].split(":")[0];
+          try {
+            Weather weather = weatherRepository.findById(UUID.fromString(weatherId)).orElse(null);
+            if (weather != null && regionName.equals(weather.getRegionName())) {
+              log.info("지역 기반 캐시 발견: region={}, key={}", regionName, key);
+              return key;
+            }
+          } catch (Exception e) {
+            // weatherId 파싱 실패 시 무시
+          }
+        }
+      }
+    } catch (Exception e) {
+      log.warn("지역 기반 캐시 검색 실패: {}", e.getMessage());
+    }
+    return null;
   }
 
   /**

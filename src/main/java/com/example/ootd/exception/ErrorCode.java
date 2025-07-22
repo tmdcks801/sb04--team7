@@ -48,8 +48,9 @@ public enum ErrorCode {
 
   // User 에러
   USER_NOT_FOUND("사용자를 찾을 수 없습니다."),
+  USER_ID_NOT_FOUND("사용자 아이디를 찾을 수 없습니다."),
 
-  //메세지 에러
+  //메세지 에러,
   FAIL_SEND_MESSAGE("메세지 전송 실패"),
   FAIL_GET_MESSAGE("메세지 조회 실패"),
 

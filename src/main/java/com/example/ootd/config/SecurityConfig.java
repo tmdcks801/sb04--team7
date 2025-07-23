@@ -1,5 +1,6 @@
 package com.example.ootd.config;
 
+import com.example.ootd.domain.user.CustomAccessDeniedHandler;
 import com.example.ootd.security.CustomUserDetailsService;
 import com.example.ootd.security.CustomUsernamePasswordAuthenticationFilter;
 import com.example.ootd.security.jwt.JwtAuthenticationFilter;
@@ -26,6 +27,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 @Slf4j
 @Configuration
@@ -44,8 +49,12 @@ public class SecurityConfig {
       CustomUsernamePasswordAuthenticationFilter customFilter,
       JwtAuthenticationFilter jwtFilter,
       OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
-      CustomOAuth2UserService customOAuth2UserService) throws Exception {
+      CustomOAuth2UserService customOAuth2UserService,
+      CustomAccessDeniedHandler accessDeniedHandler) throws Exception {
     customFilter.setAuthenticationManager(manager);
+
+    CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
+    csrfHandler.setCsrfRequestAttributeName("_csrf");
 
     http
         .exceptionHandling(e -> e
@@ -53,10 +62,16 @@ public class SecurityConfig {
               response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
             })
         )
-        .csrf(AbstractHttpConfigurer::disable)
+//        .csrf(AbstractHttpConfigurer::disable)
+        .csrf(csrf -> csrf
+            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringRequestMatchers("/api/auth/**")
+            .csrfTokenRequestHandler(csrfHandler)
+        )
         .formLogin(AbstractHttpConfigurer::disable)
-        .sessionManagement(
-            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//        .sessionManagement(
+//            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .securityContext(context -> context.securityContextRepository(new HttpSessionSecurityContextRepository()))
+        .sessionManagement(session -> session.sessionFixation().migrateSession())
         .authorizeHttpRequests(auth -> {
           auth.requestMatchers(
                       "/",
@@ -69,6 +84,7 @@ public class SecurityConfig {
                       "/actuator/health",
                       "/actuator/prometheus"
                   ).permitAll()
+                  .requestMatchers("/api/auth/csrf-token").permitAll()
                   .requestMatchers("/oauth2/callback").permitAll()
                   .requestMatchers("/api/auth/me").permitAll()
                   .requestMatchers("/api/auth/sign-out").permitAll()
@@ -102,7 +118,14 @@ public class SecurityConfig {
               log.error("OAuth2 로그인 실패 원인:", exception);
             }))
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-        .addFilterAt(customFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterAt(customFilter, UsernamePasswordAuthenticationFilter.class)
+        .exceptionHandling(exception -> exception
+            .accessDeniedHandler(accessDeniedHandler)
+            .authenticationEntryPoint((req, res, ex) -> {
+              res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            })
+        )
+        ;
 
     return http.build();
   }
@@ -147,5 +170,11 @@ public class SecurityConfig {
 //        );
 //  }
 
-
+  @Bean
+  public CsrfTokenRepository csrfTokenRepository() {
+    CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+    repository.setCookieName("XSRF-TOKEN"); // ✅ 쿠키 이름
+    repository.setHeaderName("X-XSRF-TOKEN"); // ✅ 헤더 이름
+    return repository;
+  }
 }

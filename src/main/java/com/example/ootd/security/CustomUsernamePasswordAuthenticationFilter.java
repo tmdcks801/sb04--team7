@@ -26,6 +26,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -83,8 +84,9 @@ public class CustomUsernamePasswordAuthenticationFilter extends
       FilterChain chain, Authentication authResult) throws IOException, ServletException {
     SecurityContextHolder.getContext().setAuthentication(authResult);
 
-    new HttpSessionSecurityContextRepository().saveContext(SecurityContextHolder.getContext(),
-        request, response);
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(authResult);
+    new HttpSessionSecurityContextRepository().saveContext(context, request, response);
 
     CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
     User user = userDetails.getUser();

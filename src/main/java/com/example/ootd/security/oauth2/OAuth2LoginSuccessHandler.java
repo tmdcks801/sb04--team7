@@ -18,9 +18,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -40,7 +42,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException, ServletException {
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(authentication);
+    new HttpSessionSecurityContextRepository().saveContext(context, request, response);
+
+
 
     OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
     String email = oAuth2User.getAttribute("email");
@@ -48,16 +55,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 
-//    //여기서 sse로직
-//    UUID lastEventId = null;
-//    String lastIdHeader = request.getHeader("Last-Event-ID");
-//    if (StringUtils.hasText(lastIdHeader)) {
-//      try {
-//        lastEventId = UUID.fromString(lastIdHeader);
-//      } catch (IllegalArgumentException ignore) {//일단 무시
-//      }
-//    }
-//    ssePushServiceInterface.subscribe(user.getId(), lastEventId);//여기까지
 
     JwtSession session = jwtService.generateJwtSession(user);
 

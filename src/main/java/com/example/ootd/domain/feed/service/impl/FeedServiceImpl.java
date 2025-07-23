@@ -138,7 +138,6 @@ public class FeedServiceImpl implements FeedService {
     log.debug("피드 목록 조회 시작: userId={}, request={}", userId, condition);
 
     List<Feed> feeds = feedRepository.findByCondition(condition);
-    List<UUID> feedIds = feeds.stream().map(Feed::getId).toList();
 
     boolean hasNext = (feeds.size() > condition.limit());
     String nextCursor = null;
@@ -153,6 +152,7 @@ public class FeedServiceImpl implements FeedService {
       nextIdAfter = lastFeed.getId();
     }
 
+    List<UUID> feedIds = feeds.stream().map(Feed::getId).toList();
     Map<String, Boolean> feedLikeMap = feedLikeCacheService.getFeedLikeMapByUserId(userId);
     Map<UUID, FeedCountDto> feedCountDtoMap = feedCacheService.getFeedStates(feedIds);
 

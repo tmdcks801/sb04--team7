@@ -42,15 +42,6 @@ public class FeedCommentCacheService {
     return commentMapper.toDto(comments);
   }
 
-  // 댓글 개수 캐시 조회
-  @Cacheable(key = "#feedId")
-  public Integer getCachedCommentsCount(UUID feedId) {
-
-    log.debug("댓글(개수) 캐시 MISS 발생 - feedId={}", feedId);
-
-    return (int) feedCommentRepository.countByFeedId(feedId);
-  }
-
   // 해당 피드 관련 댓글 캐시 모두 삭제
   public void deleteAllCommentCacheByFeedId(UUID feedId) {
 
@@ -61,7 +52,7 @@ public class FeedCommentCacheService {
       for (String key : keys) {
         commentCache.evict(key);
       }
-      commentCache.evict(feedId);   // 댓글 캐시 삭제 시 댓글 개수 캐시도 삭제
+      commentCache.evict(feedId);
     }
 
     cacheManager.getCache("feed_comment_key").evict(feedId);

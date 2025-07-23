@@ -119,12 +119,14 @@ public class FeedServiceImpl implements FeedService {
     log.debug("피드 수정 시작: feedId={}, {}", feedId, request);
 
     Feed feed = getFeedById(feedId);
+    List<FeedClothes> feedClothesList = feedRepository.findFeedClothesByFeedId(feedId);
     feed.updateContent(request.content());
     FeedCountDto feedCountDto = feedCacheService.getFeedStates(feedId);
 
     FeedDto dto = feedMapper.toDto(feed, isFeedLiked(feedId, userId),
         feedCountDto.currentLikeCount(),
-        (int) feedCountDto.currentCommentCount());
+        (int) feedCountDto.currentCommentCount(),
+        feedClothesList);
 
     log.info("피드 수정 완료: {}", dto);
 
@@ -155,8 +157,11 @@ public class FeedServiceImpl implements FeedService {
     List<UUID> feedIds = feeds.stream().map(Feed::getId).toList();
     Map<String, Boolean> feedLikeMap = feedLikeCacheService.getFeedLikeMapByUserId(userId);
     Map<UUID, FeedCountDto> feedCountDtoMap = feedCacheService.getFeedStates(feedIds);
+    List<FeedClothes> feedClothesList = feedRepository.findFeedClothesByFeedIds(feedIds);
+    Map<UUID, List<FeedClothes>> feedClothesMap = feedClothesList.stream()
+        .collect(Collectors.groupingBy(fc -> fc.getFeed().getId()));
 
-    List<FeedDto> feedDtos = feedMapper.toDto(feeds, feedLikeMap, feedCountDtoMap);
+    List<FeedDto> feedDtos = feedMapper.toDto(feeds, feedLikeMap, feedCountDtoMap, feedClothesMap);
 
     PageResponse<FeedDto> response = PageResponse.<FeedDto>builder()
         .data(feedDtos)
@@ -198,6 +203,7 @@ public class FeedServiceImpl implements FeedService {
     }
 
     Feed feed = getFeedById(feedId);
+    List<FeedClothes> feedClothesList = feedRepository.findFeedClothesByFeedId(feedId);
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
@@ -218,7 +224,7 @@ public class FeedServiceImpl implements FeedService {
             .build()
     );
 
-    FeedDto feedDto = feedMapper.toDto(feed, true);
+    FeedDto feedDto = feedMapper.toDto(feed, true, feedClothesList);
 
     log.info("피드 좋아요 완료: {}", feedDto);
 
@@ -292,7 +298,7 @@ public class FeedServiceImpl implements FeedService {
     boolean hasNext = commentDtos.size() > condition.limit();
     String nextCursor = null;
     UUID nextIdAfter = null;
-    long totalCount = feedCommentCacheService.getCachedCommentsCount(feedId);
+    long totalCount = feedCacheService.getFeedStates(feedId).currentCommentCount();
 
     // 다음 페이지 있는 경우
     if (hasNext) {

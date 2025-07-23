@@ -45,6 +45,7 @@ import com.example.ootd.dto.PageResponse;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -199,7 +200,7 @@ public class FeedServiceImplTest {
       given(feedRepository.findById(feedId)).willReturn(Optional.of(feed));
       given(feedCacheService.getFeedStates(feedId)).willReturn(new FeedCountDto(feedId, 0, 0));
       given(feedLikeCacheService.getFeedLikeMapByUserId(userId)).willReturn(Collections.emptyMap());
-      given(feedMapper.toDto(any(), anyBoolean(), eq(0L), eq(0))).willReturn(
+      given(feedMapper.toDto(any(), anyBoolean(), eq(0L), eq(0), anyList())).willReturn(
           FeedDto.builder().id(feedId).content("new content").build());
 
       // when
@@ -274,7 +275,8 @@ public class FeedServiceImplTest {
       given(feedRepository.findByCondition(condition)).willReturn(feeds);
       given(feedLikeCacheService.getFeedLikeMapByUserId(userId)).willReturn(feedLikeMap);
       given(feedCacheService.getFeedStates(feedIds)).willReturn(feedCountDtoMap);
-      given(feedMapper.toDto(feeds, feedLikeMap, feedCountDtoMap)).willReturn(List.of(feedDto));
+      given(feedMapper.toDto(feeds, feedLikeMap, feedCountDtoMap, new HashMap<>())).willReturn(
+          List.of(feedDto));
       given(feedRepository.countByCondition(condition)).willReturn(1L);
 
       // when
@@ -291,7 +293,7 @@ public class FeedServiceImplTest {
       verify(feedRepository).findByCondition(condition);
       verify(feedLikeCacheService).getFeedLikeMapByUserId(userId);
       verify(feedCacheService).getFeedStates(feedIds);
-      verify(feedMapper).toDto(feeds, feedLikeMap, feedCountDtoMap);
+      verify(feedMapper).toDto(feeds, feedLikeMap, feedCountDtoMap, new HashMap<>());
       verify(feedRepository).countByCondition(condition);
     }
 
@@ -369,7 +371,8 @@ public class FeedServiceImplTest {
       given(feedRepository.findByCondition(condition)).willReturn(feedsToReturn);
       given(feedLikeCacheService.getFeedLikeMapByUserId(userId)).willReturn(feedLikeMap);
       given(feedCacheService.getFeedStates(anyList())).willReturn(feedCountDtoMap);
-      given(feedMapper.toDto(feedsForDto, feedLikeMap, feedCountDtoMap)).willReturn(
+      given(
+          feedMapper.toDto(feedsForDto, feedLikeMap, feedCountDtoMap, new HashMap<>())).willReturn(
           List.of(feedDto));
       given(feedRepository.countByCondition(condition)).willReturn(2L);
 
@@ -387,7 +390,7 @@ public class FeedServiceImplTest {
       verify(feedRepository).findByCondition(condition);
       verify(feedLikeCacheService).getFeedLikeMapByUserId(userId);
       verify(feedCacheService).getFeedStates(feedIds);
-      verify(feedMapper).toDto(feedsForDto, feedLikeMap, feedCountDtoMap);
+      verify(feedMapper).toDto(feedsForDto, feedLikeMap, feedCountDtoMap, new HashMap<>());
       verify(feedRepository).countByCondition(condition);
     }
   }
@@ -423,7 +426,7 @@ public class FeedServiceImplTest {
       User user = User.builder().name("user").build();
       given(feedRepository.findById(feedId)).willReturn(Optional.of(feed));
       given(userRepository.findById(userId)).willReturn(Optional.of(user));
-      given(feedMapper.toDto(any(), eq(true))).willReturn(
+      given(feedMapper.toDto(any(), eq(true), anyList())).willReturn(
           FeedDto.builder().likedByMe(true).build());
 
       // when
@@ -512,8 +515,8 @@ public class FeedServiceImplTest {
 
       given(feedCommentCacheService.getCachedComments(feedId, condition))
           .willReturn(commentDtoList);
-      given(feedCommentCacheService.getCachedCommentsCount(feedId))
-          .willReturn(1);
+      given(feedCacheService.getFeedStates(feedId))
+          .willReturn(new FeedCountDto(feedId, 0L, 1));
 
       // when
       PageResponse<CommentDto> result = feedService.findCommentByCondition(feedId, condition);
@@ -527,7 +530,7 @@ public class FeedServiceImplTest {
       assertThat(result.data().get(0).author().name()).isEqualTo("댓글 작성자");
 
       verify(feedCommentCacheService).getCachedComments(feedId, condition);
-      verify(feedCommentCacheService).getCachedCommentsCount(feedId);
+      verify(feedCacheService).getFeedStates(feedId);
     }
 
     @Test
@@ -563,8 +566,8 @@ public class FeedServiceImplTest {
 
       given(feedCommentCacheService.getCachedComments(feedId, condition))
           .willReturn(commentList);
-      given(feedCommentCacheService.getCachedCommentsCount(feedId))
-          .willReturn(2);
+      given(feedCacheService.getFeedStates(feedId))
+          .willReturn(new FeedCountDto(feedId, 0L, 2));
 
       // when
       PageResponse<CommentDto> result = feedService.findCommentByCondition(feedId, condition);
@@ -580,7 +583,7 @@ public class FeedServiceImplTest {
       assertThat(result.nextIdAfter()).isEqualTo(commentDto1.id());
 
       verify(feedCommentCacheService).getCachedComments(feedId, condition);
-      verify(feedCommentCacheService).getCachedCommentsCount(feedId);
+      verify(feedCacheService).getFeedStates(feedId);
     }
   }
 }

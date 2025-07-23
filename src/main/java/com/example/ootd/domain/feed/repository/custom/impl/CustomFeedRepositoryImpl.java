@@ -1,9 +1,15 @@
 package com.example.ootd.domain.feed.repository.custom.impl;
 
+import com.example.ootd.domain.clothes.entity.QAttribute;
+import com.example.ootd.domain.clothes.entity.QClothes;
+import com.example.ootd.domain.clothes.entity.QClothesAttribute;
 import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.entity.Feed;
+import com.example.ootd.domain.feed.entity.FeedClothes;
 import com.example.ootd.domain.feed.entity.QFeed;
+import com.example.ootd.domain.feed.entity.QFeedClothes;
 import com.example.ootd.domain.feed.repository.custom.CustomFeedRepository;
+import com.example.ootd.domain.image.entity.QImage;
 import com.example.ootd.domain.user.QUser;
 import com.example.ootd.domain.weather.entity.QWeather;
 import com.querydsl.core.BooleanBuilder;
@@ -12,6 +18,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -24,6 +31,11 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
   private final QFeed qFeed = QFeed.feed;
   private final QUser qUser = QUser.user;
   private final QWeather qWeather = QWeather.weather;
+  private final QFeedClothes qFeedClothes = QFeedClothes.feedClothes;
+  private final QClothes qClothes = QClothes.clothes;
+  private final QClothesAttribute qClothesAttribute = QClothesAttribute.clothesAttribute;
+  private final QImage qImage = QImage.image;
+  private final QAttribute qAttribute = QAttribute.attribute;
 
   @Override
   public List<Feed> findByCondition(FeedSearchCondition condition) {
@@ -43,6 +55,30 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
         .limit(condition.limit() + 1)
         .fetch();
   }
+
+  @Override
+  public List<FeedClothes> findFeedClothesByFeedIds(List<UUID> feedIds) {
+    return jpaQueryFactory
+        .selectFrom(qFeedClothes).distinct()
+        .leftJoin(qFeedClothes.feed, qFeed).fetchJoin()
+        .leftJoin(qFeedClothes.clothes, qClothes).fetchJoin()
+        .leftJoin(qClothes.clothesAttributes, qClothesAttribute).fetchJoin()
+        .leftJoin(qClothes.image, qImage).fetchJoin()
+        .leftJoin(qClothesAttribute.attribute, qAttribute).fetchJoin()
+        .where(qFeed.id.in(feedIds))
+        .fetch();
+  }
+
+  @Override
+  public List<FeedClothes> findFeedClothesByFeedId(UUID feedId) {
+    return jpaQueryFactory
+        .selectFrom(qFeedClothes).distinct()
+        .join(qFeedClothes.feed, qFeed).fetchJoin()
+        .join(qFeedClothes.clothes, qClothes).fetchJoin()
+        .where(qFeed.id.eq(feedId))
+        .fetch();
+  }
+
 
   @Override
   public long countByCondition(FeedSearchCondition condition) {

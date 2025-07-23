@@ -64,7 +64,7 @@ public class FeedCacheService {
   }
 
   // 좋아요 수 업데이트
-  public void updateCount(Feed feed) {
+  public void updateLikeCount(Feed feed) {
     Cache cache = cacheManager.getCache("feed");
     if (cache == null) {
       log.warn("Feed cache is not available");

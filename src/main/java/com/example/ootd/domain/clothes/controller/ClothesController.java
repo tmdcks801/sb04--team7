@@ -1,5 +1,6 @@
 package com.example.ootd.domain.clothes.controller;
 
+import com.example.ootd.config.api.ClothesApi;
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesCreateRequest;
 import com.example.ootd.domain.clothes.dto.request.ClothesSearchCondition;
@@ -29,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/clothes")
-public class ClothesController {
+public class ClothesController implements ClothesApi {
 
   private final ClothesService clothesService;
 

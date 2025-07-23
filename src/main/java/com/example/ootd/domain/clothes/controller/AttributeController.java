@@ -1,5 +1,6 @@
 package com.example.ootd.domain.clothes.controller;
 
+import com.example.ootd.config.api.AttributeApi;
 import com.example.ootd.domain.clothes.dto.data.ClothesAttributeDefDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesAttributeDefCreateRequest;
 import com.example.ootd.domain.clothes.dto.request.ClothesAttributeDefUpdateRequest;
@@ -26,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/clothes/attribute-defs")
-public class AttributeController {
+public class AttributeController implements AttributeApi {
 
   private final AttributeService attributeService;
 

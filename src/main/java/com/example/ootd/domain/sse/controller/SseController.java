@@ -1,5 +1,6 @@
 package com.example.ootd.domain.sse.controller;
 
+import com.example.ootd.config.api.SseApi;
 import com.example.ootd.domain.sse.service.SsePushServiceInterface;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RestController
 @RequestMapping("/api/sse")
 @RequiredArgsConstructor
-public class SseController {
+public class SseController implements SseApi {
 
   private final SsePushServiceInterface ssePushService;
 

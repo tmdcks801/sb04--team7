@@ -1,6 +1,7 @@
 package com.example.ootd.domain.image.service;
 
 import com.example.ootd.domain.image.entity.Image;
+import java.io.InputStream;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -13,4 +14,7 @@ public interface S3Service {
 
   // 파일 삭제
   void delete(String fileName);
+
+  // 파일 읽기
+  InputStream getFileInputStream(String fileName);
 }

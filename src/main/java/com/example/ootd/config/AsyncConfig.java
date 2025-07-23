@@ -84,4 +84,17 @@ public class AsyncConfig {
     executor.initialize();
     return executor;
   }
+
+  @Bean(name = "preloadTaskExecutor") // ai 의상 추천용
+  public Executor preloadTaskExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(5);
+    executor.setMaxPoolSize(10);
+    executor.setQueueCapacity(100);
+    executor.setThreadNamePrefix("Preload-");
+    executor.setWaitForTasksToCompleteOnShutdown(true);
+    executor.setAwaitTerminationSeconds(30);
+    executor.initialize();
+    return executor;
+  }
 }

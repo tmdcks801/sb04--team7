@@ -102,11 +102,14 @@ public class SecurityConfig {
                   .requestMatchers("/ws/**").permitAll()
                   .requestMatchers("/api/batch/weather/**").hasRole("ADMIN");
 
+
           // dev 프로파일에서만 Swagger 허용
           if (java.util.Arrays.asList(environment.getActiveProfiles()).contains("dev")) {
-            auth.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
+            auth.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
                 .permitAll();
           }
+//          auth.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**")
+//              .permitAll();
 
           auth.anyRequest().authenticated();
         })

@@ -2,6 +2,7 @@ package com.example.ootd.domain.follow.controller.api;
 
 import com.example.ootd.domain.follow.dto.FollowCreateRequest;
 import com.example.ootd.domain.follow.dto.FollowDto;
+import com.example.ootd.domain.follow.dto.FollowListCondition;
 import com.example.ootd.domain.follow.dto.FollowListResponse;
 import com.example.ootd.domain.follow.dto.FollowSummaryDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,11 +11,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,10 +69,7 @@ public interface FollowApi {
   @GetMapping("/api/follows/followings")
   ResponseEntity<FollowListResponse> getFollowings(
       @RequestParam(name = "followerId") UUID userId,
-      @RequestParam(required = false) String cursor,
-      @RequestParam(required = false) UUID idAfter,
-      @RequestParam int limit,
-      @RequestParam(required = false) String nameLike
+      @ModelAttribute @Valid FollowListCondition conditions
   );
 
   @Operation(summary = "팔로워 목록 조회", description = "팔로워 목록 조회 API")
@@ -86,10 +86,7 @@ public interface FollowApi {
   @GetMapping("/api/follows/followers")
   ResponseEntity<FollowListResponse> getFollowers(
       @RequestParam(name = "followeeId") UUID userId,
-      @RequestParam(required = false) String cursor,
-      @RequestParam(required = false) UUID idAfter,
-      @RequestParam int limit,
-      @RequestParam(required = false) String nameLike
+      @ModelAttribute @Valid FollowListCondition conditions
   );
 
   @Operation(summary = "팔로우 취소", description = "팔로우 취소 API")

@@ -1,5 +1,6 @@
 package com.example.ootd.domain.notification.controller;
 
+import com.example.ootd.config.api.NotificationApi;
 import com.example.ootd.domain.notification.dto.NotificationRequest;
 import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
 import com.example.ootd.domain.notification.service.inter.NotificationServiceInterface;
@@ -26,7 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notifications")
-public class NotificationController {
+public class NotificationController implements NotificationApi {
 
   private final NotificationServiceInterface notificationService;
 

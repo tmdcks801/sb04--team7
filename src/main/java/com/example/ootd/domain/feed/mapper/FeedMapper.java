@@ -7,6 +7,7 @@ import com.example.ootd.domain.feed.entity.Feed;
 import com.example.ootd.domain.feed.entity.FeedClothes;
 import com.example.ootd.domain.user.mapper.UserMapper;
 import com.example.ootd.domain.weather.mapper.WeatherSummaryMapper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -62,6 +63,10 @@ public interface FeedMapper {
             commentCount = (int) countDto.currentCommentCount();
           }
           List<FeedClothes> feedClothesList = feedClothesMap.get(feedId);
+
+          if (feedClothesList == null) {
+            return toDto(feed, likedByMe, likeCount, commentCount, new ArrayList<>());
+          }
 
           return toDto(feed, likedByMe, likeCount, commentCount, feedClothesList);
         })

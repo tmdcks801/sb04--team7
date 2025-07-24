@@ -52,7 +52,6 @@ public class FeedCommentCacheService {
       for (String key : keys) {
         commentCache.evict(key);
       }
-      commentCache.evict(feedId);
     }
 
     cacheManager.getCache("feed_comment_key").evict(feedId);

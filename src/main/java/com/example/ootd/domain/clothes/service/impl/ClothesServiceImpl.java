@@ -13,9 +13,10 @@ import com.example.ootd.domain.clothes.mapper.ClothesMapper;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
 import com.example.ootd.domain.clothes.repository.ClothesRepository;
 import com.example.ootd.domain.clothes.service.ClothesService;
-import com.example.ootd.domain.recommend.service.RecommendService;
+import com.example.ootd.domain.clothes.service.cache.ClothesCacheService;
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.image.service.ImageService;
+import com.example.ootd.domain.recommend.service.RecommendService;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.dto.PageResponse;
@@ -49,6 +50,7 @@ public class ClothesServiceImpl implements ClothesService {
   private final AttributeRepository attributeRepository;
   private final ClothesMapper clothesMapper;
   private final RecommendService recommendService;
+  private final ClothesCacheService clothesCacheService;
 
   @Override
   public ClothesDto create(ClothesCreateRequest request, MultipartFile image, UUID userId) {
@@ -74,6 +76,7 @@ public class ClothesServiceImpl implements ClothesService {
 
     // 의상 등록시 캐시 삭제
     recommendService.safeEvictUserCache(userId);
+    clothesCacheService.deleteAllClothesCacheByOwnerId(userId);
 
     ClothesDto response = clothesMapper.toDto(clothes);
 
@@ -96,8 +99,12 @@ public class ClothesServiceImpl implements ClothesService {
 
     // 의상 정보 변경시 캐시 삭제
     recommendService.safeEvictUserCache(clothes.getUser().getId());
+    clothesCacheService.deleteAllClothesCacheByOwnerId(clothes.getUser().getId());
 
-    ClothesDto response = clothesMapper.toDto(clothes);
+    List<ClothesAttribute> clothesAttributes = clothesRepository
+        .findClothesAttributeByClothesId(clothesId);
+
+    ClothesDto response = clothesMapper.toDto(clothes, clothesAttributes);
 
     log.info("의상 수정 완료: {}", response);
 
@@ -110,24 +117,24 @@ public class ClothesServiceImpl implements ClothesService {
 
     log.debug("의상 목록 조회 시작: {}", condition);
 
-    List<Clothes> clothes = clothesRepository.findByCondition(condition);
+    List<ClothesDto> clothesDtoList = clothesCacheService.getCachedClothes(condition);
 
-    boolean hasNext = (clothes.size() > condition.limit());
+    boolean hasNext = (clothesDtoList.size() > condition.limit());
     String nextCursor = null;
     UUID nextIdAfter = null;
-    long totalCount = clothesRepository.countByCondition(condition.typeEqual(),
+    long totalCount = clothesCacheService.getCachedTotalCount(condition.typeEqual(),
         condition.ownerId());
 
     // 다음 페이지 있는 경우
     if (hasNext) {
-      clothes.remove(clothes.size() - 1);
-      Clothes lastClothes = clothes.get(clothes.size() - 1);
-      nextCursor = lastClothes.getCreatedAt().toString();
-      nextIdAfter = lastClothes.getId();
+      clothesDtoList.remove(clothesDtoList.size() - 1);
+      ClothesDto lastClothes = clothesDtoList.get(clothesDtoList.size() - 1);
+      nextCursor = lastClothes.createdAt().toString();
+      nextIdAfter = lastClothes.id();
     }
 
     PageResponse<ClothesDto> pageResponse = PageResponse.<ClothesDto>builder()
-        .data(clothesMapper.toDto(clothes))
+        .data(clothesDtoList)
         .hasNext(hasNext)
         .nextCursor(nextCursor)
         .nextIdAfter(nextIdAfter)
@@ -136,7 +143,7 @@ public class ClothesServiceImpl implements ClothesService {
         .totalCount(totalCount)
         .build();
 
-    log.info("의상 목록 조회 완료: dataCount={}", clothes.size());
+    log.info("의상 목록 조회 완료: dataCount={}", clothesDtoList.size());
 
     return pageResponse;
   }
@@ -154,6 +161,7 @@ public class ClothesServiceImpl implements ClothesService {
 
     // 의상 삭제시 캐시 삭제
     recommendService.safeEvictUserCache(userId);
+    clothesCacheService.deleteAllClothesCacheByOwnerId(userId);
 
     log.info("의상 삭제 완료");
   }

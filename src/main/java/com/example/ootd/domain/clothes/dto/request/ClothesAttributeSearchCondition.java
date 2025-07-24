@@ -26,4 +26,20 @@ public record ClothesAttributeSearchCondition(
     String keywordLike
 ) {
 
+  // 캐시 키값 반환
+  public String toSimpleKey() {
+    return String.format(
+        ":cursor=%s:idAfter=%s:limit=%s:sortBy=%s:sortDirection=%s:keywordLike=%s",
+        nullToStr(cursor),
+        nullToStr(idAfter),
+        limit,
+        sortBy,
+        sortDirection,
+        nullToStr(keywordLike)
+    );
+  }
+
+  private String nullToStr(Object o) {
+    return o == null ? "null" : o.toString();
+  }
 }

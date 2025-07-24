@@ -8,6 +8,7 @@ import com.example.ootd.domain.clothes.entity.Attribute;
 import com.example.ootd.domain.clothes.mapper.AttributeMapper;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
 import com.example.ootd.domain.clothes.service.AttributeService;
+import com.example.ootd.domain.clothes.service.cache.AttributeCacheService;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.enums.NotificationLevel;
 import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
@@ -31,6 +32,7 @@ public class AttributeServiceImpl implements AttributeService {
   private final AttributeRepository attributeRepository;
   private final AttributeMapper attributeMapper;
   private final NotificationPublisherInterface notificationPublisher;
+  private final AttributeCacheService attributeCacheService;
 
   @Override
   public ClothesAttributeDefDto create(ClothesAttributeDefCreateRequest request) {
@@ -47,6 +49,8 @@ public class AttributeServiceImpl implements AttributeService {
         .build();
 
     attributeRepository.save(attribute);
+
+    attributeCacheService.evictAllCache();
 
     // 모든 사용자에게 알림
     notificationPublisher.publishToAll(
@@ -74,6 +78,8 @@ public class AttributeServiceImpl implements AttributeService {
     updateName(attribute, request.name());
     updateDetails(attribute, request.selectableValues());
 
+    attributeCacheService.evictAllCache();
+
     // 모든 사용자에게 알림
     notificationPublisher.publishToAll(
         new NotificationEvent("의상 속성이 변경되었어요.", "[" + attribute.getName() + "] 속성을 확인해보세요.",
@@ -95,23 +101,23 @@ public class AttributeServiceImpl implements AttributeService {
 
     log.debug("의상 속성 정의 조회 시작: {}", condition);
 
-    List<Attribute> attributes = attributeRepository.findByCondition(condition);
+    List<ClothesAttributeDefDto> defDtos = attributeCacheService.getCachedClothes(condition);
 
-    boolean hasNext = (attributes.size() > condition.limit());
+    boolean hasNext = (defDtos.size() > condition.limit());
     String nextCursor = null;
     UUID nextIdAfter = null;
-    long totalCount = attributeRepository.countByKeyword(condition.keywordLike());
+    long totalCount = attributeCacheService.getCachedTotalCount(condition.keywordLike());
 
     // 다음 페이지 있는 경우
     if (hasNext) {
-      attributes.remove(attributes.size() - 1);   // 다음 페이지 확인용 마지막 요소 삭제
-      Attribute lastAttribute = attributes.get(attributes.size() - 1);
+      defDtos.remove(defDtos.size() - 1);   // 다음 페이지 확인용 마지막 요소 삭제
+      ClothesAttributeDefDto lastAttribute = defDtos.get(defDtos.size() - 1);
       nextCursor = setNextCursor(lastAttribute, condition.sortBy());
-      nextIdAfter = lastAttribute.getId();
+      nextIdAfter = lastAttribute.id();
     }
 
     PageResponse<ClothesAttributeDefDto> response = PageResponse.<ClothesAttributeDefDto>builder()
-        .data(attributeMapper.toDtoList(attributes))
+        .data(defDtos)
         .hasNext(hasNext)
         .nextCursor(nextCursor)
         .nextIdAfter(nextIdAfter)
@@ -120,7 +126,7 @@ public class AttributeServiceImpl implements AttributeService {
         .totalCount(totalCount)
         .build();
 
-    log.info("의상 속성 정의 조회 완료: dataCount={}", attributes.size());
+    log.info("의상 속성 정의 조회 완료: dataCount={}", defDtos.size());
 
     return response;
   }
@@ -132,6 +138,7 @@ public class AttributeServiceImpl implements AttributeService {
 
     Attribute attribute = getAttributeById(definitionId);
     attributeRepository.delete(attribute);
+    attributeCacheService.evictAllCache();
 
     log.info("의상 속성 정의 삭제 완료");
   }
@@ -157,13 +164,13 @@ public class AttributeServiceImpl implements AttributeService {
     }
   }
 
-  private String setNextCursor(Attribute lastAttribute, String sortBy) {
+  private String setNextCursor(ClothesAttributeDefDto lastAttribute, String sortBy) {
 
     switch (sortBy) {
       case "name":
-        return lastAttribute.getName();
+        return lastAttribute.name();
       case "createdAt":
-        return lastAttribute.getCreatedAt().toString();
+        return lastAttribute.createdAt().toString();
       default:
         return null;
     }

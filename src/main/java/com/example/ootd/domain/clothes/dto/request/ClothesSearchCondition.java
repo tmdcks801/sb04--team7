@@ -23,4 +23,19 @@ public record ClothesSearchCondition(
     UUID ownerId
 ) {
 
+  // 캐시 키값 반환
+  public String toSimpleKey() {
+    return String.format(
+        ":cursor=%s:idAfter=%s:limit=%s:typeEqual=%s:ownerId=%s",
+        nullToStr(cursor),
+        nullToStr(idAfter),
+        limit,
+        nullToStr(typeEqual),
+        ownerId
+    );
+  }
+
+  private String nullToStr(Object o) {
+    return o == null ? "null" : o.toString();
+  }
 }

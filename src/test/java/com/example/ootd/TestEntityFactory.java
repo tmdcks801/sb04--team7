@@ -1,6 +1,8 @@
 package com.example.ootd;
 
 import com.example.ootd.domain.clothes.entity.Attribute;
+import com.example.ootd.domain.clothes.entity.Clothes;
+import com.example.ootd.domain.clothes.entity.ClothesType;
 import com.example.ootd.domain.feed.entity.Feed;
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.user.Gender;
@@ -173,5 +175,14 @@ public class TestEntityFactory {
     ReflectionTestUtils.setField(feed, "createdAt", LocalDateTime.now());
 
     return feed;
+  }
+
+  public static Clothes createClothesWithoutId(User user) {
+    return Clothes.builder().user(user).image(null).name("test").type(ClothesType.ACCESSORY)
+        .build();
+  }
+
+  public static Attribute createAttributeWithoutId(String name) {
+    return Attribute.builder().name(name).details(List.of("test", "attribute")).build();
   }
 }

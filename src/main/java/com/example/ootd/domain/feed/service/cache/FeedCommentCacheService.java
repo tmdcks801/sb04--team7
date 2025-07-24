@@ -17,6 +17,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+// 댓글 커서 페이지네이션에 따른 결과 관리
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,15 +42,7 @@ public class FeedCommentCacheService {
     return commentMapper.toDto(comments);
   }
 
-  // 댓글 개수 캐시 저장
-  @Cacheable(key = "#feedId")
-  public long getCachedCommentsCount(UUID feedId) {
-
-    log.debug("댓글(개수) 캐시 MISS 발생 - feedId={}", feedId);
-
-    return feedCommentRepository.countByFeedId(feedId);
-  }
-
+  // 해당 피드 관련 댓글 캐시 모두 삭제
   public void deleteAllCommentCacheByFeedId(UUID feedId) {
 
     Set<String> keys = cacheManager.getCache("feed_comment_key").get(feedId, Set.class);
@@ -59,7 +52,7 @@ public class FeedCommentCacheService {
       for (String key : keys) {
         commentCache.evict(key);
       }
-      commentCache.evict(feedId);   // 댓글 캐시 삭제 시 댓글 개수 캐시도 삭제
+      commentCache.evict(feedId);
     }
 
     cacheManager.getCache("feed_comment_key").evict(feedId);

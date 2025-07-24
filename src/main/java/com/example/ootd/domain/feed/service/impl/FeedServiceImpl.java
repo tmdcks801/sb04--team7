@@ -3,6 +3,7 @@ package com.example.ootd.domain.feed.service.impl;
 import com.example.ootd.domain.clothes.entity.Clothes;
 import com.example.ootd.domain.clothes.repository.ClothesRepository;
 import com.example.ootd.domain.feed.dto.data.CommentDto;
+import com.example.ootd.domain.feed.dto.data.FeedCountDto;
 import com.example.ootd.domain.feed.dto.data.FeedDto;
 import com.example.ootd.domain.feed.dto.request.CommentCreateRequest;
 import com.example.ootd.domain.feed.dto.request.FeedCommentSearchCondition;
@@ -19,7 +20,9 @@ import com.example.ootd.domain.feed.repository.FeedCommentRepository;
 import com.example.ootd.domain.feed.repository.FeedLikeRepository;
 import com.example.ootd.domain.feed.repository.FeedRepository;
 import com.example.ootd.domain.feed.service.FeedService;
+import com.example.ootd.domain.feed.service.cache.FeedCacheService;
 import com.example.ootd.domain.feed.service.cache.FeedCommentCacheService;
+import com.example.ootd.domain.feed.service.cache.FeedLikeCacheService;
 import com.example.ootd.domain.follow.repository.FollowRepository;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.dto.NotificationRequest;
@@ -38,7 +41,6 @@ import com.example.ootd.exception.weather.WeatherNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -64,6 +66,8 @@ public class FeedServiceImpl implements FeedService {
   private final CommentMapper commentMapper;
   private final NotificationPublisherInterface notificationPublisher;
   private final FeedCommentCacheService feedCommentCacheService;
+  private final FeedLikeCacheService feedLikeCacheService;
+  private final FeedCacheService feedCacheService;
 
   @Override
   public FeedDto createFeed(FeedCreateRequest request) {
@@ -115,9 +119,14 @@ public class FeedServiceImpl implements FeedService {
     log.debug("피드 수정 시작: feedId={}, {}", feedId, request);
 
     Feed feed = getFeedById(feedId);
+    List<FeedClothes> feedClothesList = feedRepository.findFeedClothesByFeedId(feedId);
     feed.updateContent(request.content());
+    FeedCountDto feedCountDto = feedCacheService.getFeedStates(feedId);
 
-    FeedDto dto = feedMapper.toDto(feed, isFeedLiked(feedId, userId));
+    FeedDto dto = feedMapper.toDto(feed, isFeedLiked(feedId, userId),
+        feedCountDto.currentLikeCount(),
+        (int) feedCountDto.currentCommentCount(),
+        feedClothesList);
 
     log.info("피드 수정 완료: {}", dto);
 
@@ -145,9 +154,14 @@ public class FeedServiceImpl implements FeedService {
       nextIdAfter = lastFeed.getId();
     }
 
-    Map<UUID, FeedLike> feedLikeMap = getFeedLikeMapByUserId(userId);
+    List<UUID> feedIds = feeds.stream().map(Feed::getId).toList();
+    Map<String, Boolean> feedLikeMap = feedLikeCacheService.getFeedLikeMapByUserId(userId);
+    Map<UUID, FeedCountDto> feedCountDtoMap = feedCacheService.getFeedStates(feedIds);
+    List<FeedClothes> feedClothesList = feedRepository.findFeedClothesByFeedIds(feedIds);
+    Map<UUID, List<FeedClothes>> feedClothesMap = feedClothesList.stream()
+        .collect(Collectors.groupingBy(fc -> fc.getFeed().getId()));
 
-    List<FeedDto> feedDtos = feedMapper.toDto(feeds, feedLikeMap);
+    List<FeedDto> feedDtos = feedMapper.toDto(feeds, feedLikeMap, feedCountDtoMap, feedClothesMap);
 
     PageResponse<FeedDto> response = PageResponse.<FeedDto>builder()
         .data(feedDtos)
@@ -172,6 +186,9 @@ public class FeedServiceImpl implements FeedService {
     Feed feed = getFeedById(feedId);
     feedRepository.delete(feed);
 
+    feedCommentCacheService.deleteAllCommentCacheByFeedId(feedId);
+    feedCacheService.evictFeedCache(feedId);
+
     log.info("피드 삭제 완료");
   }
 
@@ -186,13 +203,16 @@ public class FeedServiceImpl implements FeedService {
     }
 
     Feed feed = getFeedById(feedId);
+    List<FeedClothes> feedClothesList = feedRepository.findFeedClothesByFeedId(feedId);
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     FeedLike feedLike = new FeedLike(feed, user);
     feedLikeRepository.save(feedLike);
+    feed.increaseLikeCount();
 
-    feed.increaseLikeCount(); // TODO: 동시성 문제 해결
+    feedLikeCacheService.refreshFeedLikeMap(userId);
+    feedCacheService.updateCount(feed);
 
     // 피드 작성자에게 알림
     notificationPublisher.publish(
@@ -204,7 +224,7 @@ public class FeedServiceImpl implements FeedService {
             .build()
     );
 
-    FeedDto feedDto = feedMapper.toDto(feed, true);
+    FeedDto feedDto = feedMapper.toDto(feed, true, feedClothesList);
 
     log.info("피드 좋아요 완료: {}", feedDto);
 
@@ -220,8 +240,10 @@ public class FeedServiceImpl implements FeedService {
 
     FeedLike feedLike = getFeedLikeByFeedIdAndUserId(feedId, userId);
     feedLikeRepository.delete(feedLike);
+    feed.decreaseLikeCount();
 
-    feed.decreaseLikeCount(); // TODO: 동시성 문제 해결
+    feedLikeCacheService.refreshFeedLikeMap(userId);
+    feedCacheService.updateCount(feed);
 
     log.info("피드 좋아요 삭제 완료");
   }
@@ -244,7 +266,7 @@ public class FeedServiceImpl implements FeedService {
     feedCommentRepository.save(comment);
     feedCommentCacheService.deleteAllCommentCacheByFeedId(request.feedId());
 
-    feed.increaseCommentCount();  // TODO: 동시성 문제 해결
+    feedCacheService.commentCountIncrease(feed);
 
     // 피드 작성자에게 알림
     notificationPublisher.publish(
@@ -276,7 +298,7 @@ public class FeedServiceImpl implements FeedService {
     boolean hasNext = commentDtos.size() > condition.limit();
     String nextCursor = null;
     UUID nextIdAfter = null;
-    long totalCount = feedCommentCacheService.getCachedCommentsCount(feedId);
+    long totalCount = feedCacheService.getFeedStates(feedId).currentCommentCount();
 
     // 다음 페이지 있는 경우
     if (hasNext) {
@@ -310,8 +332,9 @@ public class FeedServiceImpl implements FeedService {
   // 해당 피드에 좋아요 했는지 여부
   private boolean isFeedLiked(UUID feedId, UUID userId) {
 
-    Optional<FeedLike> feedLike = feedLikeRepository.findByFeedIdAndUserId(feedId, userId);
-    return feedLike.isPresent();
+    Map<String, Boolean> likedMap = feedLikeCacheService.getFeedLikeMapByUserId(userId);
+
+    return (likedMap.get(feedId.toString()) != null);
   }
 
   // 피드 좋아요 조회

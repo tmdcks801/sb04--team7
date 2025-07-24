@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
-import org.springframework.boot.autoconfigure.cache.CacheProperties.Redis;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -82,6 +82,15 @@ public class CacheConfig {
             .fromSerializer(jsonSerializer))
         .disableCachingNullValues();
 
+    // feed
+    RedisCacheConfiguration feedConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(Duration.ofHours(12))
+        .serializeKeysWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(jsonSerializer))
+        .disableCachingNullValues();
+
     // 통합 Redis 캐시 설정
     RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofHours(5)) // 24시간 TTL
@@ -95,6 +104,7 @@ public class CacheConfig {
         .cacheDefaults(config)
         .withCacheConfiguration("aiRecommendations", aiRecommendationConfig)
         .withCacheConfiguration("notification", notificationConfig)
+        .withCacheConfiguration("feed", feedConfig)
         .build();
   }
 

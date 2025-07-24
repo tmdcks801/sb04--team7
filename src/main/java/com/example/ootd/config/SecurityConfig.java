@@ -68,8 +68,8 @@ public class SecurityConfig {
             .csrfTokenRequestHandler(csrfHandler)
         )
         .formLogin(AbstractHttpConfigurer::disable)
-//        .sessionManagement(
-//            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .securityContext(context -> context.securityContextRepository(new HttpSessionSecurityContextRepository()))
         .sessionManagement(session -> session.sessionFixation().migrateSession())
         .authorizeHttpRequests(auth -> {
@@ -115,7 +115,6 @@ public class SecurityConfig {
                 userInfo.userService(customOAuth2UserService))
             .successHandler(oAuth2LoginSuccessHandler)
             .failureHandler((request, response, exception) -> {
-              // 1) 로그
               log.error("OAuth2 로그인 실패 원인:", exception);
             }))
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

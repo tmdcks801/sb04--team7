@@ -67,10 +67,7 @@ public interface WeatherRepository extends JpaRepository<Weather, UUID> {
         SELECT 1 FROM locations l 
         JOIN users u ON u.location_id = l.id 
         WHERE u.id = :userId
-        AND (
-            l.location_names::text LIKE '%' || w.region_name || '%'
-            OR l.location_names::jsonb @> to_jsonb(ARRAY[w.region_name])
-        )
+        AND w.region_name = TRIM(SPLIT_PART(l.location_names, ',', 1)) || ' ' || TRIM(SPLIT_PART(l.location_names, ',', 2))
     )
     ORDER BY w.forecast_at
     """, nativeQuery = true)

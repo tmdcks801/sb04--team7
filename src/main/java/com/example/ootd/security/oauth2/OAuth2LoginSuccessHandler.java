@@ -15,6 +15,7 @@ import java.lang.reflect.Member;
 import java.net.URLEncoder;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 //여기에 하나
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -45,9 +47,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     SecurityContext context = SecurityContextHolder.createEmptyContext();
     context.setAuthentication(authentication);
-    new HttpSessionSecurityContextRepository().saveContext(context, request, response);
-
-
+//    new HttpSessionSecurityContextRepository().saveContext(context, request, response);
 
     OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
     String email = oAuth2User.getAttribute("email");
@@ -55,6 +55,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 
+    if (user.getIsLocked()) {
+      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+      log.warn("잠긴 계정 로그인 시도 : {}", user.getEmail());
+      response.getWriter().write("{\"error\": \"계정이 잠겨 있습니다.\"}");
+      return;
+    }
 
     JwtSession session = jwtService.generateJwtSession(user);
 

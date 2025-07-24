@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class RecommendationPreloadService {
 
   @Async("preloadTaskExecutor")
   @Scheduled(cron = "0 0 6 * * *", zone = "Asia/Seoul") // 매일 오전 6시
+  @Transactional
   public void preloadMorningRecommendations() {
     log.info("의상 추천 배치 시작");
 
@@ -81,9 +83,34 @@ public class RecommendationPreloadService {
     log.info("사용자 {} location: {}", user.getId(), user.getLocation().getLocationNames());
     
     List<Weather> todayWeathers = weatherRepository.findTodayWeatherByUserLocation(user.getId());
-    log.info("사용자 {}의 오늘 날씨 데이터 개수: {}", user.getId(), todayWeathers.size());
+    log.info("사용자 {}의 오늘 날씨 데이터 개수: {}, 시간: {}", user.getId(), todayWeathers.size(), 
+        todayWeathers.stream().map(w -> w.getForecastAt().getHour()).collect(Collectors.toList()));
+    
+    // 한 개 날씨만 사용 (대표 시간대로 제한)
+    List<Weather> limitedWeathers = todayWeathers.stream()
+        .filter(w -> w.getForecastAt().getHour() == 6) // 오전 6시 날씨만
+        .limit(1)
+        .collect(Collectors.toList());
+    
+    if (limitedWeathers.isEmpty() && !todayWeathers.isEmpty()) {
+      // 6시 데이터가 없으면 첫 번째 데이터 사용
+      limitedWeathers = List.of(todayWeathers.get(0));
+    }
+    
+    log.info("실제 사용할 날씨 데이터 개수: {}", limitedWeathers.size());
+    
+    // 전체 오늘 날씨 데이터와 사용자 위치 정보 확인
+    if (todayWeathers.isEmpty()) {
+      List<Weather> allTodayWeathers = weatherRepository.findAll().stream()
+          .filter(w -> w.getForecastAt().toLocalDate().equals(LocalDate.now()))
+          .collect(Collectors.toList());
+      log.info("전체 오늘 날씨 데이터 개수: {}, 지역들: {}",
+          allTodayWeathers.size(),
+          allTodayWeathers.stream().map(Weather::getRegionName).distinct().collect(Collectors.toList()));
+      log.info("사용자 위치 정보: {}", user.getLocation().getLocationNames());
+    }
 
-    for (Weather weather : todayWeathers) {
+    for (Weather weather : limitedWeathers) {
       try {
         // AI 추천 받기 - LLM 호출
         RecommendationDto recommendation = aiRecommendService.recommendClothesForPreload(weather.getId(), user.getId());
@@ -92,7 +119,8 @@ public class RecommendationPreloadService {
         String cacheKey = generateBatchCacheKey(weather.getId(), user.getId());
         String recommendationJson = objectMapper.writeValueAsString(recommendation);
         stringRedisTemplate.opsForValue().set(cacheKey, recommendationJson, Duration.ofHours(24));
-        log.info("배치 캐시 저장 완료: key={}, jsonLength={}", cacheKey, recommendationJson.length());
+        log.info("배치 캐시 저장 완료: key={}, jsonLength={}, weatherId={}, userId={}", 
+            cacheKey, recommendationJson.length(), weather.getId(), user.getId());
       } catch (Exception e) {
         log.warn("개별 배치 실패 : userId = {}, weatherId = {}", user.getId(), weather.getId(), e);
       }

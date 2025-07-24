@@ -1,6 +1,7 @@
 package com.example.ootd.domain.follow.controller;
 
 
+import com.example.ootd.domain.follow.controller.api.FollowApi;
 import com.example.ootd.domain.follow.dto.FollowCreateRequest;
 import com.example.ootd.domain.follow.dto.FollowDto;
 import com.example.ootd.domain.follow.dto.FollowListCondition;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/follows")
 @Slf4j
-public class FollowController {
+public class FollowController implements FollowApi {
 
   private final FollowService followService;
 

@@ -100,11 +100,15 @@ public class Feed {
     this.likeCount--;
   }
 
+  public void updateLikeCount(long likeCount) {
+    this.likeCount = likeCount;
+  }
+
   public void increaseCommentCount() {
     this.commentCount++;
   }
 
-  public void decreaseCommentCount() {
-    this.commentCount--;
+  public void updateCommentCount(int commentCount) {
+    this.commentCount = commentCount;
   }
 }

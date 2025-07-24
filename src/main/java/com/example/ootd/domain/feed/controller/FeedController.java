@@ -1,5 +1,6 @@
 package com.example.ootd.domain.feed.controller;
 
+import com.example.ootd.config.api.FeedApi;
 import com.example.ootd.domain.feed.dto.data.CommentDto;
 import com.example.ootd.domain.feed.dto.data.FeedDto;
 import com.example.ootd.domain.feed.dto.request.CommentCreateRequest;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/feeds")
-public class FeedController {
+public class FeedController implements FeedApi {
 
   private final FeedService feedService;
 

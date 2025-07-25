@@ -23,6 +23,7 @@ import com.example.ootd.dto.PageResponse;
 import com.example.ootd.security.PrincipalUser;
 import com.example.ootd.security.jwt.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,7 +99,8 @@ public class ClothesControllerTest {
         "반팔 티셔츠",
         "https://example.com/image.jpg",
         ClothesType.TOP,
-        List.of(attr)
+        List.of(attr),
+        LocalDateTime.now()
     );
 
     PageResponse<ClothesDto> response = PageResponse.<ClothesDto>builder()
@@ -142,7 +144,8 @@ public class ClothesControllerTest {
         request.name(),
         "https://example.com/image.jpg",
         request.type(),
-        List.of()
+        List.of(),
+        LocalDateTime.now()
     );
 
     MockMultipartFile req = new MockMultipartFile(
@@ -181,7 +184,8 @@ public class ClothesControllerTest {
         request.name(),
         "https://example.com/updated.jpg",
         request.type(),
-        List.of()
+        List.of(),
+        LocalDateTime.now()
     );
 
     MockMultipartFile req = new MockMultipartFile(

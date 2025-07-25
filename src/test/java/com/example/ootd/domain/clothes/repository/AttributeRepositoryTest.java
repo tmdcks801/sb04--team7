@@ -2,6 +2,7 @@ package com.example.ootd.domain.clothes.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.ootd.config.JpaConfig;
 import com.example.ootd.config.QueryDslConfig;
 import com.example.ootd.domain.clothes.dto.request.ClothesAttributeSearchCondition;
 import com.example.ootd.domain.clothes.entity.Attribute;
@@ -27,7 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
-@Import(QueryDslConfig.class)
+@Import({QueryDslConfig.class, JpaConfig.class})
 @ActiveProfiles("test")
 @EntityScan(basePackageClasses = {Attribute.class, Clothes.class, Image.class, User.class,
     Location.class})  // 간접 연관관계로 인해 복잡해짐

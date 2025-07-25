@@ -3,6 +3,8 @@ package com.example.ootd.domain.clothes.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -20,6 +22,7 @@ import com.example.ootd.domain.clothes.entity.ClothesType;
 import com.example.ootd.domain.clothes.mapper.ClothesMapper;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
 import com.example.ootd.domain.clothes.repository.ClothesRepository;
+import com.example.ootd.domain.clothes.service.cache.ClothesCacheService;
 import com.example.ootd.domain.clothes.service.impl.ClothesServiceImpl;
 import com.example.ootd.domain.image.entity.Image;
 import com.example.ootd.domain.image.service.ImageService;
@@ -34,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -61,6 +65,8 @@ public class ClothesServiceImplTest {
   private ClothesMapper clothesMapper;
   @Mock
   private RecommendService recommendService;
+  @Mock
+  private ClothesCacheService clothesCacheService;
 
   @InjectMocks
   private ClothesServiceImpl clothesService;
@@ -177,7 +183,9 @@ public class ClothesServiceImplTest {
       given(clothesRepository.findById(clothesId)).willReturn(Optional.of(existingClothes));
       given(imageService.upload(newImageFile)).willReturn(newImage);
       given(attributeRepository.findById(attribute.getId())).willReturn(Optional.of(attribute));
-      given(clothesMapper.toDto(existingClothes)).willReturn(updatedClothesDto);
+      given(clothesRepository.findClothesAttributeByClothesId(clothesId)).willReturn(
+          new ArrayList<>());
+      given(clothesMapper.toDto(eq(existingClothes), anyList())).willReturn(updatedClothesDto);
 
       // when
       ClothesDto result = clothesService.update(request, newImageFile, clothesId);
@@ -268,7 +276,7 @@ public class ClothesServiceImplTest {
           .build();
 
       // DTO 매핑 후 결과
-      List<ClothesDto> dtoList = clothesList.subList(0, 3).stream()
+      List<ClothesDto> dtoList = clothesList.subList(0, 4).stream()
           .map(c -> ClothesDto.builder()
               .id(UUID.randomUUID())
               .ownerId(user.getId())
@@ -276,13 +284,13 @@ public class ClothesServiceImplTest {
               .type(c.getType())
               .imageUrl(c.getImage().getUrl())
               .attributes(List.of())
+              .createdAt(c.getCreatedAt())
               .build())
-          .toList();
+          .collect(Collectors.toList());
 
-      given(clothesRepository.findByCondition(condition)).willReturn(clothesList);
-      given(clothesRepository.countByCondition(condition.typeEqual(), condition.ownerId()))
+      given(clothesCacheService.getCachedTotalCount(condition.typeEqual(), condition.ownerId()))
           .willReturn(10L);
-      given(clothesMapper.toDto(any(List.class))).willReturn(dtoList);
+      given(clothesCacheService.getCachedClothes(any())).willReturn(dtoList);
 
       // when
       PageResponse<ClothesDto> result = clothesService.findByCondition(condition);
@@ -294,9 +302,8 @@ public class ClothesServiceImplTest {
       assertThat(result.sortBy()).isEqualTo("createdAt");
       assertThat(result.sortDirection()).isEqualTo("DESCENDING");
 
-      verify(clothesRepository).findByCondition(condition);
-      verify(clothesRepository).countByCondition(condition.typeEqual(), condition.ownerId());
-      verify(clothesMapper).toDto(any(List.class));
+      verify(clothesCacheService).getCachedTotalCount(condition.typeEqual(), condition.ownerId());
+      verify(clothesCacheService).getCachedClothes(condition);
     }
   }
 

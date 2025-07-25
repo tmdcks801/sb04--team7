@@ -114,8 +114,8 @@ public class FeedCommentCacheServiceTest {
     @DisplayName("해당 feedId의 모든 댓글 캐시 키들을 제거한다")
     void deleteAllCommentCacheByFeedId_shouldEvictAllRelevantKeys() {
       // given
-      String key1 = "feedId=" + feedId + "|cursor=1|size=3";
-      String key2 = "feedId=" + feedId + "|cursor=2|size=3";
+      String key1 = "feedId=" + feedId + ":cursor=1:size=3";
+      String key2 = "feedId=" + feedId + ":cursor=2:size=3";
       Set<String> keys = new HashSet<>(Set.of(key1, key2));
 
       given(cacheManager.getCache("feed_comment_key")).willReturn(keyCache);
@@ -128,7 +128,6 @@ public class FeedCommentCacheServiceTest {
       // then
       verify(commentCache).evict(key1);
       verify(commentCache).evict(key2);
-      verify(commentCache).evict(feedId);
       verify(keyCache).evict(feedId);
     }
   }

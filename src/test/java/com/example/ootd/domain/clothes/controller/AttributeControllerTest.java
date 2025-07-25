@@ -18,6 +18,7 @@ import com.example.ootd.domain.sse.service.SsePushServiceInterface;
 import com.example.ootd.dto.PageResponse;
 import com.example.ootd.security.jwt.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +66,8 @@ class AttributeControllerTest {
     @DisplayName("성공 - 속성 정의 목록 조회")
     void find_success() throws Exception {
       PageResponse<ClothesAttributeDefDto> response = PageResponse.<ClothesAttributeDefDto>builder()
-          .data(List.of(new ClothesAttributeDefDto(defId, "색상", List.of("빨강", "파랑"))))
+          .data(List.of(
+              new ClothesAttributeDefDto(defId, "색상", List.of("빨강", "파랑"), LocalDateTime.now())))
           .hasNext(false)
           .totalCount(1)
           .sortBy("createdAt")
@@ -97,7 +99,8 @@ class AttributeControllerTest {
     void create_success() throws Exception {
       ClothesAttributeDefCreateRequest request = new ClothesAttributeDefCreateRequest("스타일",
           List.of("캐주얼", "포멀"));
-      ClothesAttributeDefDto dto = new ClothesAttributeDefDto(defId, "스타일", List.of("캐주얼", "포멀"));
+      ClothesAttributeDefDto dto = new ClothesAttributeDefDto(defId, "스타일", List.of("캐주얼", "포멀"),
+          LocalDateTime.now());
 
       BDDMockito.given(attributeService.create(any()))
           .willReturn(dto);
@@ -123,7 +126,7 @@ class AttributeControllerTest {
       ClothesAttributeDefUpdateRequest request = new ClothesAttributeDefUpdateRequest("색상",
           List.of("흰색", "검정"));
       ClothesAttributeDefDto responseDto = new ClothesAttributeDefDto(defId, "색상",
-          List.of("흰색", "검정"));
+          List.of("흰색", "검정"), LocalDateTime.now());
 
       BDDMockito.given(attributeService.update(eq(request), eq(defId)))
           .willReturn(responseDto);

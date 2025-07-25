@@ -7,6 +7,7 @@ import com.example.ootd.domain.clothes.dto.request.ClothesAttributeSearchConditi
 import com.example.ootd.domain.clothes.entity.Attribute;
 import com.example.ootd.domain.clothes.mapper.AttributeMapper;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
+import com.example.ootd.domain.clothes.repository.ClothesAttributeRepository;
 import com.example.ootd.domain.clothes.service.AttributeService;
 import com.example.ootd.domain.clothes.service.cache.AttributeCacheService;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
@@ -33,6 +34,7 @@ public class AttributeServiceImpl implements AttributeService {
   private final AttributeMapper attributeMapper;
   private final NotificationPublisherInterface notificationPublisher;
   private final AttributeCacheService attributeCacheService;
+  private final ClothesAttributeRepository clothesAttributeRepository;
 
   @Override
   public ClothesAttributeDefDto create(ClothesAttributeDefCreateRequest request) {
@@ -161,6 +163,10 @@ public class AttributeServiceImpl implements AttributeService {
 
     if (!new HashSet<>(attribute.getDetails()).equals(new HashSet<>(selectableValues))) {
       attribute.updateDetails(selectableValues);
+
+      // TODO: 속성의 내용이 삭제될 때만 수정되는 것이 좋을듯
+      // 현재는 수정되면 무조건 삭제
+      clothesAttributeRepository.deleteByAttributeId(attribute.getId());
     }
   }
 

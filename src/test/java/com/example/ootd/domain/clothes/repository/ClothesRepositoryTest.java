@@ -40,7 +40,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
     Location.class})
 @EnableJpaRepositories(basePackageClasses = {ClothesRepository.class, ImageRepository.class,
     UserRepository.class})
-public class ClothesRepositoryImplTest {
+public class ClothesRepositoryTest {
 
   @MockitoBean
   private S3Service s3Service;  // image와 연관되어 있어 필요

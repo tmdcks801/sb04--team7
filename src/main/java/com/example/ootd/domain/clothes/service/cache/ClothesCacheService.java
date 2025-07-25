@@ -71,7 +71,7 @@ public class ClothesCacheService {
       clothesCache.evict(ownerId);
     }
 
-    cacheManager.getCache("feed_comment_key").evict(ownerId);
+    cacheManager.getCache("clothes_key").evict(ownerId);
   }
 
   // clothes의 키들 저장

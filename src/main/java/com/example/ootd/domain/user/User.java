@@ -143,6 +143,9 @@ public class User {
      this.tempPasswordExpiration = null;
   }
 
+  public boolean isTempPassword(){
+    return this.isTempPassword;
+  }
 
   public void resetPassword(String tempPassword){
     this.isTempPassword = true;

@@ -23,13 +23,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -41,6 +45,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends
 
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final SsePushServiceInterface ssePushServiceInterface;
+  private final CsrfTokenRepository csrfTokenRepository;
   private final JwtService jwtService;
   private final AuthenticationManager manager;
   @Value("${app.jwt.refresh-token-expiration}")
@@ -81,30 +86,20 @@ public class CustomUsernamePasswordAuthenticationFilter extends
   @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       FilterChain chain, Authentication authResult) throws IOException, ServletException {
-    SecurityContextHolder.getContext().setAuthentication(authResult);
 
-    new HttpSessionSecurityContextRepository().saveContext(SecurityContextHolder.getContext(),
-        request, response);
+//    new HttpSessionSecurityContextRepository().saveContext(context, request, response);
 
     CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
     User user = userDetails.getUser();
 
-//    HttpSession sessionObj = request.getSession(false);
-//    if (sessionObj != null) {
-//      sessionObj.setAttribute("userId", user.getId());
-//      sessionRegistry.registerNewSession(sessionObj.getId(), authResult.getPrincipal());
-//    }
+    if(user.getIsLocked()){
+      unsuccessfulAuthentication(request, response, new AuthenticationServiceException(ErrorCode.LOCKED_ACCOUNT.getMessage()));
+      return;
+    }
 
-    //여기서 sse로직
-//    UUID lastEventId = null;
-//    String lastIdHeader = request.getHeader("Last-Event-ID");
-//    if (StringUtils.hasText(lastIdHeader)) {
-//      try {
-//        lastEventId = UUID.fromString(lastIdHeader);
-//      } catch (IllegalArgumentException ignore) {//일단 무시
-//      }
-//    }
-//    ssePushServiceInterface.subscribe(user.getId(), lastEventId);//여기까지
+    SecurityContextHolder.getContext().setAuthentication(authResult);
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(authResult);
 
     JwtSession session = jwtService.generateJwtSession(user);
 
@@ -114,6 +109,9 @@ public class CustomUsernamePasswordAuthenticationFilter extends
     refreshToken.setPath("/");
     refreshToken.setMaxAge((int) (refreshTokenExpiration / 1000));
     response.addCookie(refreshToken);
+
+    CsrfToken csrfToken = csrfTokenRepository.generateToken(request);
+    csrfTokenRepository.saveToken(csrfToken, request, response);
 
     response.setStatus(HttpServletResponse.SC_OK);
     response.setContentType("application/json");

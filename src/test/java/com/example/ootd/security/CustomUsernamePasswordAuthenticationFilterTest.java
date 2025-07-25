@@ -43,6 +43,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +64,8 @@ public class CustomUsernamePasswordAuthenticationFilterTest {
   @Mock
   FilterChain filterChain;
 
+  @Mock
+  CsrfTokenRepository repository;
   private final String TEST_EMAIL = "test@gmail.com";
   private final String TEST_PASSWORD = "test-password";
   private final UUID TEST_USER_ID = UUID.randomUUID();
@@ -147,6 +151,7 @@ public class CustomUsernamePasswordAuthenticationFilterTest {
       // given
       given(authentication.getPrincipal()).willReturn(userDetails);
       given(jwtService.generateJwtSession(user)).willReturn(session);
+      given(repository.generateToken(any())).willReturn(mock(CsrfToken.class));
       // when
       filter.successfulAuthentication(request, response, filterChain, authentication);
 

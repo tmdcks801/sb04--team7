@@ -54,6 +54,7 @@ public interface UserMapper {
   User toEntity(UserCreateRequest request, @Context PasswordEncoder passwordEncoder);
 
   @Mapping(target = "linkedOAuthProviders", expression = "java(user.getProvider() == null ? java.util.List.of() : java.util.List.of(user.getProvider()))")
+  @Mapping(target = "locked", source = "isLocked")
   UserDto toDto(User user);
 
   List<UserDto> toDtoList(List<User> users);

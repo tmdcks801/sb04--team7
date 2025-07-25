@@ -1,6 +1,7 @@
 package com.example.ootd.domain.user.controller;
 
 
+import com.example.ootd.domain.user.dto.CsrfTokenResponse;
 import com.example.ootd.domain.user.dto.ResetPasswordRequest;
 import com.example.ootd.domain.user.dto.UserCreateRequest;
 import com.example.ootd.domain.user.dto.UserDto;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,6 +48,15 @@ public class AuthController {
   public ResponseEntity<Void> signOut(HttpServletRequest request, HttpServletResponse response){
     authService.signOut(request, response);
     return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/auth/csrf-token")
+  public ResponseEntity<CsrfTokenResponse> getCsrfToken(CsrfToken token) {
+    return ResponseEntity.ok(new CsrfTokenResponse(
+        "",
+        token.getParameterName(),
+        token.getHeaderName()
+    ));
   }
 
   @GetMapping("/auth/me")

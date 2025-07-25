@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.ootd.TestPrincipalUser;
+import com.example.ootd.config.TestSecurityConfig;
 import com.example.ootd.domain.clothes.dto.data.ClothesAttributeWithDefDto;
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesCreateRequest;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,6 +43,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+@Import(TestSecurityConfig.class)
 
 @WebMvcTest(ClothesController.class)
 public class ClothesControllerTest {

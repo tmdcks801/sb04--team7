@@ -65,7 +65,7 @@ public class GlobalExceptionHandler {
       OotdException e) { // ErrorCode 생성시 HttpStatus 를 같이 넘기는 것이 더 깔끔한것 같음 (개선안)
     ErrorCode errorCode = e.getErrorCode();
     return switch (errorCode) {
-      case AUTHENTICATION_FAILED -> HttpStatus.UNAUTHORIZED;
+      case AUTHENTICATION_FAILED, LOCKED_ACCOUNT -> HttpStatus.UNAUTHORIZED;
       case CLOTHES_NOT_FOUND, FEED_NOT_FOUND, IMAGE_NOT_FOUND, FOLLOWER_NOT_FOUND,
            FOLLOWEE_NOT_FOUND, FOLLOW_USER_NOT_FOUND, FOLLOW_NOT_FOUND, ATTRIBUTE_NOT_FOUND,
            USER_NOT_FOUND, ATTRIBUTE_DETAIL_NOT_FOUND, FEED_LIKE_NOT_FOUND, FAIL_GET_MESSAGE,

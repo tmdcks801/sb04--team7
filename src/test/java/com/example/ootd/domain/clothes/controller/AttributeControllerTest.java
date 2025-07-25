@@ -10,12 +10,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.ootd.config.TestSecurityConfig;
 import com.example.ootd.domain.clothes.dto.data.ClothesAttributeDefDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesAttributeDefCreateRequest;
 import com.example.ootd.domain.clothes.dto.request.ClothesAttributeDefUpdateRequest;
 import com.example.ootd.domain.clothes.service.AttributeService;
 import com.example.ootd.domain.sse.service.SsePushServiceInterface;
 import com.example.ootd.dto.PageResponse;
+import com.example.ootd.security.CustomUsernamePasswordAuthenticationFilter;
 import com.example.ootd.security.jwt.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -34,6 +37,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@Import(TestSecurityConfig.class)
 @WebMvcTest(AttributeController.class)
 class AttributeControllerTest {
 
@@ -53,7 +57,6 @@ class AttributeControllerTest {
   private AuthenticationManager authenticationManager;
   @MockitoBean
   private UserDetailsService userDetailsService;
-
 
   private final UUID defId = UUID.randomUUID();
 

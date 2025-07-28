@@ -79,27 +79,4 @@ public class FeedCacheService {
 
     cache.put(feed.getId(), updatedDto);
   }
-
-  // 댓글 수 증가
-  public void commentCountIncrease(Feed feed) {
-
-    Cache cache = cacheManager.getCache("feed");
-
-    if (cache == null) {
-      log.warn("Feed cache is not available");
-      return;
-    }
-
-    FeedCountDto currentFeedCountDto = cache.get(feed.getId(), FeedCountDto.class);
-
-    long likeCount = feed.getLikeCount();
-    long commentCount = feed.getCommentCount();
-    if (currentFeedCountDto != null) {
-      likeCount = currentFeedCountDto.currentLikeCount();
-      commentCount = currentFeedCountDto.currentCommentCount();
-    }
-    FeedCountDto updatedFeedCountDto = new FeedCountDto(feed.getId(), likeCount, commentCount + 1);
-
-    cache.put(feed.getId(), updatedFeedCountDto);
-  }
 }

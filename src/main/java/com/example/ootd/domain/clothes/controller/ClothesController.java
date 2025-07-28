@@ -5,6 +5,7 @@ import com.example.ootd.domain.clothes.dto.data.ClothesDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesCreateRequest;
 import com.example.ootd.domain.clothes.dto.request.ClothesSearchCondition;
 import com.example.ootd.domain.clothes.dto.request.ClothesUpdateRequest;
+import com.example.ootd.domain.clothes.service.ClothesInfoLoadService;
 import com.example.ootd.domain.clothes.service.ClothesService;
 import com.example.ootd.dto.PageResponse;
 import com.example.ootd.security.PrincipalUser;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ClothesController implements ClothesApi {
 
   private final ClothesService clothesService;
+  private final ClothesInfoLoadService clothesInfoLoadService;
 
   @GetMapping
   public ResponseEntity<PageResponse<ClothesDto>> find(
@@ -95,6 +98,16 @@ public class ClothesController implements ClothesApi {
     ClothesDto response = clothesService.update(request, image, clothesId);
 
     log.debug("의상 수정 응답: {}", response);
+
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(response);
+  }
+
+  @GetMapping(path = "/extractions")
+  public ResponseEntity<ClothesDto> load(@RequestParam String url) {
+
+    ClothesDto response = clothesInfoLoadService.load(url);
 
     return ResponseEntity
         .status(HttpStatus.OK)

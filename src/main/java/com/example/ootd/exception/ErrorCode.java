@@ -14,6 +14,7 @@ public enum ErrorCode {
   ATTRIBUTE_NOT_FOUND("속성 정의를 찾을 수 없습니다."),
   ATTRIBUTE_DETAIL_NOT_FOUND("속성 내용을 찾을 수 없습니다."),
   ATTRIBUTE_NAME_DUPLICATE("동일한 속성이 이미 존재합니다."),
+  UNSUPPORTED_CRAWLING_URL("해당 URL은 크롤링을 지원하지 않습니다."),
 
   // Feed 에러
   FEED_NOT_FOUND("피드를 찾을 수 없습니다."),

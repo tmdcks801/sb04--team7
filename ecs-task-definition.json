@@ -55,6 +55,34 @@
                 {
                     "name": "NOTIFICATIN_DB",
                     "value": "ootd"
+                },
+                {
+                    "name": "CACHE_TYPE",
+                    "value": "redis"
+                },
+                {
+                    "name": "REDIS_HOST",
+                    "value": "clustercfg.cachecluster.0x9nzp.apn2.cache.amazonaws.com"
+                },
+                {
+                    "name": "REDIS_PORT",
+                    "value": "6379"
+                },
+                {
+                    "name": "REDIS_SSL",
+                    "value": "true"
+                },
+                {
+                    "name": "TZ",
+                    "value": "Asia/Seoul"
+                },
+                {
+                    "name": "MONGODB_DATABASE",
+                    "value": "javaProject4"
+                },
+                {
+                    "name": "NOTLOIFICATIN_DB",
+                    "value": "notification_db"
                 }
             ],
             "secrets": [
@@ -97,6 +125,10 @@
                 {
                     "name": "AWS_S3_SECRET_KEY",
                     "valueFrom": "arn:aws:ssm:ap-northeast-2:826421662185:parameter/ootd/s3/secret-key"
+                },
+                {
+                    "name": "OPENAI_API_KEY",
+                    "valueFrom": "arn:aws:ssm:ap-northeast-2:826421662185:parameter/ootd/OPENAI_API_KEY"
                 }
             ],
             "logConfiguration": {

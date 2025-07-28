@@ -69,6 +69,14 @@
                     "value": "6379"
                 },
                 {
+                    "name": "REDIS_SSL",
+                    "value": "true"
+                },
+                {
+                    "name": "TZ",
+                    "value": "Asia/Seoul"
+                },
+                {
                     "name": "MONGODB_DATABASE",
                     "value": "javaProject4"
                 },

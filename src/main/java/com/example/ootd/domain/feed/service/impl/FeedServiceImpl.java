@@ -212,7 +212,7 @@ public class FeedServiceImpl implements FeedService {
     feed.increaseLikeCount();
 
     feedLikeCacheService.refreshFeedLikeMap(userId);
-    feedCacheService.updateCount(feed);
+    feedCacheService.updateLikeCount(feed);
 
     // 피드 작성자에게 알림
     notificationPublisher.publish(
@@ -243,7 +243,7 @@ public class FeedServiceImpl implements FeedService {
     feed.decreaseLikeCount();
 
     feedLikeCacheService.refreshFeedLikeMap(userId);
-    feedCacheService.updateCount(feed);
+    feedCacheService.updateLikeCount(feed);
 
     log.info("피드 좋아요 삭제 완료");
   }

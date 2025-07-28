@@ -14,12 +14,15 @@ import com.example.ootd.domain.clothes.dto.request.ClothesAttributeSearchConditi
 import com.example.ootd.domain.clothes.entity.Attribute;
 import com.example.ootd.domain.clothes.mapper.AttributeMapper;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
+import com.example.ootd.domain.clothes.repository.ClothesAttributeRepository;
+import com.example.ootd.domain.clothes.service.cache.AttributeCacheService;
 import com.example.ootd.domain.clothes.service.impl.AttributeServiceImpl;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
 import com.example.ootd.dto.PageResponse;
 import com.example.ootd.exception.clothes.AttributeNameAlreadyExistsException;
 import com.example.ootd.exception.clothes.AttributeNotFoundException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +48,10 @@ public class AttributeServiceImplTest {
   private AttributeMapper attributeMapper;
   @Mock
   private NotificationPublisherInterface notificationPublisher;
+  @Mock
+  private AttributeCacheService attributeCacheService;
+  @Mock
+  private ClothesAttributeRepository clothesAttributeRepository;
 
   @InjectMocks
   private AttributeServiceImpl attributeService;
@@ -208,13 +215,12 @@ public class AttributeServiceImplTest {
       // given
       ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder()
           .limit(5).sortBy("name").sortDirection("ASCENDING").build();
-      given(attributeRepository.findByCondition(condition)).willReturn(attributes.subList(0, 6));
-      given(attributeRepository.countByKeyword(condition.keywordLike())).willReturn(
+      given(attributeCacheService.getCachedTotalCount(condition.keywordLike())).willReturn(
           (long) attributes.size());
-      given(attributeMapper.toDtoList(any())).willReturn(
-          attributes.subList(0, 5).stream()
+      given(attributeCacheService.getCachedClothes(any())).willReturn(
+          attributes.subList(0, 6).stream()
               .map(attr -> new ClothesAttributeDefDto(attr.getId(), attr.getName(),
-                  attr.getDetails()))
+                  attr.getDetails(), LocalDateTime.now()))
               .collect(Collectors.toList())
       );
 
@@ -225,8 +231,8 @@ public class AttributeServiceImplTest {
       assertThat(result.hasNext()).isTrue();
       assertThat(result.nextCursor()).isEqualTo(attributes.get(4).getName());
       assertThat(result.data()).hasSize(5);
-      verify(attributeRepository).findByCondition(condition);
-      verify(attributeRepository).countByKeyword(condition.keywordLike());
+      verify(attributeCacheService).getCachedClothes(condition);
+      verify(attributeCacheService).getCachedTotalCount(condition.keywordLike());
     }
 
     @Test
@@ -236,13 +242,12 @@ public class AttributeServiceImplTest {
       // given
       ClothesAttributeSearchCondition condition = ClothesAttributeSearchCondition.builder()
           .limit(20).sortBy("name").sortDirection("ASCENDING").build();
-      given(attributeRepository.findByCondition(condition)).willReturn(attributes);
-      given(attributeRepository.countByKeyword(condition.keywordLike())).willReturn(
+      given(attributeCacheService.getCachedTotalCount(condition.keywordLike())).willReturn(
           (long) attributes.size());
-      given(attributeMapper.toDtoList(any())).willReturn(
+      given(attributeCacheService.getCachedClothes(any())).willReturn(
           attributes.stream()
               .map(attr -> new ClothesAttributeDefDto(attr.getId(), attr.getName(),
-                  attr.getDetails()))
+                  attr.getDetails(), LocalDateTime.now()))
               .collect(Collectors.toList())
       );
 
@@ -253,8 +258,8 @@ public class AttributeServiceImplTest {
       assertThat(result.hasNext()).isFalse();
       assertThat(result.nextCursor()).isNull();
       assertThat(result.data()).hasSize(attributes.size());
-      verify(attributeRepository).findByCondition(condition);
-      verify(attributeRepository).countByKeyword(condition.keywordLike());
+      verify(attributeCacheService).getCachedClothes(condition);
+      verify(attributeCacheService).getCachedTotalCount(condition.keywordLike());
     }
   }
 }

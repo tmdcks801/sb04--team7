@@ -60,7 +60,6 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
   public List<FeedClothes> findFeedClothesByFeedIds(List<UUID> feedIds) {
     return jpaQueryFactory
         .selectFrom(qFeedClothes).distinct()
-        .leftJoin(qFeedClothes.feed, qFeed).fetchJoin()
         .leftJoin(qFeedClothes.clothes, qClothes).fetchJoin()
         .leftJoin(qClothes.clothesAttributes, qClothesAttribute).fetchJoin()
         .leftJoin(qClothes.image, qImage).fetchJoin()
@@ -73,8 +72,7 @@ public class CustomFeedRepositoryImpl implements CustomFeedRepository {
   public List<FeedClothes> findFeedClothesByFeedId(UUID feedId) {
     return jpaQueryFactory
         .selectFrom(qFeedClothes).distinct()
-        .join(qFeedClothes.feed, qFeed).fetchJoin()
-        .join(qFeedClothes.clothes, qClothes).fetchJoin()
+        .leftJoin(qFeedClothes.clothes, qClothes).fetchJoin()
         .where(qFeed.id.eq(feedId))
         .fetch();
   }

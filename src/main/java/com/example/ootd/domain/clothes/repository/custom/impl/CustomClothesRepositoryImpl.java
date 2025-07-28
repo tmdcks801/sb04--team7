@@ -2,8 +2,11 @@ package com.example.ootd.domain.clothes.repository.custom.impl;
 
 import com.example.ootd.domain.clothes.dto.request.ClothesSearchCondition;
 import com.example.ootd.domain.clothes.entity.Clothes;
+import com.example.ootd.domain.clothes.entity.ClothesAttribute;
 import com.example.ootd.domain.clothes.entity.ClothesType;
+import com.example.ootd.domain.clothes.entity.QAttribute;
 import com.example.ootd.domain.clothes.entity.QClothes;
+import com.example.ootd.domain.clothes.entity.QClothesAttribute;
 import com.example.ootd.domain.clothes.repository.custom.CustomClothesRepository;
 import com.example.ootd.domain.image.entity.QImage;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -22,6 +25,8 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
   private final JPAQueryFactory jpaQueryFactory;
   private final QClothes qClothes = QClothes.clothes;
   private final QImage qImage = QImage.image;
+  private final QClothesAttribute qClothesAttribute = QClothesAttribute.clothesAttribute;
+  private final QAttribute qAttribute = QAttribute.attribute;
 
   @Override
   public List<Clothes> findByCondition(ClothesSearchCondition condition) {
@@ -42,6 +47,25 @@ public class CustomClothesRepositoryImpl implements CustomClothesRepository {
   }
 
   @Override
+  public List<ClothesAttribute> findClothesAttributeByClothesIds(List<UUID> clothesIds) {
+    return jpaQueryFactory
+        .selectFrom(qClothesAttribute).distinct()
+        .leftJoin(qClothesAttribute.attribute).fetchJoin()
+        .where(qClothesAttribute.clothes.id.in(clothesIds))
+        .fetch();
+  }
+
+  @Override
+  public List<ClothesAttribute> findClothesAttributeByClothesId(UUID clothesId) {
+    return jpaQueryFactory
+        .selectFrom(qClothesAttribute).distinct()
+        .leftJoin(qClothesAttribute.attribute).fetchJoin()
+        .where(qClothesAttribute.clothes.id.eq(clothesId))
+        .fetch();
+  }
+
+  @Override
+
   public long countByCondition(ClothesType typeEqual, UUID ownerId) {
 
     Long count = jpaQueryFactory

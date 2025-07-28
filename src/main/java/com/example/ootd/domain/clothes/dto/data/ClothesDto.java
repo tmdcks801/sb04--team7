@@ -2,6 +2,7 @@ package com.example.ootd.domain.clothes.dto.data;
 
 import com.example.ootd.domain.clothes.entity.ClothesType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
@@ -20,7 +21,9 @@ public record ClothesDto(
     @Schema(description = "의상 타입")
     ClothesType type,
     @Schema(description = "의상 속성 목록")
-    List<ClothesAttributeWithDefDto> attributes
+    List<ClothesAttributeWithDefDto> attributes,
+    @Schema(description = "의상 등록일")
+    LocalDateTime createdAt
 ) {
 
 }

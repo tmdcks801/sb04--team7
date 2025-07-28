@@ -4,8 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.ootd.TestEntityFactory;
 import com.example.ootd.config.TestMailConfig;
+import com.example.ootd.domain.clothes.entity.Attribute;
+import com.example.ootd.domain.clothes.entity.Clothes;
+import com.example.ootd.domain.clothes.entity.ClothesAttribute;
+import com.example.ootd.domain.clothes.repository.AttributeRepository;
+import com.example.ootd.domain.clothes.repository.ClothesRepository;
 import com.example.ootd.domain.feed.dto.request.FeedSearchCondition;
 import com.example.ootd.domain.feed.entity.Feed;
+import com.example.ootd.domain.feed.entity.FeedClothes;
+import com.example.ootd.domain.image.entity.Image;
+import com.example.ootd.domain.image.repository.ImageRepository;
 import com.example.ootd.domain.user.User;
 import com.example.ootd.domain.user.repository.UserRepository;
 import com.example.ootd.domain.weather.entity.PrecipitationType;
@@ -37,6 +45,12 @@ public class FeedRepositoryTest {
   private UserRepository userRepository;
   @Autowired
   private WeatherRepository weatherRepository;
+  @Autowired
+  private ClothesRepository clothesRepository;
+  @Autowired
+  private AttributeRepository attributeRepository;
+  @Autowired
+  private ImageRepository imageRepository;
 
   private User user;
   private Weather weather;
@@ -370,6 +384,76 @@ public class FeedRepositoryTest {
 
       // then
       assertThat(count).isEqualTo(0L);
+    }
+  }
+
+  @Nested
+  @DisplayName("findFeedClothesByFeedIds() - 피드 아이디 리스트 넣으면 해당 피드들의 옷 반환")
+  class FindFeedClothesByFeedIdsTest {
+
+    @Test
+    @DisplayName("성공 - 피드 옷 조회 성공")
+    void findFeedClothesByFeedIds_shouldReturnAssociatedClothes() {
+
+      // given
+      Feed feed = feedList.get(0);
+      Clothes clothes = clothesRepository.save(TestEntityFactory.createClothesWithoutId(user));
+      Attribute attribute = attributeRepository.save(
+          TestEntityFactory.createAttributeWithoutId("casual"));
+      ClothesAttribute clothesAttribute = new ClothesAttribute(clothes, attribute, "test");
+      clothes.addClothesAttribute(clothesAttribute);
+
+      Image image = imageRepository.save(TestEntityFactory.createImageWithoutId("1"));
+      clothes.updateImage(image);
+
+      FeedClothes feedClothes = new FeedClothes(feed, clothes);
+      feed.addFeedClothes(feedClothes);
+
+      // when
+      List<FeedClothes> result = feedRepository.findFeedClothesByFeedIds(List.of(feed.getId()));
+
+      // then
+      assertThat(result).hasSize(1);
+      FeedClothes fetched = result.get(0);
+      assertThat(fetched.getFeed().getId()).isEqualTo(feed.getId());
+      assertThat(fetched.getClothes().getId()).isEqualTo(clothes.getId());
+      assertThat(fetched.getClothes().getClothesAttributes()).hasSize(1);
+      assertThat(fetched.getClothes().getImage()).isNotNull();
+    }
+  }
+
+  @Nested
+  @DisplayName("findFeedClothesByFeedId() - 피드 아이디 넣으면 해당 피드들의 옷 반환")
+  class FindFeedClothesByFeedIdTest {
+
+    @Test
+    @DisplayName("성공 - 피드 옷 조회 성공")
+    void findFeedClothesByFeedIds_shouldReturnAssociatedClothes() {
+
+      // given
+      Feed feed = feedList.get(0);
+      Clothes clothes = clothesRepository.save(TestEntityFactory.createClothesWithoutId(user));
+      Attribute attribute = attributeRepository.save(
+          TestEntityFactory.createAttributeWithoutId("casual"));
+      ClothesAttribute clothesAttribute = new ClothesAttribute(clothes, attribute, "test");
+      clothes.addClothesAttribute(clothesAttribute);
+
+      Image image = imageRepository.save(TestEntityFactory.createImageWithoutId("1"));
+      clothes.updateImage(image);
+
+      FeedClothes feedClothes = new FeedClothes(feed, clothes);
+      feed.addFeedClothes(feedClothes);
+
+      // when
+      List<FeedClothes> result = feedRepository.findFeedClothesByFeedId(feed.getId());
+
+      // then
+      assertThat(result).hasSize(1);
+      FeedClothes fetched = result.get(0);
+      assertThat(fetched.getFeed().getId()).isEqualTo(feed.getId());
+      assertThat(fetched.getClothes().getId()).isEqualTo(clothes.getId());
+      assertThat(fetched.getClothes().getClothesAttributes()).hasSize(1);
+      assertThat(fetched.getClothes().getImage()).isNotNull();
     }
   }
 }

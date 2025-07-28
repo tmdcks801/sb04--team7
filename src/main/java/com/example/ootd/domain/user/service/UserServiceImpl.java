@@ -110,11 +110,10 @@ public class UserServiceImpl implements UserService{
     if(req.location() != null){
       locationService.getGridAndLocation(req.location().getLatitude(), req.location().getLongitude());
       Location location = locationRepository.findByLatitudeAndLongitude(req.location().getLatitude(), req.location().getLongitude());
-      user.updateLocation(location); // TODO : 업데이트 로직 더 깔끔하게 작성 -> locationService + locationRepository 둘 모두 참조중 (수정 필요)
-
+      user.updateLocation(location);
     }
 
-    Image profileImage = imageService.upload(image); // TODO : 비동기 처리 고려. 업로드 완료시 이벤트 발행?
+    Image profileImage = imageService.upload(image);
     user.updateProfile(req, profileImage);
 
     return mapper.toProfileDto(user);

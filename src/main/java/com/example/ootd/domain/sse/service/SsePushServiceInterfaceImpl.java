@@ -87,24 +87,32 @@ public class SsePushServiceInterfaceImpl implements SsePushServiceInterface {
 
   //알림보내기
   private void sendNotification(SseEmitter emitter, NotificationDto dto) {
-    try {
-      emitter.send(SseEmitter.event()
-          .id(dto.id().toString())
-          .name("notifications")
-          .data(dto));
-    } catch (IOException ex) {
-      throw new SseException(ErrorCode.FAIL_SSE_PUSH, ex);
+    synchronized (emitter) {          // ① emitter 별 단일 진입 보장
+      try {
+        emitter.send(
+            SseEmitter.event()
+                .id(dto.id().toString())
+                .name("notifications")
+                .data(dto)
+        );
+      } catch (IOException ex) {
+        throw new SseException(ErrorCode.FAIL_SSE_PUSH, ex);
+      }
     }
   }
 
   //연결 살리기
   private void sendHeartbeat(SseEmitter emitter) {
-    try {
-      emitter.send(SseEmitter.event()
-          .name("heartbeat")
-          .data("ping"));
-    } catch (IOException ignore) {
-      throw new SseException(ErrorCode.FAIL_SSE_HEARTBEAT, ignore);
+    synchronized (emitter) {          // ② 같은 이유로 직렬화
+      try {
+        emitter.send(
+            SseEmitter.event()
+                .name("heartbeat")
+                .data("ping")
+        );
+      } catch (IOException ex) {
+        throw new SseException(ErrorCode.FAIL_SSE_HEARTBEAT, ex);
+      }
     }
   }
 

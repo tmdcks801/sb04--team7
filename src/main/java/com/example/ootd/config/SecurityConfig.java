@@ -84,6 +84,7 @@ public class SecurityConfig {
                   "/actuator/health",
                   "/actuator/prometheus"
               ).permitAll()
+              .requestMatchers("/api/auth/csrf-token").permitAll()
               .requestMatchers("/oauth2/callback").permitAll()
               .requestMatchers("/api/auth/me").permitAll()
               .requestMatchers("/api/auth/sign-out").permitAll()

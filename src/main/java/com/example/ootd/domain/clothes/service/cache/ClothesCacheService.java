@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -74,6 +75,12 @@ public class ClothesCacheService {
     cacheManager.getCache("clothes_key").evict(ownerId);
   }
 
+  // 모든 캐시 삭제
+  @CacheEvict(allEntries = true)
+  public void evictAllCache() {
+    log.info("clothes 캐시 전체 삭제");
+  }
+
   // clothes의 키들 저장
   private void saveKey(ClothesSearchCondition condition) {
 
@@ -89,4 +96,5 @@ public class ClothesCacheService {
     existingKeys.add(key);
     cacheManager.getCache("clothes_key").put(condition.ownerId(), existingKeys);
   }
+
 }

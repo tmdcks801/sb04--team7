@@ -91,6 +91,33 @@ public class CacheConfig {
             .fromSerializer(jsonSerializer))
         .disableCachingNullValues();
 
+    // comment, comment_key
+    RedisCacheConfiguration commentConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(Duration.ofHours(12))
+        .serializeKeysWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(jsonSerializer))
+        .disableCachingNullValues();
+
+    // clothes
+    RedisCacheConfiguration clothesConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(Duration.ofHours(12))
+        .serializeKeysWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(jsonSerializer))
+        .disableCachingNullValues();
+
+    // attribute
+    RedisCacheConfiguration attributeConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(Duration.ofHours(24))
+        .serializeKeysWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(jsonSerializer))
+        .disableCachingNullValues();
+
     // 통합 Redis 캐시 설정
     RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofHours(5)) // 24시간 TTL
@@ -105,6 +132,11 @@ public class CacheConfig {
         .withCacheConfiguration("aiRecommendations", aiRecommendationConfig)
         .withCacheConfiguration("notification", notificationConfig)
         .withCacheConfiguration("feed", feedConfig)
+        .withCacheConfiguration("feed_comment", commentConfig)
+        .withCacheConfiguration("feed_comment_key", commentConfig)
+        .withCacheConfiguration("clothes", clothesConfig)
+        .withCacheConfiguration("clothes_key", clothesConfig)
+        .withCacheConfiguration("attribute", attributeConfig)
         .build();
   }
 

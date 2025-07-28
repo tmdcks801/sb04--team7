@@ -82,9 +82,36 @@ public class CacheConfig {
             .fromSerializer(jsonSerializer))
         .disableCachingNullValues();
 
-    // feed
+    // feed - 스케줄러가 12시간마다 작동하므로 캐시도 12시간 유지
     RedisCacheConfiguration feedConfig = RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofHours(12))
+        .serializeKeysWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(jsonSerializer))
+        .disableCachingNullValues();
+
+    // comment, comment_key
+    RedisCacheConfiguration commentConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(Duration.ofHours(24))
+        .serializeKeysWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(jsonSerializer))
+        .disableCachingNullValues();
+
+    // clothes
+    RedisCacheConfiguration clothesConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(Duration.ofHours(24))
+        .serializeKeysWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(RedisSerializationContext.SerializationPair
+            .fromSerializer(jsonSerializer))
+        .disableCachingNullValues();
+
+    // attribute
+    RedisCacheConfiguration attributeConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .entryTtl(Duration.ofHours(24))
         .serializeKeysWith(RedisSerializationContext.SerializationPair
             .fromSerializer(new StringRedisSerializer()))
         .serializeValuesWith(RedisSerializationContext.SerializationPair
@@ -105,6 +132,11 @@ public class CacheConfig {
         .withCacheConfiguration("aiRecommendations", aiRecommendationConfig)
         .withCacheConfiguration("notification", notificationConfig)
         .withCacheConfiguration("feed", feedConfig)
+        .withCacheConfiguration("feed_comment", commentConfig)
+        .withCacheConfiguration("feed_comment_key", commentConfig)
+        .withCacheConfiguration("clothes", clothesConfig)
+        .withCacheConfiguration("clothes_key", clothesConfig)
+        .withCacheConfiguration("attribute", attributeConfig)
         .build();
   }
 

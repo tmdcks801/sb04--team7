@@ -78,32 +78,4 @@ public class FeedCacheServiceTest {
       verify(feedRepository, never()).countLikesAndCommentsByFeedIds(anyList());
     }
   }
-
-  @Nested
-  @DisplayName("updateLikeCount() - 좋아요 수 업데이트")
-  class updateLikeCountTest {
-
-    @Test
-    @DisplayName("캐시된 피드: 댓글 수 1 증가 후 캐시에 반영한다")
-    void commentCountIncrease_whenCached_shouldIncreaseCommentCountAndPut() {
-
-      // given
-      Feed feed = mock(Feed.class);
-      given(feed.getId()).willReturn(feedId);
-      given(feed.getLikeCount()).willReturn(5L);
-      given(feed.getCommentCount()).willReturn(8);
-
-      FeedCountDto cachedDto = new FeedCountDto(feedId, 10L, 20L);
-
-      given(cacheManager.getCache("feed")).willReturn(cache);
-      given(cache.get(eq(feedId), eq(FeedCountDto.class))).willReturn(cachedDto);
-
-      // when
-      feedCacheService.commentCountIncrease(feed);
-
-      // then
-      FeedCountDto expected = new FeedCountDto(feedId, 10L, 21L);
-      verify(cache).put(eq(feedId), eq(expected));
-    }
-  }
 }

@@ -17,6 +17,7 @@ import com.example.ootd.domain.clothes.dto.data.ClothesDto;
 import com.example.ootd.domain.clothes.dto.request.ClothesCreateRequest;
 import com.example.ootd.domain.clothes.dto.request.ClothesUpdateRequest;
 import com.example.ootd.domain.clothes.entity.ClothesType;
+import com.example.ootd.domain.clothes.service.ClothesInfoLoadService;
 import com.example.ootd.domain.clothes.service.ClothesService;
 import com.example.ootd.domain.sse.service.SsePushServiceInterface;
 import com.example.ootd.domain.user.User;
@@ -65,6 +66,8 @@ public class ClothesControllerTest {
   private AuthenticationManager authenticationManager;
   @MockitoBean
   private UserDetailsService userDetailsService;
+  @MockitoBean
+  private ClothesInfoLoadService clothesInfoLoadService;
 
   @BeforeEach
   void setup() {
@@ -224,5 +227,28 @@ public class ClothesControllerTest {
     mockMvc.perform(delete("/api/clothes/" + clothesId)
             .with(csrf()))
         .andExpect(status().isNoContent());
+  }
+
+  @Test
+  @DisplayName("GET /api/clothes/extractions - 의상 정보 불러오기 성공")
+  void loadClothes_success() throws Exception {
+
+    // given
+    String url = "https://www.example.com/clothes/123";
+    ClothesDto expectedDto = ClothesDto.builder()
+        .name("시어 가디건 325547 [4color]")
+        .imageUrl("https://cdn.musinsa.com/images/cardigan.jpg")
+        .build();
+
+    Mockito.when(clothesInfoLoadService.load(any(String.class)))
+        .thenReturn(expectedDto);
+
+    // when & then
+    mockMvc.perform(get("/api/clothes/extractions")
+            .param("url", url)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("시어 가디건 325547 [4color]"))
+        .andExpect(jsonPath("$.imageUrl").value("https://cdn.musinsa.com/images/cardigan.jpg"));
   }
 }

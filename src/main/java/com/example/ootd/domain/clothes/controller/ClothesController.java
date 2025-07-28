@@ -107,7 +107,6 @@ public class ClothesController implements ClothesApi {
   @GetMapping(path = "/extractions")
   public ResponseEntity<ClothesDto> load(@RequestParam String url) {
 
-    // TODO: 구매링크로 옷 정보 불러오기 서비스 작성
     ClothesDto response = clothesInfoLoadService.load(url);
 
     return ResponseEntity

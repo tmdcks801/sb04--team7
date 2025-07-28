@@ -1,6 +1,7 @@
 package com.example.ootd.domain.clothes.service;
 
 import com.example.ootd.domain.clothes.dto.data.ClothesDto;
+import com.example.ootd.exception.clothes.UnsupportedCrawlingUrlException;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
@@ -42,7 +43,7 @@ public class ClothesInfoLoadService {
       return "musinsa";
     }
 
-    return null;
+    throw UnsupportedCrawlingUrlException.withUrl(url);
   }
 
   // 지그재그

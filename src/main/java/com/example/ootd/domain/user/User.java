@@ -44,7 +44,7 @@ public class User {
   @JoinColumn(name = "image_id", nullable = true)
   private Image image;
 
-  @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+  @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
   @JoinColumn(name = "location_id")
   private Location location;
 
@@ -162,7 +162,7 @@ public class User {
     this.name = request.name() == null ? this.name : request.name();
     this.gender = request.gender() == null ? this.gender : request.gender();
     this.birthDate = request.birthDate() == null ? this.birthDate : request.birthDate();
-    this.location = request.location() == null ? this.location : request.location();
+//    this.location = request.location() == null ? this.location : request.location();
     this.temperatureSensitivity = request.temperatureSensitivity() == 0 ? this.temperatureSensitivity : request.temperatureSensitivity();
   }
 

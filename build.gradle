@@ -98,6 +98,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'io.github.cdimascio:java-dotenv:5.2.2'
 
+    // jsoup (웹 스크래핑)
+    implementation 'org.jsoup:jsoup:1.20.1'
 }
 
 // queryDsl 설정

@@ -266,7 +266,7 @@ public class FeedServiceImpl implements FeedService {
     feedCommentRepository.save(comment);
     feedCommentCacheService.deleteAllCommentCacheByFeedId(request.feedId());
 
-    feedCacheService.commentCountIncrease(feed);
+    feedCacheService.evictFeedCache(feed.getId());
 
     // 피드 작성자에게 알림
     notificationPublisher.publish(

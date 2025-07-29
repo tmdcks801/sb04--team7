@@ -16,6 +16,7 @@ import com.example.ootd.domain.clothes.mapper.AttributeMapper;
 import com.example.ootd.domain.clothes.repository.AttributeRepository;
 import com.example.ootd.domain.clothes.repository.ClothesAttributeRepository;
 import com.example.ootd.domain.clothes.service.cache.AttributeCacheService;
+import com.example.ootd.domain.clothes.service.cache.ClothesCacheService;
 import com.example.ootd.domain.clothes.service.impl.AttributeServiceImpl;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
@@ -52,6 +53,8 @@ public class AttributeServiceImplTest {
   private AttributeCacheService attributeCacheService;
   @Mock
   private ClothesAttributeRepository clothesAttributeRepository;
+  @Mock
+  private ClothesCacheService clothesCacheService;
 
   @InjectMocks
   private AttributeServiceImpl attributeService;

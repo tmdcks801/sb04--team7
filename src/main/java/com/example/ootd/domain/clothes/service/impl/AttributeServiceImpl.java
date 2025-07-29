@@ -10,6 +10,7 @@ import com.example.ootd.domain.clothes.repository.AttributeRepository;
 import com.example.ootd.domain.clothes.repository.ClothesAttributeRepository;
 import com.example.ootd.domain.clothes.service.AttributeService;
 import com.example.ootd.domain.clothes.service.cache.AttributeCacheService;
+import com.example.ootd.domain.clothes.service.cache.ClothesCacheService;
 import com.example.ootd.domain.notification.dto.NotificationEvent;
 import com.example.ootd.domain.notification.enums.NotificationLevel;
 import com.example.ootd.domain.notification.service.inter.NotificationPublisherInterface;
@@ -35,6 +36,7 @@ public class AttributeServiceImpl implements AttributeService {
   private final NotificationPublisherInterface notificationPublisher;
   private final AttributeCacheService attributeCacheService;
   private final ClothesAttributeRepository clothesAttributeRepository;
+  private final ClothesCacheService clothesCacheService;
 
   @Override
   public ClothesAttributeDefDto create(ClothesAttributeDefCreateRequest request) {
@@ -81,6 +83,7 @@ public class AttributeServiceImpl implements AttributeService {
     updateDetails(attribute, request.selectableValues());
 
     attributeCacheService.evictAllCache();
+    clothesCacheService.evictAllCache();
 
     // 모든 사용자에게 알림
     notificationPublisher.publishToAll(
@@ -141,6 +144,7 @@ public class AttributeServiceImpl implements AttributeService {
     Attribute attribute = getAttributeById(definitionId);
     attributeRepository.delete(attribute);
     attributeCacheService.evictAllCache();
+    clothesCacheService.evictAllCache();
 
     log.info("의상 속성 정의 삭제 완료");
   }

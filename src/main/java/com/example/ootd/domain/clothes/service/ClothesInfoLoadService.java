@@ -49,8 +49,6 @@ public class ClothesInfoLoadService {
           .timeout(10 * 1000);  // 최대 10초 대기
       Document document = connection.get();
 
-      log.info("에이블리: {}", document.html());
-
       Elements elements = document.select("meta[property=og:title]");
       String name = elements.attr("content");
 

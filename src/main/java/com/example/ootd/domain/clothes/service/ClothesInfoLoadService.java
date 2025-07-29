@@ -40,7 +40,6 @@ public class ClothesInfoLoadService {
     return false;
   }
 
-  // 무신사
   private ClothesDto loader() {
     try {
       Connection connection = Jsoup.connect(url)

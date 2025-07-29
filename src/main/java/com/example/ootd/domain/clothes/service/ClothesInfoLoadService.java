@@ -19,11 +19,7 @@ public class ClothesInfoLoadService {
   public ClothesDto load(String url) {
 
     this.url = url;
-
-    if (!supports()) {
-      throw UnsupportedCrawlingUrlException.withUrl(url);
-    }
-
+    supports();
     return loader();
   }
 
@@ -37,10 +33,9 @@ public class ClothesInfoLoadService {
       return true;
     }
 
-    return false;
+    throw UnsupportedCrawlingUrlException.withUrl(url);
   }
-
-  // 무신사
+  
   private ClothesDto loader() {
     try {
       Connection connection = Jsoup.connect(url)

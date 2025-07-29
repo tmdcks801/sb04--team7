@@ -20,11 +20,11 @@ public class ClothesInfoLoadService {
 
     this.url = url;
 
-    if (supports()) {
-      return loader();
+    if (!supports()) {
+      throw UnsupportedCrawlingUrlException.withUrl(url);
     }
 
-    throw UnsupportedCrawlingUrlException.withUrl(url);
+    return loader();
   }
 
   private boolean supports() {

@@ -56,7 +56,7 @@ public class UserController {
       produces = MediaType.APPLICATION_JSON_VALUE
   )
   public ResponseEntity<ProfileDto> updateUserProfile(@PathVariable UUID userId, @RequestPart
-      ProfileUpdateRequest request, @RequestPart(required = false) MultipartFile profile){
+      ProfileUpdateRequest request, @RequestPart(required = false, value = "image") MultipartFile profile){
     return ResponseEntity.ok(userService.updateUserProfile(userId, request, profile));
   }
 
